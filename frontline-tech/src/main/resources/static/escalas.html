@@ -74,6 +74,10 @@
         .btn-youtube:hover { background: #ef4444; color: white; border-color: #ef4444; }
         .btn-link.disabled { opacity: 0.3; pointer-events: none; }
         .admin-only, .boss-only { display: none !important; }
+
+        /* MICRO CAMPO DE PESQUISA */
+        .search-micro { width: 100%; margin-bottom: 10px; padding: 10px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 6px; font-family: 'Urbanist', sans-serif; transition: 0.3s;}
+        .search-micro:focus { border-color: var(--primary); outline: none; }
     </style>
 </head>
 <body>
@@ -146,10 +150,12 @@
         <div class="builder-grid">
             <div>
                 <p style="font-size:13px; color:var(--text-dim); font-weight: bold; margin-bottom: 8px;"><i class="fas fa-users"></i> Escalar Equipe:</p>
+                <input type="text" id="buscaMembroEscala" class="search-micro" placeholder="Buscar membro..." onkeyup="dataAlteradaManualmente()">
                 <div id="listaMembros" class="selector-box"></div>
             </div>
             <div>
                 <p style="font-size:13px; color:var(--text-dim); font-weight: bold; margin-bottom: 8px;"><i class="fas fa-music"></i> Definir Repertório:</p>
+                <input type="text" id="buscaLouvorEscala" class="search-micro" placeholder="Buscar louvor..." onkeyup="renderizarLouvores()">
                 <div id="listaLouvores" class="selector-box"></div>
             </div>
         </div>
@@ -287,7 +293,7 @@
             if(resM.ok) membrosDB = await resM.json();
             if(resL.ok) {
                 louvoresDB = await resL.json();
-                renderizarLouvores(louvoresDB);
+                renderizarLouvores();
             }
         } catch(e) { console.error("Erro na conexão", e); }
     }
@@ -341,8 +347,15 @@
     function fecharPrancheta() { document.getElementById('cardNovaEscala').style.display = 'none'; idEscalaSendoEditada = null; equipeSel = []; louvorSel = []; document.getElementById('tituloEscala').value = ''; }
     function dataAlteradaManualmente() { renderizarMembros(document.getElementById('dataEscala').value); }
 
+    // RENDERIZAR MEMBROS NA ESCALA (COM FILTRO E ORDENAÇÃO)
     function renderizarMembros(dataFiltro) {
-        document.getElementById('listaMembros').innerHTML = membrosDB.map(d => {
+        const termoBusca = document.getElementById('buscaMembroEscala').value.toLowerCase();
+        
+        let membrosFiltrados = membrosDB.filter(m => m.nome.toLowerCase().includes(termoBusca));
+        
+        membrosFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
+
+        document.getElementById('listaMembros').innerHTML = membrosFiltrados.map(d => {
             const funcoes = (d.funcao || 'Membro').split(',').map(f => f.trim());
             const ausente = faltasDB.some(f => f.data === dataFiltro && f.nomeMembro.trim() === d.nome.trim());
             const estiloBlock = ausente ? 'opacity: 0.4; pointer-events: none;' : '';
@@ -367,9 +380,19 @@
         if(icon) icon.className = estaAberto ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
     }
 
-    function renderizarLouvores(louvores) {
+    // RENDERIZAR LOUVORES NA ESCALA (COM FILTRO E ORDENAÇÃO)
+    function renderizarLouvores() {
         const notas = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-        document.getElementById('listaLouvores').innerHTML = louvores.map(l => {
+        const termoBusca = document.getElementById('buscaLouvorEscala').value.toLowerCase();
+        
+        let louvoresFiltrados = louvoresDB.filter(l => 
+            (l.titulo && l.titulo.toLowerCase().includes(termoBusca)) || 
+            (l.artista && l.artista.toLowerCase().includes(termoBusca))
+        );
+
+        louvoresFiltrados.sort((a, b) => a.titulo.localeCompare(b.titulo));
+
+        document.getElementById('listaLouvores').innerHTML = louvoresFiltrados.map(l => {
             const tomOriginal = l.tom || 'C';
             return `
             <div class="item-wrapper">
