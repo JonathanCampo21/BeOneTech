@@ -6,7 +6,6 @@
     <title>Be One Tech - Sugestões</title>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
     <link rel="stylesheet" href="style.css">
 
     <style>
@@ -42,7 +41,11 @@
         .sugestao-info h4 { font-size: 18px; color: white; margin-bottom: 5px; padding-right: 30px;}
         .sugestao-info p { font-size: 13px; color: var(--text-dim); display: flex; align-items: center; gap: 5px;}
 
-        .votos-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(255, 87, 34, 0.1); color: var(--primary); padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-top: 15px; align-self: flex-start;}
+        .card-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+        .votos-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(255, 87, 34, 0.1); color: var(--primary); padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        
+        .btn-votar { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 6px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; display: flex; align-items: center; gap: 5px;}
+        .btn-votar:hover { background: var(--primary); color: black; }
 
         .btn-excluir { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #ef4444; font-size: 16px; cursor: pointer; opacity: 0.5; transition: 0.2s; }
         .btn-excluir:hover { opacity: 1; transform: scale(1.1); }
@@ -68,6 +71,7 @@
     <a href="louvores.html"><i class="fas fa-music"></i> Repertório</a>
     <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
     <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
+    <a href="perfil.html"><i class="fas fa-user-circle"></i> Meu Perfil</a>
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
     <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
 </aside>
@@ -83,14 +87,12 @@
         <h3><i class="fas fa-headphones" style="color: var(--primary);"></i> Enviar Nova Sugestão</h3>
 
         <div class="input-group">
-            <input type="text" id="titulo" list="sugestoes" placeholder="Nome da Música (Ex: Maranata)">
-            <datalist id="sugestoes"></datalist>
-
+            <input type="text" id="titulo" placeholder="Nome da Música (Ex: Maranata)">
             <input type="text" id="ministro" placeholder="Ministro / Banda (Ex: Ministério Zoe)">
         </div>
 
         <button class="btn-submit" onclick="salvarMusica()">
-            <i class="fas fa-paper-plane"></i> Enviar Sugestão
+            <i class="fas fa-paper-plane"></i> Enviar Nova Sugestão
         </button>
     </div>
 
@@ -108,7 +110,6 @@
     function toggleMenu() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
-
         sidebar.classList.toggle('active');
         overlay.classList.toggle('active');
     }
@@ -127,20 +128,23 @@
             const musicas = await res.json();
 
             const lista = document.getElementById('listaMusicas');
-            const dataList = document.getElementById('sugestoes');
-
             lista.innerHTML = '';
-            dataList.innerHTML = '';
 
             if (musicas.length === 0) {
                 lista.innerHTML = '<p style="color: var(--text-dim); grid-column: 1 / -1;">Nenhuma sugestão enviada ainda. Seja o primeiro!</p>';
                 return;
             }
 
+            // Ordena pelo maior número de votos
             musicas.sort((a, b) => (b.quantidadeSugestoes || 1) - (a.quantidadeSugestoes || 1));
 
             musicas.forEach(m => {
                 const btnLixeira = isChefia ? `<button class="btn-excluir" onclick="excluirMusica(${m.id})" title="Apagar Sugestão"><i class="fas fa-trash"></i></button>` : '';
+                
+                // Tratamento para evitar que aspas quebrem o JS no onclick
+                const tituloSeguro = m.titulo.replace(/'/g, "\\'");
+                const ministroSeguro = (m.ministro || '').replace(/'/g, "\\'");
+                const tituloMinusculo = m.titulo.toLowerCase();
 
                 lista.innerHTML += `
                     <div class="sugestao-card">
@@ -149,18 +153,22 @@
                             <h4>${m.titulo}</h4>
                             <p><i class="fas fa-microphone-alt"></i> ${m.ministro || 'Banda Desconhecida'}</p>
                         </div>
-                        <div class="votos-badge">
-                            <i class="fas fa-arrow-up"></i> ${m.quantidadeSugestoes || 1} Voto(s)
+                        <div class="card-actions">
+                            <div class="votos-badge">
+                                <i class="fas fa-fire"></i> ${m.quantidadeSugestoes || 1} Voto(s)
+                            </div>
+                            <button class="btn-votar" onclick="votarPeloCard('${tituloMinusculo}', '${tituloSeguro}', '${ministroSeguro}')">
+                                <i class="fas fa-arrow-up"></i> Votar
+                            </button>
                         </div>
                     </div>`;
-
-                dataList.innerHTML += `<option value="${m.titulo}">`;
             });
         } catch (error) {
             console.error(error);
         }
     }
 
+    // Função para registrar nova sugestão pela barra de pesquisa
     async function salvarMusica() {
         const inputTitulo = document.getElementById('titulo').value.trim();
         const inputMinistro = document.getElementById('ministro').value.trim();
@@ -170,21 +178,28 @@
             return;
         }
 
-        let meusVotos = JSON.parse(localStorage.getItem('votosBeOneTech') || '[]');
-        const tituloMinusculo = inputTitulo.toLowerCase();
+        enviarVotoBackend(inputTitulo, inputMinistro);
+    }
 
+    // Função engatilhada pelo botão de votar dentro do card
+    function votarPeloCard(tituloMinusculo, tituloOriginal, ministroOriginal) {
+        enviarVotoBackend(tituloOriginal, ministroOriginal);
+    }
+
+    // Função central que comunica com o Back-end
+    async function enviarVotoBackend(titulo, ministro) {
+        let meusVotos = JSON.parse(localStorage.getItem('votosBeOneTech') || '[]');
+        const tituloMinusculo = titulo.toLowerCase();
+
+        // Trava para a pessoa não votar duas vezes na mesma música no mesmo celular/PC
         if (meusVotos.includes(tituloMinusculo)) {
-            alert("Você já votou neste louvor! Tente sugerir uma música diferente para enriquecer nosso repertório.");
+            alert("Você já votou neste louvor! Apoie as outras opções da lista.");
             return;
         }
 
-        const btn = document.querySelector('.btn-submit');
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-        btn.disabled = true;
-
         const m = {
-            titulo: inputTitulo,
-            ministro: inputMinistro || 'Não informado'
+            titulo: titulo,
+            ministro: ministro || 'Não informado'
         };
 
         try {
@@ -194,18 +209,17 @@
                 body: JSON.stringify(m)
             });
 
+            // Salva no celular que a pessoa já votou nessa música
             meusVotos.push(tituloMinusculo);
             localStorage.setItem('votosBeOneTech', JSON.stringify(meusVotos));
 
             document.getElementById('titulo').value = '';
             document.getElementById('ministro').value = '';
-            await carregar();
+            
+            await carregar(); // Recarrega a tela para mostrar o voto subindo!
 
         } catch (e) {
-            alert("Erro ao enviar sugestão. Tente novamente.");
-        } finally {
-            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Sugestão';
-            btn.disabled = false;
+            alert("Erro ao conectar com o servidor. Tente novamente.");
         }
     }
 
