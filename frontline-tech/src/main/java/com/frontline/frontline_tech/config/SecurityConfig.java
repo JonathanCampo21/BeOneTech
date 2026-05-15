@@ -40,6 +40,9 @@ public class SecurityConfig {
                         // 2. PORTA DO LOGIN: A rota de fazer login tem que ser pública, senão ninguém entra
                         .requestMatchers("/api/auth/login").permitAll()
 
+                        // -> NOVO: Libera a API de sugestões (Músicas) para a galera votar sem estar logada
+                        .requestMatchers("/api/musicas/**").permitAll()
+
                         // 3. A CATRACA: Daqui pra baixo, TUDO dentro de /api exige o Token!
                         .requestMatchers("/api/**").authenticated()
 
