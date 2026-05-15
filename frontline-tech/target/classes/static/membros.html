@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be One Tech - Membros</title>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="auth.js"></script>
+    <style>
+        /* CSS ESPECÍFICO DESTA TELA */
+        .funcoes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin: 15px 0; }
+        .funcao-checkbox { background: #1a1a1a; border: 1px solid #333; padding: 10px; border-radius: 6px; cursor: pointer; text-align: center; font-size: 13px; transition: 0.3s; color: #a1a1aa; }
+        .funcao-checkbox.active { background: var(--primary); color: black; border-color: var(--primary); font-weight: bold; }
+        .membro-card { background: #111; border: 1px solid #333; padding: 20px; border-radius: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .tag-funcao { background: #222; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 11px; margin-right: 5px; border: 1px solid #333; font-weight: bold;}
+        input, select { padding:12px; background:#1a1a1a; border:1px solid #333; color:white; border-radius:6px; outline: none; font-family: 'Urbanist', sans-serif; width: 100%;}
+        .admin-only, .boss-only { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<header class="mobile-header">
+    <button class="hamburger-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+    <h2>Be One <span class="highlight">Tech</span></h2>
+</header>
+
+<aside class="sidebar" id="sidebar">
+    <h2>Be One <span class="highlight">Tech</span></h2>
+    <a href="inicio.html"><i class="fas fa-home"></i> Início</a>
+    <a href="dashboard.html"><i class="fas fa-lightbulb"></i> Sugestões</a>
+    <a href="louvores.html"><i class="fas fa-music"></i> Repertório</a>
+    <a href="membros.html" class="active"><i class="fas fa-users"></i> Membros</a>
+    <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
+    <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
+    <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
+</aside>
+
+<main class="main-content">
+    <div style="margin-bottom: 30px;">
+        <h1>Equipe do Ministério</h1>
+        <p style="color: var(--text-dim);">Visualize os membros e suas funções musicais.</p>
+    </div>
+
+    <div class="card boss-only" id="cardCadastro" style="background:#111; border:1px solid #333; padding:20px; border-radius:12px; margin-bottom:30px; overflow-x: auto;">
+        <h3 id="tituloFormMembro"><i class="fas fa-user-plus highlight"></i> Novo Membro</h3>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; margin-top:15px;">
+            <input type="text" id="nomeMembro" placeholder="Nome Completo">
+            <input type="text" id="whatsappMembro" placeholder="WhatsApp">
+            <select id="cargoMembro">
+                <option value="MEMBRO">Membro</option>
+                <option value="LIDER">Líder</option>
+                <option value="PASTOR">Pastor</option>
+                <option value="ADMIN">Admin</option>
+                <option value="DEV">Dev</option>
+            </select>
+        </div>
+        <div class="funcoes-grid" id="listaFuncoes"></div>
+        <button id="btnSalvarMembro" onclick="salvarMembro()" style="width:100%; padding:15px; background:var(--primary); border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-family: 'Urbanist', sans-serif;">Cadastrar Membro</button>
+    </div>
+
+    <div id="containerMembros">
+        <p style="text-align: center; color: var(--text-dim);">Buscando equipe no servidor...</p>
+    </div>
+</main>
+
+<script>
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('overlay').classList.toggle('active');
+    }
+
+    const user = JSON.parse(localStorage.getItem('usuario')) || {cargo: 'MEMBRO'};
+    const cargoUser = String(user.cargo).toUpperCase().trim();
+    const funcoesDisponiveis = ["Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado", "Ministro", "Diretor Musical"];
+    let funcoesSelecionadas = [];
+    let membrosDB = [];
+    let idMembroSendoEditado = null;
+
+    function ajustarAcessos() {
+        if (cargoUser === 'ADMIN' || cargoUser === 'DEV') {
+            const linkAdmin = document.getElementById('linkAdmin');
+            if (linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
+        }
+        if (['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser)) {
+            document.querySelectorAll('.boss-only').forEach(el => el.classList.remove('boss-only'));
+        }
+    }
+
+    function carregarOpcoesFuncoes() {
+        document.getElementById('listaFuncoes').innerHTML = funcoesDisponiveis.map(f => `
+            <div class="funcao-checkbox" onclick="toggleFuncao(this, '${f}')">${f}</div>
+        `).join('');
+    }
+
+    function toggleFuncao(el, funcao) {
+        if (funcoesSelecionadas.includes(funcao)) {
+            funcoesSelecionadas = funcoesSelecionadas.filter(f => f !== funcao);
+            el.classList.remove('active');
+        } else {
+            funcoesSelecionadas.push(funcao);
+            el.classList.add('active');
+        }
+    }
+
+    async function carregarMembros() {
+        try {
+            const res = await fetch('/api/membros');
+            membrosDB = await res.json();
+            const container = document.getElementById('containerMembros');
+            const isBoss = ['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser);
+
+            container.innerHTML = membrosDB.map(m => {
+                const cargoFormatado = (m.cargo && typeof m.cargo === 'string') ? m.cargo.toLowerCase() : 'membro';
+
+                return `
+                <div class="membro-card">
+                    <div>
+                        <strong style="font-size:18px;">${m.nome}</strong>
+                        <small style="color:var(--text-dim); margin-left: 5px;">(${cargoFormatado})</small>
+                        <div style="margin-top:8px;">
+                            ${m.funcao ? m.funcao.split(',').map(f => `<span class="tag-funcao">${f.trim()}</span>`).join('') : '<span style="font-size:11px; color:#444">Sem função</span>'}
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        ${m.whatsapp ? `<a href="https://wa.me/55${m.whatsapp.replace(/\D/g,'')}" target="_blank" style="color:#25d366; font-size:20px;"><i class="fab fa-whatsapp"></i></a>` : ''}
+                        ${isBoss ? `
+                            <button onclick="prepararEdicaoMembro(${m.id})" style="background:none; border:1px solid #3b82f6; color:#3b82f6; padding:8px; border-radius:6px; cursor:pointer;"><i class="fas fa-edit"></i></button>
+                            <button onclick="excluirMembro(${m.id})" style="background:none; border:1px solid #ef4444; color:#ef4444; padding:8px; border-radius:6px; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                        ` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+            ajustarAcessos();
+        } catch (e) {
+            document.getElementById('containerMembros').innerHTML = '<p style="color:red; text-align:center;">Erro ao conectar com o banco de dados.</p>';
+        }
+    }
+
+    function prepararEdicaoMembro(id) {
+        const m = membrosDB.find(item => item.id == id);
+        if(!m) return;
+        idMembroSendoEditado = id;
+        document.getElementById('nomeMembro').value = m.nome;
+        document.getElementById('whatsappMembro').value = m.whatsapp || '';
+        document.getElementById('cargoMembro').value = m.cargo || 'MEMBRO';
+        funcoesSelecionadas = m.funcao ? m.funcao.split(',').map(f => f.trim()) : [];
+        document.querySelectorAll('.funcao-checkbox').forEach(el => {
+            el.classList.toggle('active', funcoesSelecionadas.includes(el.innerText));
+        });
+        document.getElementById('tituloFormMembro').innerHTML = '<i class="fas fa-edit highlight"></i> Editando Membro';
+        document.getElementById('btnSalvarMembro').innerText = 'Atualizar Dados';
+        document.querySelector('.main-content').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function salvarMembro() {
+        const nome = document.getElementById('nomeMembro').value;
+        const cargo = document.getElementById('cargoMembro').value;
+        const whatsapp = document.getElementById('whatsappMembro').value;
+        const funcao = funcoesSelecionadas.join(', ');
+
+        if(!nome) return alert("Nome é obrigatório");
+
+        const metodo = idMembroSendoEditado ? 'PUT' : 'POST';
+        const url = idMembroSendoEditado ? `/api/membros/${idMembroSendoEditado}` : '/api/membros';
+
+        const res = await fetch(url, {
+            method: metodo,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ nome, cargo, whatsapp, funcao, senha: '123' })
+        });
+        if(res.ok) location.reload();
+    }
+
+    async function excluirMembro(id) {
+        if(confirm("Deseja remover este membro?")) {
+            await fetch(`/api/membros/${id}`, { method: 'DELETE' });
+            carregarMembros();
+        }
+    }
+
+    carregarOpcoesFuncoes();
+    carregarMembros();
+</script>
+</body>
+</html>

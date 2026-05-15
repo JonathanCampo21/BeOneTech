@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Escala Be One Tech</title>
+    <style>
+        /* ==========================================
+           REMOVENDO A BORDA BRANCA DO PDF
+           ========================================== */
+        @page {
+            size: A4 landscape;
+            margin: 0; /* Zera a margem física do papel (tira a borda branca) */
+        }
+        body {
+            font-family: sans-serif;
+            background-color: #0a0a0a;
+            color: #f3f4f6;
+            margin: 0;
+            padding: 15mm; /* Joga o respiro para dentro, pintando tudo de preto */
+        }
+
+        .escala-container { margin-bottom: 30px; page-break-inside: avoid; }
+
+        .header { text-align: center; border-bottom: 2px solid #ff5722; padding-bottom: 10px; margin-bottom: 20px; }
+        .header h2 { color: #ff5722; margin: 0; text-transform: uppercase; font-weight: 900; letter-spacing: 2px;}
+        .header p { color: #9ca3af; margin: 5px 0 0 0; }
+
+        h3 { color: #ff5722; margin-bottom: 5px; text-transform: uppercase; font-size: 15px; letter-spacing: 1px;}
+
+        .equipe-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        .equipe-table td { border: 1px solid #222; padding: 8px; text-align: left; background-color: #111; color: #ddd; font-size: 13px; }
+
+        /* ESTILO DAS BOXES DE MÚSICA */
+        .musica-box {
+            background: #111;
+            border: 1px solid #222;
+            border-left: 4px solid #ff5722;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        /* ESTILO DAS BOXZINHAS DE LINKS (BOTÕES) */
+        .btn-pdf {
+            display: inline-block;
+            padding: 6px 10px;
+            margin-right: 8px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: bold;
+            background: #1a1a1a;
+            border: 1px solid #333;
+        }
+        .btn-yt { color: #ff4b4b; border-color: #ff4b4b; }
+        .btn-cifra { color: #3b82f6; border-color: #3b82f6; }
+        .btn-vs { color: #a78bfa; border-color: #a78bfa; }
+        .btn-letra { color: #10b981; border-color: #10b981; }
+
+    </style>
+</head>
+<body>
+
+<div th:each="esc : ${escalas}" class="escala-container">
+    <div class="header">
+        <h2><span th:text="${esc.titulo}"></span></h2>
+        <p><span th:text="${esc.data}"></span></p>
+    </div>
+
+    <div style="width: 100%;">
+        <div style="width: 48%; float: left;">
+            <h3>Vocal / Ministros</h3>
+            <table class="equipe-table">
+                <tr th:each="membro : ${esc.vocal}">
+                    <td style="font-weight: bold; width: 45%; color: #fff;"><span th:text="${membro.nome}"></span></td>
+                    <td><span th:text="${membro.funcao}"></span></td>
+                </tr>
+            </table>
+        </div>
+        <div style="width: 48%; float: right;">
+            <h3>Banda</h3>
+            <table class="equipe-table">
+                <tr th:each="membro : ${esc.banda}">
+                    <td style="font-weight: bold; width: 45%; color: #fff;"><span th:text="${membro.nome}"></span></td>
+                    <td><span th:text="${membro.funcao}"></span></td>
+                </tr>
+            </table>
+        </div>
+        <div style="clear: both;"></div>
+    </div>
+</div>
+
+<div th:if="${isIndividual}" style="page-break-before: always;">
+    <div class="header" style="margin-top: 10px;">
+        <h2>Guia de Estudo - Repertorio</h2>
+        <p><span th:text="${escala.titulo}"></span> - <span th:text="${escala.data}"></span></p>
+    </div>
+
+    <div th:each="musica : ${escala.repertorio}" class="musica-box">
+        <h3 style="margin: 0 0 5px 0; color: #fff; text-transform: none; font-size: 16px;">
+            <span th:text="${musica.titulo}"></span>
+            <span style="color: #ff5722;">(<span th:text="${musica.tom}"></span>)</span>
+        </h3>
+
+        <p style="margin: 0 0 10px 0; font-size: 11px; color: #aaa;">
+            <strong style="color:#ff5722;">BPM:</strong> <span th:text="${musica.bpm}"></span> |
+            <strong style="color:#ff5722;">COMPASSO:</strong> <span th:text="${musica.compasso}"></span>
+        </p>
+
+        <div style="margin-top: 5px;">
+            <a th:if="${musica.linkYoutube != ''}" th:href="${musica.linkYoutube}" class="btn-pdf btn-yt">▶ YOUTUBE</a>
+            <a th:if="${musica.linkCifra != ''}" th:href="${musica.linkCifra}" class="btn-pdf btn-cifra">🎵 CIFRA</a>
+            <a th:if="${musica.linkLetra != ''}" th:href="${musica.linkLetra}" class="btn-pdf btn-letra">📝 LETRA</a>
+            <a th:if="${musica.linkVs != ''}" th:href="${musica.linkVs}" class="btn-pdf btn-vs">🎧 VS / MULTITRACK</a>
+        </div>
+    </div>
+
+    <p style="text-align: center; color: #444; font-size: 9px; margin-top: 20px;">DOCUMENTO GERADO POR BE ONE TECH</p>
+</div>
+
+</body>
+</html>
