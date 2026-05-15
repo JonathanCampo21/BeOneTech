@@ -3,26 +3,24 @@ package com.frontline.frontline_tech.controller;
 import com.frontline.frontline_tech.model.musica;
 import com.frontline.frontline_tech.repository.MusicaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController // Diz ao Spring que esta classe vai responder requisições da internet
-@RequestMapping("/api/musicas") // É o "endereço" (URL) base dessa porta de entrada
-@CrossOrigin(origins = "*") // MÁGICA: Impede que o navegador bloqueie o seu site de acessar a API
+@RestController
+@RequestMapping("/api/musicas")
+@CrossOrigin(origins = "*")
 public class MusicaController {
 
     @Autowired
-    private MusicaRepository musicaRepository; // Injeta o banco de dados que você criou antes
+    private MusicaRepository musicaRepository;
 
-    // 1. Método GET: Lista todas as músicas cadastradas
-    // O site dos jovens vai chamar esse método para montar a lista na tela
     @GetMapping
     public List<musica> listarMusicas() {
-        return musicaRepository.findAll(); // Vai no MySQL e traz tudo
+        return musicaRepository.findAll();
     }
 
-    // 3. Método GET específico para o Ranking
     @GetMapping("/ranking")
     public List<musica> obterRanking() {
         return musicaRepository.findAll().stream()
@@ -34,37 +32,38 @@ public class MusicaController {
                 .toList();
     }
 
-    // 4. Método DELETE para zerar o ranking (Sincronizado com o JS)
     @DeleteMapping("/ranking/zerar")
     public void zerarRanking() {
         musicaRepository.deleteAll();
     }
 
-    // NOVO: Método para excluir uma música específica pelo ID
     @DeleteMapping("/{id}")
     public void excluirMusica(@PathVariable Long id) {
         musicaRepository.deleteById(id);
     }
-    // 2. Método POST: Cadastra uma nova música
-    // Quando o jovem pesquisar um louvor e não achar, o site manda os dados pra cá
+
+    // Usando ResponseEntity para poder avisar o site caso dê erro no Banco de Dados
     @PostMapping
-    public musica adicionarMusica(@RequestBody musica novaMusica) {
+    public ResponseEntity<?> adicionarMusica(@RequestBody musica novaMusica) {
+        try {
+            String tituloLimpo = novaMusica.getTitulo().trim();
+            novaMusica.setTitulo(tituloLimpo);
 
-        // 1. Limpeza: Tira espaços em branco do começo e do fim que o usuário digitou sem querer
-        String tituloLimpo = novaMusica.getTitulo().trim();
-        novaMusica.setTitulo(tituloLimpo);
+            musica musicaExistente = musicaRepository.findByTituloIgnoreCase(tituloLimpo);
 
-        // 2. Procura no banco ignorando maiúsculas/minúsculas (o IgnoreCase já faz a mágica)
-        musica musicaExistente = musicaRepository.findByTituloIgnoreCase(tituloLimpo);
-
-        if (musicaExistente != null) {
-            int contagemAtual = musicaExistente.getQuantidadeSugestoes() != null ? musicaExistente.getQuantidadeSugestoes() : 0;
-            musicaExistente.setQuantidadeSugestoes(contagemAtual + 1);
-
-            return musicaRepository.save(musicaExistente);
-        } else {
-            novaMusica.setQuantidadeSugestoes(1);
-            return musicaRepository.save(novaMusica);
+            if (musicaExistente != null) {
+                int contagemAtual = musicaExistente.getQuantidadeSugestoes() != null ? musicaExistente.getQuantidadeSugestoes() : 0;
+                musicaExistente.setQuantidadeSugestoes(contagemAtual + 1);
+                musica salva = musicaRepository.save(musicaExistente);
+                return ResponseEntity.ok(salva);
+            } else {
+                novaMusica.setQuantidadeSugestoes(1);
+                musica salva = musicaRepository.save(novaMusica);
+                return ResponseEntity.ok(salva);
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // Vai cuspir o erro real na tela preta do Render!
+            return ResponseEntity.status(500).body("Erro no banco de dados: " + e.getMessage());
         }
     }
 }
