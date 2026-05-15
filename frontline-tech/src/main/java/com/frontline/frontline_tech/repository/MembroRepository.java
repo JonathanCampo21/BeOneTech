@@ -4,17 +4,17 @@ import com.frontline.frontline_tech.model.Membro;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface MembroRepository extends JpaRepository<Membro, Long> {
-    Optional<Membro> findByNome(String nome);
-    // Por enquanto, não precisamos de nenhuma busca especial aqui.
-    // O JpaRepository já nos dá o "salvar", "deletar" e "listar todos" de graça!
-}
+    
+    // Os métodos de busca precisam ficar AQUI DENTRO, antes da última chave
+    
+    // Para listar todos em ordem alfabética
+    List<Membro> findAllByOrderByNomeAsc();
 
-// Para listar todos em ordem alfabética
-List<Membro> findAllByOrderByNomeAsc();
+    // Para pesquisar por nome e já vir ordenado
+    List<Membro> findByNomeContainingIgnoreCaseOrderByNomeAsc(String nome);
 
-// Para pesquisar por nome e já vir ordenado
-List<Membro> findByNomeContainingIgnoreCaseOrderByNomeAsc(String nome);
+} // <-- O arquivo TEM que terminar com essa chave fechando a interface!
