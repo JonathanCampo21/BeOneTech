@@ -403,4 +403,112 @@
         if (escalaAtualAberta.confirmacoes) {
             try {
                 const confJSON = JSON.parse(escalaAtualAberta.confirmacoes);
-                if
+                if (confJSON[user.nome] === 'CONFIRMADO') { status = 'CONFIRMADO'; cor = '#10b981'; }
+                else if (confJSON[user.nome] === 'RECUSADO') { status = 'NÃO VOU'; cor = '#ef4444'; }
+            } catch(e) {}
+        }
+
+        document.getElementById('statusPresenca').innerHTML = `Seu status: <span style="color: ${cor};">${status}</span>`;
+
+        if (status !== 'PENDENTE') {
+            document.getElementById('rsvpBotoes').style.display = 'none';
+        } else {
+            document.getElementById('rsvpBotoes').style.display = 'flex';
+        }
+
+        const modal = document.getElementById('escalaModal');
+        modal.style.transformOrigin = `${event.clientX}px ${event.clientY}px`;
+        modal.style.left = '50%'; modal.style.top = '50%';
+        modal.style.transform = 'translate(-50%, -50%) scale(0)';
+        document.getElementById('escalaOverlay').classList.add('active');
+
+        setTimeout(() => { modal.style.transform = 'translate(-50%, -50%) scale(1)'; modal.style.opacity = '1'; }, 10);
+    }
+
+    function fecharEscalaModal() {
+        document.getElementById('escalaOverlay').classList.remove('active');
+        const modal = document.getElementById('escalaModal');
+        modal.style.transform = 'translate(-50%, -50%) scale(0)';
+        modal.style.opacity = '0';
+    }
+
+    async function responderEscala(resposta) {
+        if(!escalaAtualAberta) return;
+
+        let confJSON = {};
+        if (escalaAtualAberta.confirmacoes) {
+            try { confJSON = JSON.parse(escalaAtualAberta.confirmacoes); } catch(e) {}
+        }
+        confJSON[user.nome] = resposta;
+
+        const escalaAtualizada = { ...escalaAtualAberta, confirmacoes: JSON.stringify(confJSON) };
+
+        const res = await fetch(`/api/escalas/${escalaAtualAberta.id}`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(escalaAtualizada)
+        });
+
+        if (res.ok) {
+            escalaAtualAberta.confirmacoes = JSON.stringify(confJSON);
+            let cor = resposta === 'CONFIRMADO' ? '#10b981' : '#ef4444';
+            let texto = resposta === 'CONFIRMADO' ? 'CONFIRMADO' : 'NÃO VOU';
+
+            document.getElementById('statusPresenca').innerHTML = `Seu status: <span style="color: ${cor};">${texto}</span>`;
+            document.getElementById('rsvpBotoes').style.display = 'none';
+            carregarTudo();
+        } else {
+            alert('Erro ao confirmar presença!');
+        }
+    }
+
+    // ==========================================
+    // SEGUNDO MODAL: O GÊNIO DO LOUVOR
+    // ==========================================
+    function abrirLouvorGenie(idLouvor, event) {
+        event.stopPropagation();
+        const louvor = louvoresGlobais ? louvoresGlobais.find(l => l.id == idLouvor) : null;
+        if(!louvor) return;
+
+        document.getElementById('louvorCapaModal').src = louvor.imagemUrl || DEFAULT_IMG;
+        document.getElementById('louvorTituloModal').innerText = louvor.titulo;
+        document.getElementById('louvorArtistaModal').innerText = louvor.artista || 'Sem Ministro';
+        document.getElementById('louvorTomModal').innerText = louvor.tom || '--';
+        document.getElementById('louvorBpmModal').innerText = louvor.bpm || '--';
+        document.getElementById('louvorCompassoModal').innerText = louvor.compasso || '--';
+
+        configurarLink('btnCifra', louvor.linkCifra);
+        configurarLink('btnLetra', louvor.linkLetra);
+        configurarLink('btnVs', louvor.linkVs);
+        configurarLink('btnYoutube', louvor.linkYoutube);
+
+        const modal = document.getElementById('louvorModal');
+        modal.style.transformOrigin = `${event.clientX}px ${event.clientY}px`;
+        modal.style.left = '50%'; modal.style.top = '50%';
+        modal.style.transform = 'translate(-50%, -50%) scale(0)';
+
+        document.getElementById('louvorOverlay').classList.add('active');
+
+        setTimeout(() => { modal.style.transform = 'translate(-50%, -50%) scale(1)'; modal.style.opacity = '1'; }, 10);
+    }
+
+    function fecharLouvorGenie() {
+        document.getElementById('louvorOverlay').classList.remove('active');
+        const modal = document.getElementById('louvorModal');
+        modal.style.transform = 'translate(-50%, -50%) scale(0)';
+        modal.style.opacity = '0';
+    }
+
+    function configurarLink(btnId, url) {
+        const btn = document.getElementById(btnId);
+        if(url && url.trim() !== "") {
+            btn.href = url;
+            btn.classList.remove('disabled');
+        } else {
+            btn.removeAttribute('href');
+            btn.classList.add('disabled');
+        }
+    }
+
+    inicializarPainel();
+</script>
+</body>
+</html>
