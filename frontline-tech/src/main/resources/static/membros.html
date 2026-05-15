@@ -18,12 +18,42 @@
         input, select { padding:12px; background:#1a1a1a; border:1px solid #333; color:white; border-radius:6px; outline: none; font-family: 'Urbanist', sans-serif; width: 100%;}
         .admin-only, .boss-only { display: none !important; }
         
-        /* CSS DA BARRA DE PESQUISA */
-        .search-container { display: flex; gap: 15px; margin-bottom: 20px; }
-        .search-input { flex: 1; background: #1a1a1a; border: 1px solid #333; padding: 12px 20px; border-radius: 8px; color: white; font-family: 'Urbanist', sans-serif; transition: 0.3s; }
-        .search-input:focus { border-color: var(--primary); outline: none; }
-        .search-select { background: #1a1a1a; border: 1px solid #333; color: white; padding: 0 15px; border-radius: 8px; cursor: pointer; font-family: 'Urbanist', sans-serif; transition: 0.3s;}
-        .search-select:focus { border-color: var(--primary); }
+       /* CSS DA BARRA DE PESQUISA */
+.search-container { 
+    display: flex; 
+    gap: 15px; 
+    margin-bottom: 20px; 
+    width: 100%; 
+}
+.search-input { 
+    flex: 1; 
+    width: 100%; 
+    min-width: 200px; /* Isso impede ele de virar um quadradinho */
+    background: #1a1a1a; 
+    border: 1px solid #333; 
+    padding: 12px 20px; 
+    border-radius: 8px; 
+    color: white; 
+    font-family: 'Urbanist', sans-serif; 
+    transition: 0.3s; 
+}
+.search-input:focus { 
+    border-color: var(--primary); 
+    outline: none; 
+}
+.search-select { 
+    background: #1a1a1a; 
+    border: 1px solid #333; 
+    color: white; 
+    padding: 0 15px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-family: 'Urbanist', sans-serif; 
+    transition: 0.3s;
+}
+.search-select:focus { 
+    border-color: var(--primary); 
+}
     </style>
 </head>
 <body>
