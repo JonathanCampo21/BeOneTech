@@ -18,7 +18,7 @@
         input, select { padding:12px; background:#1a1a1a; border:1px solid #333; color:white; border-radius:6px; outline: none; font-family: 'Urbanist', sans-serif; width: 100%;}
         .admin-only, .boss-only { display: none !important; }
         
-       /* CSS DA BARRA DE PESQUISA */
+     /* CSS DA BARRA DE PESQUISA */
 .search-container { 
     display: flex; 
     gap: 15px; 
@@ -26,9 +26,9 @@
     width: 100%; 
 }
 .search-input { 
-    flex: 1; 
+    flex: 1; /* Faz o input roubar todo o espaço livre */
     width: 100%; 
-    min-width: 200px; /* Isso impede ele de virar um quadradinho */
+    min-width: 200px; 
     background: #1a1a1a; 
     border: 1px solid #333; 
     padding: 12px 20px; 
@@ -42,6 +42,8 @@
     outline: none; 
 }
 .search-select { 
+    width: 120px !important; /* Trava o tamanho exato da caixa A-Z */
+    flex-shrink: 0; /* Impede que ela esmague no celular */
     background: #1a1a1a; 
     border: 1px solid #333; 
     color: white; 
