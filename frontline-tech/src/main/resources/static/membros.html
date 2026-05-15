@@ -18,44 +18,26 @@
         input, select { padding:12px; background:#1a1a1a; border:1px solid #333; color:white; border-radius:6px; outline: none; font-family: 'Urbanist', sans-serif; width: 100%;}
         .admin-only, .boss-only { display: none !important; }
         
-     /* CSS DA BARRA DE PESQUISA */
-.search-container { 
-    display: flex; 
-    gap: 15px; 
-    margin-bottom: 20px; 
-    width: 100%; 
-}
-.search-input { 
-    flex: 1; /* Faz o input roubar todo o espaço livre */
-    width: 100%; 
-    min-width: 200px; 
-    background: #1a1a1a; 
-    border: 1px solid #333; 
-    padding: 12px 20px; 
-    border-radius: 8px; 
-    color: white; 
-    font-family: 'Urbanist', sans-serif; 
-    transition: 0.3s; 
-}
-.search-input:focus { 
-    border-color: var(--primary); 
-    outline: none; 
-}
-.search-select { 
-    width: 120px !important; /* Trava o tamanho exato da caixa A-Z */
-    flex-shrink: 0; /* Impede que ela esmague no celular */
-    background: #1a1a1a; 
-    border: 1px solid #333; 
-    color: white; 
-    padding: 0 15px; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    font-family: 'Urbanist', sans-serif; 
-    transition: 0.3s;
-}
-.search-select:focus { 
-    border-color: var(--primary); 
-}
+        /* CSS DA BARRA DE PESQUISA ATUALIZADO (SEM O SELECT) */
+        .search-container { 
+            display: flex; 
+            margin-bottom: 20px; 
+            width: 100%; 
+        }
+        .search-input { 
+            width: 100%; 
+            background: #1a1a1a; 
+            border: 1px solid #333; 
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            color: white; 
+            font-family: 'Urbanist', sans-serif; 
+            transition: 0.3s; 
+        }
+        .search-input:focus { 
+            border-color: var(--primary); 
+            outline: none; 
+        }
     </style>
 </head>
 <body>
@@ -101,12 +83,9 @@
         <button id="btnSalvarMembro" onclick="salvarMembro()" style="width:100%; padding:15px; background:var(--primary); border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-family: 'Urbanist', sans-serif;">Cadastrar Membro</button>
     </div>
 
+    <!-- BARRA DE PESQUISA ATUALIZADA (SEM O SELECT DE A-Z) -->
     <div class="search-container">
         <input type="text" id="buscaMembro" class="search-input" placeholder="Pesquisar por nome ou função..." onkeyup="renderizarListaMembros()">
-        <select id="ordemMembro" class="search-select" onchange="renderizarListaMembros()">
-            <option value="asc">A - Z</option>
-            <option value="desc">Z - A</option>
-        </select>
     </div>
 
     <div id="containerMembros">
@@ -157,18 +136,17 @@
         try {
             const res = await fetch('/api/membros');
             membrosDB = await res.json();
-            renderizarListaMembros(); // Chama a função que filtra e renderiza
+            renderizarListaMembros(); 
             ajustarAcessos();
         } catch (e) {
             document.getElementById('containerMembros').innerHTML = '<p style="color:red; text-align:center;">Erro ao conectar com o banco de dados.</p>';
         }
     }
 
-    // NOVA FUNÇÃO DE RENDERIZAR COM FILTRO E ORDENAÇÃO
+    // FUNÇÃO RENDERIZAR ATUALIZADA COM ORDENAÇÃO ALFABÉTICA FORÇADA (A-Z)
     function renderizarListaMembros() {
         const container = document.getElementById('containerMembros');
         const termoBusca = document.getElementById('buscaMembro').value.toLowerCase();
-        const ordem = document.getElementById('ordemMembro').value;
         const isBoss = ['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser);
 
         let filtrados = membrosDB.filter(m => 
@@ -176,12 +154,8 @@
             (m.funcao && m.funcao.toLowerCase().includes(termoBusca))
         );
 
-        filtrados.sort((a, b) => {
-            let nomeA = a.nome.toLowerCase();
-            let nomeB = b.nome.toLowerCase();
-            if (ordem === 'asc') return nomeA.localeCompare(nomeB);
-            return nomeB.localeCompare(nomeA);
-        });
+        // Força a ordem alfabética sempre (A-Z)
+        filtrados.sort((a, b) => a.nome.localeCompare(b.nome));
 
         if (filtrados.length === 0) {
             container.innerHTML = '<p style="text-align: center; color: var(--text-dim);">Nenhum membro encontrado.</p>';
