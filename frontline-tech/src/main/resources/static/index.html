@@ -239,6 +239,48 @@
         window.location.href = 'index.html';
     }
 
+async function enviarVotoBackend(titulo, ministro) {
+        let meusVotos = JSON.parse(localStorage.getItem('votosBeOneTech') || '[]');
+        const tituloMinusculo = titulo.toLowerCase();
+
+        if (meusVotos.includes(tituloMinusculo)) {
+            alert("Você já votou neste louvor!");
+            return;
+        }
+
+        const m = {
+            titulo: titulo,
+            ministro: ministro || 'Não informado'
+        };
+
+        try {
+            const res = await fetch('/api/musicas', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(m)
+            });
+
+            // NOVA LÓGICA DE VERIFICAÇÃO DE ERRO
+            if (!res.ok) {
+                const erroTexto = await res.text();
+                alert("O Servidor recusou a sugestão: " + erroTexto);
+                return;
+            }
+
+            meusVotos.push(tituloMinusculo);
+            localStorage.setItem('votosBeOneTech', JSON.stringify(meusVotos));
+
+            document.getElementById('titulo').value = '';
+            document.getElementById('ministro').value = '';
+            
+            alert("Sugestão enviada com sucesso!");
+            await carregar(); 
+
+        } catch (e) {
+            alert("Erro de conexão (o servidor pode estar fora do ar).");
+        }
+    }
+    
     ajustarAcessos();
     carregar();
 </script>
