@@ -68,7 +68,7 @@
         .info-item { background: #1a1a1a; padding: 15px 20px; border-radius: 12px; border: 1px solid #222; text-align: center; flex: 1; }
         .info-item span { display: block; font-size: 12px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 5px; font-weight: bold;}
         .info-item strong { font-size: 24px; color: var(--primary); }
-        .link-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .btn-link { background: #222; color: white; padding: 15px; text-align: center; border-radius: 10px; text-decoration: none; font-weight: bold; transition: 0.3s; border: 1px solid #333; display: block;}
         .btn-link:hover { background: var(--primary); color: black; border-color: var(--primary); transform: translateY(-3px); }
         .btn-youtube:hover { background: #ef4444; color: white; border-color: #ef4444; }
@@ -347,11 +347,24 @@
     function fecharPrancheta() { document.getElementById('cardNovaEscala').style.display = 'none'; idEscalaSendoEditada = null; equipeSel = []; louvorSel = []; document.getElementById('tituloEscala').value = ''; }
     function dataAlteradaManualmente() { renderizarMembros(document.getElementById('dataEscala').value); }
 
-    // RENDERIZAR MEMBROS NA ESCALA (COM FILTRO E ORDENAÇÃO)
+    // RENDERIZAR MEMBROS NA ESCALA (COM FILTRO E ORDENAÇÃO E TRAVA PARA PASTOR SEM FUNÇÃO)
     function renderizarMembros(dataFiltro) {
         const termoBusca = document.getElementById('buscaMembroEscala').value.toLowerCase();
         
-        let membrosFiltrados = membrosDB.filter(m => m.nome.toLowerCase().includes(termoBusca));
+        let membrosFiltrados = membrosDB.filter(m => {
+            const passouNaBusca = m.nome.toLowerCase().includes(termoBusca);
+            
+            // Verifica se é pastor e se tem função musical
+            const isPastor = m.cargo && String(m.cargo).toUpperCase().trim() === 'PASTOR';
+            const temFuncao = m.funcao && m.funcao.trim() !== '';
+            
+            // Se for Pastor e NÃO tiver função musical cadastrada, esconde da lista de escala
+            if (isPastor && !temFuncao) {
+                return false;
+            }
+            
+            return passouNaBusca;
+        });
         
         membrosFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
 
