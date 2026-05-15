@@ -3,11 +3,11 @@
    ========================================= */
 :root {
     --bg-color: #0a0a0a;
-    --primary: #10b981; /* VERDE ESMERALDA */
+    --primary: #10b981; 
     --text-dim: #9ca3af;
     --sidebar-width: 260px;
-    /* Curva de animação profissional (igual da Apple/Google) */
-    --transition-bezier: cubic-bezier(0.33, 1, 0.68, 1);
+    /* Curva de aceleração ultra suave para PCs */
+    --transition-bezier: cubic-bezier(0.2, 1, 0.2, 1);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,7 +26,7 @@ body {
 *::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
 /* =========================================
-   SIDEBAR OTIMIZADA
+   SIDEBAR FIXA (USA GPU)
    ========================================= */
 #sidebar {
     position: fixed;
@@ -40,7 +40,8 @@ body {
     z-index: 1000;
     display: flex;
     flex-direction: column;
-    /* Aceleração de hardware */
+    /* Força o uso da placa de vídeo */
+    backface-visibility: hidden;
     transition: transform 0.4s var(--transition-bezier);
     will-change: transform;
 }
@@ -52,34 +53,27 @@ body {
 #sidebar .btn-sair { margin-top: auto; color: #ef4444; }
 
 /* =========================================
-   CONTEÚDO PRINCIPAL (SEM MARGIN ANIMADA)
+   CONTEÚDO PRINCIPAL (LAYOUT FIXO + TRANSFORM)
    ========================================= */
 .main-content {
-    /* Em vez de margin, usamos largura total e transform */
-    width: 100%;
-    padding-left: calc(var(--sidebar-width) + 40px); /* Espaço fixo da sidebar */
-    padding-right: 40px;
-    padding-top: 40px;
-    padding-bottom: 40px;
+    position: absolute;
+    left: var(--sidebar-width); /* Já começa no lugar certo */
+    right: 0;
     height: 100vh;
     overflow-y: auto;
-
-    /* A mágica acontece aqui: animamos transform, não margin */
-    transition: transform 0.4s var(--transition-bezier), padding 0.4s var(--transition-bezier);
+    padding: 40px;
+    
+    /* A mágica do PC: Usamos apenas transform para não "quebrar" o layout */
+    transition: transform 0.4s var(--transition-bezier);
     will-change: transform, opacity;
     
-    animation: contentFadeIn 0.6s var(--transition-bezier) forwards;
+    /* Animação de entrada mais rápida para evitar conflito */
+    animation: contentFadeIn 0.4s var(--transition-bezier) forwards;
 }
 
 @keyframes contentFadeIn {
-    from { 
-        opacity: 0; 
-        transform: translateY(20px); 
-    }
-    to { 
-        opacity: 1; 
-        transform: translateY(0); 
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* =========================================
@@ -128,9 +122,10 @@ body {
     }
 
     .main-content {
-        padding-left: 20px; /* No mobile, o conteúdo encosta na borda */
-        padding-right: 20px;
+        left: 0; /* No celular ele ocupa a tela toda */
         height: calc(100vh - 70px);
+        padding: 20px;
+        transform: none !important; /* Desativa o empurrão no mobile para ser mais leve */
     }
 
     #sidebar a { padding: 18px; font-size: 16px; }
