@@ -64,6 +64,13 @@
         .custom-file-upload i { color: var(--primary); }
         .custom-file-upload.selected { border-color: var(--primary); background: rgba(16, 185, 129, 0.1); color: var(--primary); }
         .admin-only, .boss-only { display: none !important; }
+        
+        /* CSS DA BARRA DE PESQUISA */
+        .search-container { display: flex; gap: 15px; margin-top: 20px; }
+        .search-input { flex: 1; background: #1a1a1a; border: 1px solid #333; padding: 12px 20px; border-radius: 8px; color: white; font-family: 'Urbanist', sans-serif; transition: 0.3s; }
+        .search-input:focus { border-color: var(--primary); outline: none; }
+        .search-select { background: #1a1a1a; border: 1px solid #333; color: white; padding: 0 15px; border-radius: 8px; cursor: pointer; font-family: 'Urbanist', sans-serif; transition: 0.3s;}
+        .search-select:focus { border-color: var(--primary); }
     </style>
 </head>
 <body>
@@ -95,6 +102,14 @@
         <button onclick="abrirFormulario()" class="btn btn-primary boss-only">
             <i class="fas fa-plus"></i> Cadastrar Louvor
         </button>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="buscaLouvor" class="search-input" placeholder="Pesquisar por título, artista ou tom..." onkeyup="renderizarGrid()">
+        <select id="ordemLouvor" class="search-select" onchange="renderizarGrid()">
+            <option value="asc">A - Z</option>
+            <option value="desc">Z - A</option>
+        </select>
     </div>
 
     <div class="repertorio-grid" id="gridLouvores">
@@ -247,16 +262,33 @@
         } catch (e) { console.error("Erro", e); }
     }
 
+    // FUNÇÃO ATUALIZADA COM FILTRO E ORDENAÇÃO
     function renderizarGrid() {
         const grid = document.getElementById('gridLouvores');
         const isChefia = ['DEV', 'LIDER'].includes(cargoUser);
+        
+        const termoBusca = document.getElementById('buscaLouvor').value.toLowerCase();
+        const ordem = document.getElementById('ordemLouvor').value;
 
-        if(louvoresDB.length === 0) {
-            grid.innerHTML = '<p style="color: var(--text-dim);">Nenhum louvor cadastrado.</p>';
+        let filtrados = louvoresDB.filter(l => 
+            (l.titulo && l.titulo.toLowerCase().includes(termoBusca)) || 
+            (l.artista && l.artista.toLowerCase().includes(termoBusca)) ||
+            (l.tom && l.tom.toLowerCase().includes(termoBusca))
+        );
+
+        filtrados.sort((a, b) => {
+            let tituloA = (a.titulo || '').toLowerCase();
+            let tituloB = (b.titulo || '').toLowerCase();
+            if (ordem === 'asc') return tituloA.localeCompare(tituloB);
+            return tituloB.localeCompare(tituloA);
+        });
+
+        if(filtrados.length === 0) {
+            grid.innerHTML = '<p style="color: var(--text-dim);">Nenhum louvor encontrado.</p>';
             return;
         }
 
-        grid.innerHTML = louvoresDB.map(l => {
+        grid.innerHTML = filtrados.map(l => {
             const img = l.imagemUrl || DEFAULT_IMG;
             const bpmBadge = l.bpm ? `<div class="tag"><i class="fas fa-heartbeat"></i> ${l.bpm}</div>` : '';
             const tomBadge = l.tom ? `<div class="tag"><i class="fas fa-music"></i> ${l.tom}</div>` : '';
