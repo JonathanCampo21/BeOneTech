@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be One Tech - Meu Perfil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="auth.js"></script>
+    <style>
+        .profile-card { background: #111; border: 1px solid #333; border-radius: 15px; padding: 40px; max-width: 500px; margin: 0 auto; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; font-size: 12px; color: var(--text-dim); text-transform: uppercase; font-weight: bold; margin-bottom: 8px; }
+        input { width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 8px; outline: none; font-family: 'Urbanist', sans-serif; transition: 0.3s; }
+        input:focus { border-color: var(--primary); }
+        input:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-save { width: 100%; padding: 15px; background: var(--primary); color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Urbanist', sans-serif; font-size: 16px; transition: 0.3s; margin-top: 10px; }
+        .btn-save:hover { transform: translateY(-2px); opacity: 0.9; }
+        .cargo-badge { display: inline-block; padding: 5px 12px; background: rgba(16, 185, 129, 0.1); color: var(--primary); border-radius: 20px; font-size: 12px; font-weight: bold; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<header class="mobile-header">
+    <button class="hamburger-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+    <h2>Be One <span class="highlight">Tech</span></h2>
+</header>
+
+<aside class="sidebar" id="sidebar">
+    <h2>Be One <span class="highlight">Tech</span></h2>
+    <a href="inicio.html"><i class="fas fa-home"></i> Início</a>
+    <a href="dashboard.html"><i class="fas fa-lightbulb"></i> Sugestões</a>
+    <a href="louvores.html"><i class="fas fa-music"></i> Repertório</a>
+    <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
+    <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
+    <a href="perfil.html" class="active"><i class="fas fa-user-circle"></i> Meu Perfil</a>
+    <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
+    <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
+</aside>
+
+<main class="main-content">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1>Configurações de Acesso</h1>
+        <p style="color: var(--text-dim);">Mantenha seus dados e senha atualizados.</p>
+    </div>
+
+    <div class="profile-card">
+        <div id="badgePastor" style="display:none; text-align: center;">
+            <div class="cargo-badge">PASTOR / GESTOR</div>
+        </div>
+        
+        <div class="input-group">
+            <label>Nome Completo</label>
+            <input type="text" id="nomePerfil">
+        </div>
+        <div class="input-group">
+            <label>WhatsApp (Apenas números)</label>
+            <input type="text" id="whatsappPerfil">
+        </div>
+        <div class="input-group">
+            <label>Cargo (Não editável)</label>
+            <input type="text" id="cargoPerfil" disabled>
+        </div>
+        
+        <hr style="border: 0; border-top: 1px solid #222; margin: 30px 0;">
+        
+        <div class="input-group">
+            <label>Nova Senha</label>
+            <input type="password" id="senhaPerfil" placeholder="Deixe em branco para manter a atual">
+        </div>
+        <div class="input-group">
+            <label>Confirmar Nova Senha</label>
+            <input type="password" id="confirmarSenhaPerfil" placeholder="Repita a nova senha">
+        </div>
+
+        <button class="btn-save" onclick="atualizarPerfil()">Salvar Alterações</button>
+    </div>
+</main>
+
+<script>
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('overlay').classList.toggle('active');
+    }
+
+    const user = JSON.parse(localStorage.getItem('usuario'));
+    if (!user) location.href = 'index.html';
+
+    // Preencher os campos ao carregar
+    function carregarDados() {
+        document.getElementById('nomePerfil').value = user.nome;
+        document.getElementById('whatsappPerfil').value = user.whatsapp || '';
+        document.getElementById('cargoPerfil').value = user.cargo;
+
+        if(user.cargo.toUpperCase().trim() === 'PASTOR') {
+            document.getElementById('badgePastor').style.display = 'block';
+        }
+
+        // Ajuste para Admin/Dev no menu
+        const cargoUser = String(user.cargo).toUpperCase().trim();
+        if (cargoUser === 'ADMIN' || cargoUser === 'DEV') {
+            const linkAdmin = document.getElementById('linkAdmin');
+            if(linkAdmin) { linkAdmin.style.display = 'flex'; }
+        }
+    }
+
+    async function atualizarPerfil() {
+        const nome = document.getElementById('nomePerfil').value;
+        const whatsapp = document.getElementById('whatsappPerfil').value;
+        const senha = document.getElementById('senhaPerfil').value;
+        const confirma = document.getElementById('confirmarSenhaPerfil').value;
+
+        if (!nome) return alert("O nome não pode ficar vazio.");
+        if (senha && senha !== confirma) return alert("As senhas não coincidem!");
+
+        const dadosAtualizados = {
+            ...user, // Mantém o ID, Cargo e Funções originais
+            nome: nome,
+            whatsapp: whatsapp,
+            senha: senha || user.senha // Se a senha estiver vazia, manda a que já estava (ou o back ignora)
+        };
+
+        try {
+            const res = await fetch(`/api/membros/${user.id}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(dadosAtualizados)
+            });
+
+            if (res.ok) {
+                // Atualiza o localStorage para refletir a mudança no site imediatamente
+                localStorage.setItem('usuario', JSON.stringify(dadosAtualizados));
+                alert("Perfil atualizado com sucesso!");
+                location.reload();
+            } else {
+                alert("Erro ao atualizar perfil no servidor.");
+            }
+        } catch (e) {
+            alert("Erro de conexão.");
+        }
+    }
+
+    carregarDados();
+</script>
+</body>
+</html>
