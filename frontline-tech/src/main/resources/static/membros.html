@@ -83,7 +83,6 @@
         <button id="btnSalvarMembro" onclick="salvarMembro()" style="width:100%; padding:15px; background:var(--primary); border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-family: 'Urbanist', sans-serif;">Cadastrar Membro</button>
     </div>
 
-    <!-- BARRA DE PESQUISA ATUALIZADA (SEM O SELECT DE A-Z) -->
     <div class="search-container">
         <input type="text" id="buscaMembro" class="search-input" placeholder="Pesquisar por nome ou função..." onkeyup="renderizarListaMembros()">
     </div>
@@ -143,7 +142,7 @@
         }
     }
 
-    // FUNÇÃO RENDERIZAR ATUALIZADA COM ORDENAÇÃO ALFABÉTICA FORÇADA (A-Z)
+    // FUNÇÃO RENDERIZAR ATUALIZADA (COM TAG GESTOR AUTOMÁTICA PARA PASTOR E ORDENAÇÃO A-Z)
     function renderizarListaMembros() {
         const container = document.getElementById('containerMembros');
         const termoBusca = document.getElementById('buscaMembro').value.toLowerCase();
@@ -163,7 +162,26 @@
         }
 
         container.innerHTML = filtrados.map(m => {
-            const cargoFormatado = (m.cargo && typeof m.cargo === 'string') ? m.cargo.toLowerCase() : 'membro';
+            const cargoStr = (m.cargo && typeof m.cargo === 'string') ? m.cargo.toUpperCase() : 'MEMBRO';
+            const cargoFormatado = cargoStr.toLowerCase();
+
+            // LÓGICA DAS TAGS DE FUNÇÃO
+            let tagsHtml = '';
+
+            // 1. Se for Pastor, adiciona a tag Gestor primeiro (sem o ícone de coroa)
+            if (cargoStr === 'PASTOR') {
+                tagsHtml += `<span class="tag-funcao">Gestor</span>`;
+            }
+
+            // 2. Adiciona as funções musicais normais (se a pessoa tiver)
+            if (m.funcao && m.funcao.trim() !== '') {
+                tagsHtml += m.funcao.split(',').map(f => `<span class="tag-funcao">${f.trim()}</span>`).join('');
+            }
+
+            // 3. Se a pessoa não tiver função e não for pastor
+            if (tagsHtml === '') {
+                tagsHtml = '<span style="font-size:11px; color:#444">Sem função</span>';
+            }
 
             return `
             <div class="membro-card">
@@ -171,7 +189,7 @@
                     <strong style="font-size:18px;">${m.nome}</strong>
                     <small style="color:var(--text-dim); margin-left: 5px;">(${cargoFormatado})</small>
                     <div style="margin-top:8px;">
-                        ${m.funcao ? m.funcao.split(',').map(f => `<span class="tag-funcao">${f.trim()}</span>`).join('') : '<span style="font-size:11px; color:#444">Sem função</span>'}
+                        ${tagsHtml}
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
