@@ -1,0 +1,25 @@
+# Pasta de build (O VILÃO!)
+/target/
+
+# Arquivos do IntelliJ
+/.idea/
+/*.iml
+/out/
+/gen/
+
+# Arquivos do VS Code
+/.vscode/
+*.code-workspace
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Maven wrapper (Opcional, melhor ignorar se não usa)
+/mvnw
+/mvnw.cmd
+/.mvn/
+
+# Logs e arquivos temporários
+/*.log
+/tmp/
