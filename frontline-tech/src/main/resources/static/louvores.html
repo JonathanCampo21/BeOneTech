@@ -65,12 +65,10 @@
         .custom-file-upload.selected { border-color: var(--primary); background: rgba(16, 185, 129, 0.1); color: var(--primary); }
         .admin-only, .boss-only { display: none !important; }
         
-        /* CSS DA BARRA DE PESQUISA */
-        .search-container { display: flex; gap: 15px; margin-top: 20px; }
-        .search-input { flex: 1; background: #1a1a1a; border: 1px solid #333; padding: 12px 20px; border-radius: 8px; color: white; font-family: 'Urbanist', sans-serif; transition: 0.3s; }
+        /* CSS DA BARRA DE PESQUISA ATUALIZADO (SEM O SELECT) */
+        .search-container { display: flex; margin-top: 20px; width: 100%; }
+        .search-input { width: 100%; background: #1a1a1a; border: 1px solid #333; padding: 12px 20px; border-radius: 8px; color: white; font-family: 'Urbanist', sans-serif; transition: 0.3s; }
         .search-input:focus { border-color: var(--primary); outline: none; }
-        .search-select { background: #1a1a1a; border: 1px solid #333; color: white; padding: 0 15px; border-radius: 8px; cursor: pointer; font-family: 'Urbanist', sans-serif; transition: 0.3s;}
-        .search-select:focus { border-color: var(--primary); }
     </style>
 </head>
 <body>
@@ -106,10 +104,6 @@
 
     <div class="search-container">
         <input type="text" id="buscaLouvor" class="search-input" placeholder="Pesquisar por título, artista ou tom..." onkeyup="renderizarGrid()">
-        <select id="ordemLouvor" class="search-select" onchange="renderizarGrid()">
-            <option value="asc">A - Z</option>
-            <option value="desc">Z - A</option>
-        </select>
     </div>
 
     <div class="repertorio-grid" id="gridLouvores">
@@ -262,13 +256,12 @@
         } catch (e) { console.error("Erro", e); }
     }
 
-    // FUNÇÃO ATUALIZADA COM FILTRO E ORDENAÇÃO
+    // FUNÇÃO ATUALIZADA COM FILTRO E ORDENAÇÃO FORÇADA DE A-Z
     function renderizarGrid() {
         const grid = document.getElementById('gridLouvores');
         const isChefia = ['DEV', 'LIDER'].includes(cargoUser);
         
         const termoBusca = document.getElementById('buscaLouvor').value.toLowerCase();
-        const ordem = document.getElementById('ordemLouvor').value;
 
         let filtrados = louvoresDB.filter(l => 
             (l.titulo && l.titulo.toLowerCase().includes(termoBusca)) || 
@@ -276,11 +269,11 @@
             (l.tom && l.tom.toLowerCase().includes(termoBusca))
         );
 
+        // Força a ordem alfabética sempre (A-Z)
         filtrados.sort((a, b) => {
             let tituloA = (a.titulo || '').toLowerCase();
             let tituloB = (b.titulo || '').toLowerCase();
-            if (ordem === 'asc') return tituloA.localeCompare(tituloB);
-            return tituloB.localeCompare(tituloA);
+            return tituloA.localeCompare(tituloB);
         });
 
         if(filtrados.length === 0) {
