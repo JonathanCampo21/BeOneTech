@@ -13,3 +13,8 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
     // O JpaRepository já nos dá o "salvar", "deletar" e "listar todos" de graça!
 }
 
+// Para listar todos em ordem alfabética
+List<Membro> findAllByOrderByNomeAsc();
+
+// Para pesquisar por nome e já vir ordenado
+List<Membro> findByNomeContainingIgnoreCaseOrderByNomeAsc(String nome);
