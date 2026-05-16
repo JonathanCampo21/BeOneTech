@@ -65,10 +65,17 @@
         .custom-file-upload.selected { border-color: var(--primary); background: rgba(16, 185, 129, 0.1); color: var(--primary); }
         .admin-only, .boss-only { display: none !important; }
         
-        /* CSS DA BARRA DE PESQUISA ATUALIZADO (SEM O SELECT) */
         .search-container { display: flex; margin-top: 20px; width: 100%; }
         .search-input { width: 100%; background: #1a1a1a; border: 1px solid #333; padding: 12px 20px; border-radius: 8px; color: white; font-family: 'Urbanist', sans-serif; transition: 0.3s; }
         .search-input:focus { border-color: var(--primary); outline: none; }
+
+        /* ESTILO DO USUÁRIO NA SIDEBAR (CLICÁVEL) */
+        .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 10px 15px; border: 1px solid transparent; border-bottom: 1px solid #222; margin-bottom: 15px; cursor: pointer; transition: 0.3s; border-radius: 8px;}
+        .sidebar-user:hover { background: #1a1a1a; border-color: var(--primary); }
+        .sidebar-user img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+        .sidebar-user-info { display: flex; flex-direction: column; }
+        .sidebar-user-info strong { color: white; font-size: 14px; }
+        .sidebar-user-info span { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -82,12 +89,20 @@
 
 <aside class="sidebar" id="sidebar">
     <h2>Be One <span class="highlight">Tech</span></h2>
+
+    <div class="sidebar-user" id="sidebarUserBox" onclick="window.location.href='perfil.html'" title="Acessar Meu Perfil">
+        <img src="https://ui-avatars.com/api/?name=User&background=222&color=fff" id="sidebarAvatar" alt="Avatar">
+        <div class="sidebar-user-info">
+            <strong id="sidebarUserName">Carregando...</strong>
+            <span id="sidebarUserRole">Membro</span>
+        </div>
+    </div>
+
     <a href="inicio.html"><i class="fas fa-home"></i> Início</a>
     <a href="dashboard.html"><i class="fas fa-lightbulb"></i> Sugestões</a>
     <a href="louvores.html" class="active"><i class="fas fa-music"></i> Repertório</a>
     <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
     <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
-    <a href="perfil.html"><i class="fas fa-user-circle"></i> Meu Perfil</a>
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
     <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
 </aside>
@@ -202,6 +217,18 @@
 
     const DEFAULT_IMG = "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80";
 
+    function carregarSidebar() {
+        const fotoFinal = user.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nome)}&background=222&color=10b981`;
+        document.getElementById('sidebarAvatar').src = fotoFinal;
+        
+        const cargoFormatado = String(user.cargo).toUpperCase().trim();
+        let primeiroNome = user.nome.split(' ')[0];
+        if (cargoFormatado === 'PASTOR') { primeiroNome = "Pr. " + primeiroNome; }
+
+        document.getElementById('sidebarUserName').innerText = primeiroNome;
+        document.getElementById('sidebarUserRole').innerText = user.cargo;
+    }
+
     document.getElementById('imgUpload').addEventListener('change', function(e) {
         const file = e.target.files[0];
         const label = document.getElementById('fileLabel');
@@ -236,7 +263,10 @@
     });
 
     function ajustarAcessos() {
-        if (['ADMIN', 'DEV'].includes(cargoUser)) {
+        // ===============================================
+        // MUDANÇA: APENAS O DEV VÊ A GESTÃO DE USUÁRIOS!
+        // ===============================================
+        if (cargoUser === 'DEV') {
             const linkAdmin = document.getElementById('linkAdmin');
             if(linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
         }
@@ -257,11 +287,9 @@
         } catch (e) { console.error("Erro", e); }
     }
 
-    // FUNÇÃO ATUALIZADA COM FILTRO E ORDENAÇÃO FORÇADA DE A-Z
     function renderizarGrid() {
         const grid = document.getElementById('gridLouvores');
         const isChefia = ['DEV', 'LIDER'].includes(cargoUser);
-        
         const termoBusca = document.getElementById('buscaLouvor').value.toLowerCase();
 
         let filtrados = louvoresDB.filter(l => 
@@ -270,7 +298,6 @@
             (l.tom && l.tom.toLowerCase().includes(termoBusca))
         );
 
-        // Força a ordem alfabética sempre (A-Z)
         filtrados.sort((a, b) => {
             let tituloA = (a.titulo || '').toLowerCase();
             let tituloB = (b.titulo || '').toLowerCase();
@@ -288,7 +315,6 @@
             const tomBadge = l.tom ? `<div class="tag"><i class="fas fa-music"></i> ${l.tom}</div>` : '';
             const compassoBadge = l.compasso ? `<div class="tag"><i class="fas fa-wave-square"></i> ${l.compasso}</div>` : '';
             const artista = l.artista || 'Ministro não informado';
-
             const btnEdit = isChefia ? `<button class="btn-edit-card" onclick="prepararEdicao(${l.id}, event)"><i class="fas fa-pen"></i></button>` : '';
 
             return `
@@ -444,6 +470,12 @@
         }
     }
 
+    function sair() {
+        localStorage.removeItem('usuario');
+        window.location.href = 'index.html';
+    }
+
+    carregarSidebar();
     carregarLouvores();
 </script>
 </body>
