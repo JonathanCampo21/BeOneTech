@@ -10,7 +10,6 @@
     <script src="auth.js"></script>
 
     <style>
-        /* CSS ESPECÍFICO DESTA TELA */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
         .card { background: #111; border: 1px solid #333; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); overflow-x: auto; border-left: 4px solid var(--primary); }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 500px; }
@@ -104,22 +103,37 @@
     const user = JSON.parse(localStorage.getItem('usuario')) || {cargo: 'MEMBRO'};
     const cargoUser = String(user.cargo).toUpperCase().trim();
 
-    function carregarSidebar() {
-        const fotoFinal = user.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nome)}&background=222&color=10b981`;
+    // ==========================================
+    // FUNÇÃO INTELIGENTE DE CARREGAR FOTO
+    // ==========================================
+    async function carregarSidebar() {
+        // 1. Mostra a foto rápida do cache do navegador
+        let fotoFinal = user.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nome || 'Visitante')}&background=222&color=10b981`;
         document.getElementById('sidebarAvatar').src = fotoFinal;
         
-        const cargoFormatado = String(user.cargo).toUpperCase().trim();
-        let primeiroNome = user.nome.split(' ')[0];
-        if (cargoFormatado === 'PASTOR') { primeiroNome = "Pr. " + primeiroNome; }
+        let primeiroNome = user.nome ? user.nome.split(' ')[0] : 'Visitante';
+        if (cargoUser === 'PASTOR') { primeiroNome = "Pr. " + primeiroNome; }
 
         document.getElementById('sidebarUserName').innerText = primeiroNome;
         document.getElementById('sidebarUserRole').innerText = user.cargo;
+
+        // 2. Dá uma espiadinha no Banco de Dados em segundo plano para ver se tem foto nova
+        try {
+            if (!user.id) return;
+            const res = await fetch('/api/membros');
+            if (res.ok) {
+                const membros = await res.json();
+                const userAtualizado = membros.find(m => m.id === user.id);
+                // Se achar uma foto diferente no banco, atualiza na tela e salva no cache!
+                if (userAtualizado && userAtualizado.fotoPerfil) {
+                    document.getElementById('sidebarAvatar').src = userAtualizado.fotoPerfil;
+                    localStorage.setItem('usuario', JSON.stringify(userAtualizado));
+                }
+            }
+        } catch(e) { console.log("Carregando apenas do cache."); }
     }
 
     function ajustarAcessos() {
-        // ===============================================
-        // MUDANÇA: APENAS O DEV VÊ A GESTÃO DE USUÁRIOS!
-        // ===============================================
         if (cargoUser === 'DEV') {
             const linkAdmin = document.getElementById('linkAdmin');
             if (linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
