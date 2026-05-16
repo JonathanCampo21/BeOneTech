@@ -10,7 +10,6 @@
     <script src="auth.js"></script>
 
     <style>
-        /* CSS ESPECÍFICO DESTA TELA */
         .card { background: #111; border: 1px solid #333; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .calendar-header button { background: none; border: 1px solid #333; color: white; border-radius: 6px; padding: 5px 15px; cursor: pointer; transition: 0.2s; }
@@ -49,7 +48,6 @@
         .escala-musica-info h6 { margin: 0; font-size: 14px; color: white; display: flex; justify-content: space-between; align-items: center;}
         .escala-musica-info p { margin: 2px 0 0 0; font-size: 11px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;}
 
-        /* MODAIS GERAIS */
         .genie-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 1001; }
         .genie-overlay.active { opacity: 1; pointer-events: all; }
         .genie-modal { position: fixed; background: #111; border: 1px solid #333; border-radius: 20px; padding: 0; width: 90%; max-width: 600px; height: auto; max-height: 90vh; overflow-y: auto; transform: scale(0); opacity: 0; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease; z-index: 1002; }
@@ -78,7 +76,6 @@
         .search-micro { width: 100%; margin-bottom: 10px; padding: 10px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 6px; font-family: 'Urbanist', sans-serif; transition: 0.3s;}
         .search-micro:focus { border-color: var(--primary); outline: none; }
 
-        /* ESTILO DO USUÁRIO NA SIDEBAR (CLICÁVEL) */
         .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 10px 15px; border: 1px solid transparent; border-bottom: 1px solid #222; margin-bottom: 15px; cursor: pointer; transition: 0.3s; border-radius: 8px;}
         .sidebar-user:hover { background: #1a1a1a; border-color: var(--primary); }
         .sidebar-user img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
@@ -256,6 +253,414 @@
         
         const cargoFormatado = String(user.cargo).toUpperCase().trim();
         let primeiroNome = user.nome.split(' ')[0];
+        if (cargoFormatado === 'PASTOR') { primeiroNome = "Pr. " + primeiroNome; }
+
+        document.getElementById('sidebarUserName').innerText = primeiroNome;
+        document.getElementById('sidebarUserRole').innerText = user.cargo;
+    }
+
+    function agruparEquipe(equipeStr) {
+        if (!equipeStr) return [];
+        const linhas = equipeStr.split('\n').filter(Boolean);
+        const mapa = {};
+        linhas.forEach(linha => {
+            let nome = linha;
+            let funcao = '';
+            if (linha.includes('(') && linha.includes(')')) {
+                const openIdx = linha.lastIndexOf('(');
+                const closeIdx = linha.lastIndexOf(')');
+                nome = linha.substring(0, openIdx).trim();
+                funcao = linha.substring(openIdx + 1, closeIdx).trim();
+            }
+            if (!mapa[nome]) mapa[nome] = [];
+            if (funcao) mapa[nome].push(funcao);
+        });
+        return Object.entries(mapa).map(([n, f]) => f.length > 0 ? `${n} (${f.join(', ')})` : n);
+    }
+
+    function alternarModoClique() {
+        modoMarcarAusencia = !modoMarcarAusencia;
+        const container = document.getElementById('toggleModoLider');
+        const icon = document.getElementById('iconModo');
+        const label = document.getElementById('labelModo');
+        if (modoMarcarAusencia) {
+            container.classList.add('active'); icon.className = 'fas fa-user-times'; label.innerText = 'Modo: Marcar Minha Falta';
+        } else {
+            container.classList.remove('active'); icon.className = 'fas fa-calendar-plus'; label.innerText = 'Modo: Montar Escala';
+            fecharPrancheta();
+        }
+    }
+
+    function ajustarAcessos() {
+        // ===============================================
+        // MUDANÇA: APENAS O DEV VÊ A GESTÃO DE USUÁRIOS!
+        // ===============================================
+        if (cargoUser === 'DEV') {
+            const linkAdmin = document.getElementById('linkAdmin');
+            if (linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
+        }
+        if (['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser)) {
+            document.querySelectorAll('.boss-only').forEach(el => el.classList.remove('boss-only'));
+        }
+    }
+
+    async function carregarPagina() {
+        carregarSidebar();
+        ajustarAcessos();
+        await carregarDadosDoServidor();
+        desenharCalendario();
+        renderizarEscalas();
+    }
+
+    async function carregarDadosDoServidor() {
+        try {
+            const [resF, resE, resM, resL] = await Promise.all([
+                fetch('/api/indisponibilidade'), fetch('/api/escalas'), fetch('/api/membros'), fetch('/api/louvores')
+            ]);
+            if(resF.ok) faltasDB = await resF.json();
+            if(resE.ok) escalasDB = await resE.json();
+            if(resM.ok) membrosDB = await resM.json();
+            if(resL.ok) {
+                louvoresDB = await resL.json();
+                renderizarLouvores();
+            }
+        } catch(e) { console.error("Erro na conexão", e); }
+    }
+
+    function mudarMes(dir) { dataFoco.setMonth(dataFoco.getMonth() + dir); desenharCalendario(); renderizarEscalas(); }
+
+    function desenharCalendario() {
+        const ano = dataFoco.getFullYear(), mes = dataFoco.getMonth();
+        const mesesNomes = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+        document.getElementById('mesAnoTitulo').innerText = `${mesesNomes[mes]} ${ano}`;
+
+        const primeiroDia = new Date(ano, mes, 1).getDay();
+        const ultimoDia = new Date(ano, mes + 1, 0).getDate();
+        const grid = document.getElementById('diasCalendario');
+        grid.innerHTML = '';
+
+        for(let i=0; i<primeiroDia; i++) grid.innerHTML += '<div class="day-cell empty"></div>';
+
+        for(let d=1; d<=ultimoDia; d++) {
+            const dataStr = `${ano}-${String(mes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const falta = faltasDB.find(f => f.data === dataStr && f.nomeMembro.trim() === user.nome.trim());
+            const isAdmin = ['ADMIN','DEV','LIDER','PASTOR'].includes(cargoUser);
+
+            grid.innerHTML += `
+                <div class="day-cell ${falta ? 'minha-falta' : ''}" onclick="clicarNoDia('${dataStr}')" title="${isAdmin ? 'Clique para escalar / avisar falta' : 'Clique para marcar/desmarcar ausência'}">
+                    ${d}
+                </div>`;
+        }
+    }
+
+    async function clicarNoDia(dataStr) {
+        const isChefia = ['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser);
+        if (cargoUser === 'MEMBRO' || modoMarcarAusencia) {
+            const falta = faltasDB.find(f => f.data === dataStr && f.nomeMembro.trim() === user.nome.trim());
+            if(falta) await fetch(`/api/indisponibilidade/${falta.id}`, {method:'DELETE'});
+            else await fetch('/api/indisponibilidade', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({nomeMembro: user.nome, data: dataStr})});
+            await carregarDadosDoServidor(); desenharCalendario(); renderizarEscalas();
+        } else if (isChefia) {
+            abrirPrancheta(dataStr);
+        }
+    }
+
+    function abrirPrancheta(dataSelecionada) {
+        const form = document.getElementById('cardNovaEscala');
+        form.style.display = 'block';
+        document.getElementById('dataEscala').value = dataSelecionada;
+        renderizarMembros(dataSelecionada);
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function fecharPrancheta() { document.getElementById('cardNovaEscala').style.display = 'none'; idEscalaSendoEditada = null; equipeSel = []; louvorSel = []; document.getElementById('tituloEscala').value = ''; }
+    function dataAlteradaManualmente() { renderizarMembros(document.getElementById('dataEscala').value); }
+
+    function renderizarMembros(dataFiltro) {
+        const termoBusca = document.getElementById('buscaMembroEscala').value.toLowerCase();
         
-        if (cargoFormatado === 'PASTOR') {
-            primeiroNome = "Pr.
+        let membrosFiltrados = membrosDB.filter(m => {
+            const passouNaBusca = m.nome.toLowerCase().includes(termoBusca);
+            const isPastor = m.cargo && String(m.cargo).toUpperCase().trim() === 'PASTOR';
+            const temFuncao = m.funcao && m.funcao.trim() !== '';
+            if (isPastor && !temFuncao) { return false; }
+            return passouNaBusca;
+        });
+        
+        membrosFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
+
+        document.getElementById('listaMembros').innerHTML = membrosFiltrados.map(d => {
+            const funcoes = (d.funcao || 'Membro').split(',').map(f => f.trim());
+            const ausente = faltasDB.some(f => f.data === dataFiltro && f.nomeMembro.trim() === d.nome.trim());
+            const estiloBlock = ausente ? 'opacity: 0.4; pointer-events: none;' : '';
+            const tagAusente = ausente ? '<span style="color:#ef4444; font-size:10px; font-weight:bold; display:block; margin-top:2px;">INDISPONÍVEL</span>' : '';
+
+            return `
+            <div class="item-wrapper" style="${estiloBlock}">
+                <div class="item-row" onclick="toggleAccordion('sub-${d.id}', this)">
+                    <div><strong>${d.nome}</strong>${tagAusente}</div>
+                    <i class="fas fa-chevron-down" style="font-size:10px; color:var(--primary)"></i>
+                </div>
+                <div id="sub-${d.id}" class="sub-options">
+                    ${funcoes.map(f => `<div class="role-btn" onclick="selecionarFuncao(this, '${d.nome}', '${f}')">${f}</div>`).join('')}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function toggleAccordion(id, el) {
+        const sub = document.getElementById(id); const icon = el.querySelector('i');
+        const estaAberto = sub.style.display === 'block'; sub.style.display = estaAberto ? 'none' : 'block';
+        if(icon) icon.className = estaAberto ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+    }
+
+    function renderizarLouvores() {
+        const notas = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const termoBusca = document.getElementById('buscaLouvorEscala').value.toLowerCase();
+        
+        let louvoresFiltrados = louvoresDB.filter(l => 
+            (l.titulo && l.titulo.toLowerCase().includes(termoBusca)) || (l.artista && l.artista.toLowerCase().includes(termoBusca))
+        );
+
+        louvoresFiltrados.sort((a, b) => a.titulo.localeCompare(b.titulo));
+
+        document.getElementById('listaLouvores').innerHTML = louvoresFiltrados.map(l => {
+            const tomOriginal = l.tom || 'C';
+            return `
+            <div class="item-wrapper">
+                <div class="item-row" onclick="toggleAccordion('louv-${l.id}', this)">
+                    <span><strong>${l.titulo}</strong> <small style="color:var(--text-dim)">(${tomOriginal})</small></span>
+                    <i class="fas fa-chevron-down" style="font-size:10px; color:var(--primary)"></i>
+                </div>
+                <div id="louv-${l.id}" class="sub-options">
+                    <p style="font-size:10px; color:var(--text-dim); margin-bottom:5px;">Tom:</p>
+                    ${notas.map(nota => `<div class="role-btn" onclick="selTom(this, '${l.titulo}', '${nota}')">${nota === tomOriginal ? '★ ' + nota : nota}</div>`).join('')}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function selecionarFuncao(btn, nome, funcao) {
+        const iden = `${nome} (${funcao})`;
+        if (equipeSel.includes(iden)) { equipeSel = equipeSel.filter(i => i !== iden); btn.classList.remove('active'); }
+        else { equipeSel.push(iden); btn.classList.add('active'); }
+    }
+
+    function selTom(btn, titulo, tom) {
+        const iden = `${titulo} (${tom})`;
+        louvorSel = louvorSel.filter(item => !item.startsWith(titulo + ' ('));
+        btn.parentElement.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+        louvorSel.push(iden); btn.classList.add('active');
+    }
+
+    function prepararEdicao(id) {
+        const escala = escalasDB.find(e => e.id == id);
+        if (!escala) return;
+        idEscalaSendoEditada = id; document.getElementById('tituloEscala').value = escala.titulo || '';
+        abrirPrancheta(escala.data);
+        equipeSel = escala.equipe ? escala.equipe.split('\n').filter(Boolean) : [];
+        louvorSel = escala.repertorio ? escala.repertorio.split('\n').filter(Boolean) : [];
+
+        setTimeout(() => {
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                const txt = btn.innerText.replace('★', '').trim();
+                const paiNome = btn.closest('.item-wrapper').querySelector('strong').innerText.trim();
+                if (equipeSel.includes(`${paiNome} (${txt})`) || louvorSel.includes(`${paiNome} (${txt})`)) {
+                    btn.classList.add('active'); btn.closest('.sub-options').style.display = 'block';
+                    btn.closest('.item-wrapper').querySelector('.fa-chevron-down').className = 'fas fa-chevron-up';
+                } else { btn.classList.remove('active'); }
+            });
+        }, 50);
+        document.getElementById('tituloForm').innerHTML = '<i class="fas fa-edit" style="color: #3b82f6;"></i> Editando Escala';
+    }
+
+    async function salvarEscala() {
+        const t = document.getElementById('tituloEscala').value; const d = document.getElementById('dataEscala').value;
+        if(!t || !d) return alert("Preencha o Título e a Data!");
+
+        let confirmacoesAtuais = "{}";
+        if(idEscalaSendoEditada) {
+            const escalaAntiga = escalasDB.find(e => e.id == idEscalaSendoEditada);
+            if(escalaAntiga && escalaAntiga.confirmacoes) confirmacoesAtuais = escalaAntiga.confirmacoes;
+        }
+
+        const dados = JSON.stringify({ titulo: t, data: d, equipe: equipeSel.join('\n'), repertorio: louvorSel.join('\n'), confirmacoes: confirmacoesAtuais });
+        const url = idEscalaSendoEditada ? `/api/escalas/${idEscalaSendoEditada}` : '/api/escalas';
+        const metodo = idEscalaSendoEditada ? 'PUT' : 'POST';
+
+        const res = await fetch(url, { method: metodo, headers: {'Content-Type':'application/json'}, body: dados });
+        if (res.ok) {
+            fecharPrancheta();
+            const [ano, mes] = d.split('-'); dataFoco = new Date(parseInt(ano), parseInt(mes) - 1, 1);
+            await carregarDadosDoServidor(); desenharCalendario(); renderizarEscalas();
+        } else alert('Erro ao salvar no banco de dados.');
+    }
+
+    function abrirGenie(id, event) {
+        if(event.target.closest('.btn-icon')) return;
+
+        const escala = escalasDB.find(e => e.id == id);
+        if(!escala) return;
+
+        document.getElementById('modalEscalaTitulo').innerText = escala.titulo || 'Sem Título';
+        document.getElementById('modalEscalaData').innerText = escala.data ? escala.data.split('-').reverse().join('/') : 'Sem Data';
+
+        let htmlEquipe = '';
+        if (escala.equipe) {
+            let confJSON = {};
+            try { if (escala.confirmacoes) confJSON = JSON.parse(escala.confirmacoes); } catch(e) {}
+
+            const equipeAgrupada = agruparEquipe(escala.equipe);
+            equipeAgrupada.forEach(linha => {
+                const nomePuro = linha.split('(')[0].trim();
+                let statusCor = '#f59e0b';
+                if (confJSON[nomePuro] === 'CONFIRMADO') statusCor = '#10b981';
+                else if (confJSON[nomePuro] === 'RECUSADO') statusCor = '#ef4444';
+
+                htmlEquipe += `<div><i class="fas fa-circle" style="color: ${statusCor}; font-size: 12px; margin-right: 8px;"></i> ${linha}</div>`;
+            });
+        } else { htmlEquipe = 'Ninguém escalado.'; }
+        document.getElementById('modalEscalaEquipeStatus').innerHTML = htmlEquipe;
+
+        let htmlRepertorio = '';
+        if (escala.repertorio) {
+            const linhasMusicas = escala.repertorio.split('\n').filter(Boolean);
+            linhasMusicas.forEach(linha => {
+                let tituloPuro = linha; let tomInfo = '';
+                if (linha.includes('(') && linha.includes(')')) {
+                    const openIdx = linha.lastIndexOf('(');
+                    tituloPuro = linha.substring(0, openIdx).trim();
+                    tomInfo = linha.substring(openIdx);
+                }
+
+                const louvorOficial = louvoresDB.find(l => l.titulo.toLowerCase().trim() === tituloPuro.toLowerCase().trim());
+                const img = louvorOficial && louvorOficial.imagemUrl ? louvorOficial.imagemUrl : DEFAULT_IMG;
+                const artista = louvorOficial && louvorOficial.artista ? louvorOficial.artista : 'Música';
+                const isClickable = louvorOficial ? `class="escala-musica-item clickable" onclick="abrirLouvorGenie(${louvorOficial.id}, event)"` : `class="escala-musica-item"`;
+
+                htmlRepertorio += `
+                    <div ${isClickable}>
+                        <img src="${img}" class="escala-musica-img">
+                        <div class="escala-musica-info">
+                            <h6>${tituloPuro} <span style="color: var(--primary); font-size: 11px;">${tomInfo}</span></h6>
+                            <p>${artista}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        } else { htmlRepertorio = 'Nenhuma música definida.'; }
+        document.getElementById('modalEscalaRepertorio').innerHTML = htmlRepertorio;
+
+        const modal = document.getElementById('escalaModal');
+        modal.style.transformOrigin = `${event.clientX}px ${event.clientY}px`;
+        modal.style.left = '50%'; modal.style.top = '50%';
+        modal.style.transform = 'translate(-50%, -50%) scale(0)';
+        document.getElementById('escalaOverlay').classList.add('active');
+
+        setTimeout(() => { modal.style.transform = 'translate(-50%, -50%) scale(1)'; modal.style.opacity = '1'; }, 10);
+    }
+
+    function fecharGenie() {
+        document.getElementById('escalaOverlay').classList.remove('active');
+        document.getElementById('escalaModal').style.transform = 'translate(-50%, -50%) scale(0)';
+        document.getElementById('escalaModal').style.opacity = '0';
+    }
+
+    function abrirLouvorGenie(idLouvor, event) {
+        event.stopPropagation();
+        const louvor = louvoresDB.find(l => l.id == idLouvor);
+        if(!louvor) return;
+
+        document.getElementById('louvorCapaModal').src = louvor.imagemUrl || DEFAULT_IMG;
+        document.getElementById('louvorTituloModal').innerText = louvor.titulo;
+        document.getElementById('louvorArtistaModal').innerText = louvor.artista || 'Sem Ministro';
+        document.getElementById('louvorTomModal').innerText = louvor.tom || '--';
+        document.getElementById('louvorBpmModal').innerText = louvor.bpm || '--';
+        document.getElementById('louvorCompassoModal').innerText = louvor.compasso || '--';
+
+        configurarLink('btnCifra', louvor.linkCifra);
+        configurarLink('btnLetra', louvor.linkLetra);
+        configurarLink('btnVs', louvor.linkVs);
+        configurarLink('btnYoutube', louvor.linkYoutube);
+
+        const modal = document.getElementById('louvorModal');
+        modal.style.transformOrigin = `${event.clientX}px ${event.clientY}px`;
+        modal.style.left = '50%'; modal.style.top = '50%';
+        modal.style.transform = 'translate(-50%, -50%) scale(0)';
+        document.getElementById('louvorOverlay').classList.add('active');
+
+        setTimeout(() => { modal.style.transform = 'translate(-50%, -50%) scale(1)'; modal.style.opacity = '1'; }, 10);
+    }
+
+    function fecharLouvorGenie() {
+        document.getElementById('louvorOverlay').classList.remove('active');
+        const modal = document.getElementById('louvorModal');
+        modal.style.transform = 'translate(-50%, -50%) scale(0)';
+        modal.style.opacity = '0';
+    }
+
+    function configurarLink(btnId, url) {
+        const btn = document.getElementById(btnId);
+        if(url && url.trim() !== "") { btn.href = url; btn.classList.remove('disabled'); }
+        else { btn.removeAttribute('href'); btn.classList.add('disabled'); }
+    }
+
+    function renderizarEscalas() {
+        const container = document.getElementById('containerEscalas');
+        const mesFoco = dataFoco.getMonth(), anoFoco = dataFoco.getFullYear();
+
+        const escalasDoMes = escalasDB.filter(e => {
+            if (!e.data) return false;
+            const [ano, mes] = e.data.split('-');
+            return parseInt(ano) === anoFoco && (parseInt(mes) - 1) === mesFoco;
+        });
+
+        if (escalasDoMes.length === 0) {
+            container.innerHTML = '<p style="color: var(--text-dim); text-align: center; padding: 20px;">Nenhuma escala agendada para este mês.</p>'; return;
+        }
+
+        container.innerHTML = escalasDoMes.map(e => {
+            const equipeExibir = e.equipe ? agruparEquipe(e.equipe).join('<br>') : 'Ninguém escalado';
+
+            return `
+            <div class="escala-card" onclick="abrirGenie(${e.id}, event)">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h4 style="color:white; margin:0; font-size: 20px;">${e.titulo || 'Sem Título'} <small style="color: #888;">(${e.data ? e.data.split('-').reverse().join('/') : 'Data Indefinida'})</small></h4>
+                    <div style="display:flex; gap:10px;" class="boss-only">
+                        <button onclick="prepararEdicao('${e.id}')" class="btn-icon" style="color: #3b82f6;"><i class="fas fa-edit"></i></button>
+                        <button onclick="baixarPdfIndividual('${e.id}')" class="btn-icon" style="color: #ef4444;"><i class="fas fa-file-pdf"></i></button>
+                        <button onclick="enviarZap('${e.id}')" class="btn-icon" style="color: #25D366;"><i class="fab fa-whatsapp"></i></button>
+                        <button onclick="excluirEscala('${e.id}')" class="btn-icon" style="color: #ef4444;"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:10px; font-size:14px; line-height: 1.6;">
+                    <div style="background:#0a0a0a; padding:15px; border-radius:8px; border: 1px solid #222;">
+                        <strong style="color:var(--primary); font-size: 12px; text-transform: uppercase;">Equipe</strong><br>
+                        ${equipeExibir}
+                    </div>
+                    <div style="background:#0a0a0a; padding:15px; border-radius:8px; border: 1px solid #222;">
+                        <strong style="color:var(--primary); font-size: 12px; text-transform: uppercase;">Repertório</strong><br>
+                        ${(e.repertorio || 'Sem músicas').replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+                <p style="margin:0; font-size:12px; color:var(--text-dim);">Clique para ver status de confirmação da equipe.</p>
+            </div>`;
+        }).join('');
+        ajustarAcessos();
+    }
+
+    function enviarZap(id) {
+        const e = escalasDB.find(x => x.id == id);
+        const d = e.data ? e.data.split('-').reverse().join('/') : 'Data Indefinida';
+        const baseUrl = window.location.origin;
+        const linkPdf = `${baseUrl}/api/escalas/pdf?id=${id}`;
+        const mensagem = `🎵 *ESCALA: ${e.titulo}*\n📅 *Data:* ${d}\n\nBaixe o PDF com a equipe e os links de estudo clicando abaixo:\n🔗 ${linkPdf}`;
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensagem)}`, '_blank');
+    }
+
+    function sair() { localStorage.removeItem('usuario'); window.location.href = 'index.html'; }
+
+    carregarPagina();
+</script>
+</body>
+</html>
