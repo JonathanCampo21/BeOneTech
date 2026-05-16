@@ -11,15 +11,19 @@
     <style>
         .profile-card { background: #111; border: 1px solid #333; border-radius: 15px; padding: 30px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
+        /* CSS DA FOTO DE PERFIL */
+        .avatar-container { text-align: center; margin-bottom: 25px; position: relative; display: inline-block; left: 50%; transform: translateX(-50%); }
+        .avatar-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); background: #222; }
+        .btn-upload-avatar { position: absolute; bottom: 0; right: 0; background: var(--primary); color: black; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); transition: 0.3s; }
+        .btn-upload-avatar:hover { transform: scale(1.1); }
+        #fotoUpload { display: none; }
+
         .profile-field { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333; transition: 0.3s; }
         .field-data { flex: 1; }
         .field-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
         
-        /* Input que parece texto normal */
         .field-input { width: 100%; background: transparent; border: none; color: white; font-size: 16px; font-family: 'Urbanist', sans-serif; outline: none; transition: 0.3s; padding: 0; }
         .field-input:disabled { color: #fff; opacity: 1; }
-        
-        /* Quando o input estiver sendo editado */
         .field-input.editing { background: #0a0a0a; border: 1px solid var(--primary); padding: 12px; border-radius: 6px; margin-top: 5px; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1); }
         
         .btn-edit { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 16px; transition: 0.2s; padding: 10px; border-radius: 6px; }
@@ -40,6 +44,13 @@
         .admin-only { display: none !important; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* ESTILO DO USUÁRIO NA SIDEBAR */
+        .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 15px; border-bottom: 1px solid #222; margin-bottom: 15px; }
+        .sidebar-user img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+        .sidebar-user-info { display: flex; flex-direction: column; }
+        .sidebar-user-info strong { color: white; font-size: 14px; }
+        .sidebar-user-info span { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -53,6 +64,15 @@
 
 <aside class="sidebar" id="sidebar">
     <h2>Be One <span class="highlight">Tech</span></h2>
+    
+    <div class="sidebar-user" id="sidebarUserBox">
+        <img src="https://ui-avatars.com/api/?name=User&background=222&color=fff" id="sidebarAvatar" alt="Avatar">
+        <div class="sidebar-user-info">
+            <strong id="sidebarUserName">Carregando...</strong>
+            <span id="sidebarUserRole">Membro</span>
+        </div>
+    </div>
+
     <a href="inicio.html"><i class="fas fa-home"></i> Início</a>
     <a href="dashboard.html"><i class="fas fa-lightbulb"></i> Sugestões</a>
     <a href="louvores.html"><i class="fas fa-music"></i> Repertório</a>
@@ -70,6 +90,13 @@
     </div>
 
     <div class="profile-card">
+        
+        <div class="avatar-container">
+            <img src="https://ui-avatars.com/api/?name=User&background=222&color=fff" id="avatarPreview" class="avatar-img" alt="Foto de Perfil">
+            <label for="fotoUpload" class="btn-upload-avatar" title="Mudar foto"><i class="fas fa-camera"></i></label>
+            <input type="file" id="fotoUpload" accept="image/*">
+        </div>
+
         <div id="badgePastor" style="display:none; text-align: center;">
             <div class="cargo-badge"><i class="fas fa-crown"></i> GESTOR</div>
         </div>
@@ -123,33 +150,65 @@
         document.getElementById('overlay').classList.toggle('active');
     }
 
-    // Pega o usuário do cache. Se não existir nada lá, expulsa pra tela inicial.
     let user = JSON.parse(localStorage.getItem('usuario'));
-    if (!user) {
-        window.location.href = 'index.html';
-    }
+    if (!user) { window.location.href = 'index.html'; }
+
+    let imagemBase64 = null; // Guarda a foto se a pessoa alterar
+
+    // LÓGICA DE RECORTAR E SALVAR A FOTO
+    document.getElementById('fotoUpload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 300; canvas.height = 300; // Resolução da foto de perfil
+                const ctx = canvas.getContext('2d');
+                
+                // Corta quadrado perfeito no centro
+                const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
+                const x = (canvas.width / scale - img.width) / 2;
+                const y = (canvas.height / scale - img.height) / 2;
+                ctx.drawImage(img, x, y, img.width, img.height, 0, 0, canvas.width, canvas.height);
+                
+                imagemBase64 = canvas.toDataURL('image/jpeg', 0.6); // 60% de qualidade pra não pesar o banco
+                document.getElementById('avatarPreview').src = imagemBase64;
+                document.getElementById('areaSalvar').style.display = 'block'; // Mostra botão de salvar
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
 
     async function carregarDados() {
         try {
             const res = await fetch('/api/membros');
             if (res.ok) {
                 const membros = await res.json();
-                
-                // Busca você pelo nome ou pelo ID para atualizar o cache
                 const userAtualizado = membros.find(m => m.nome === user.nome || m.id === user.id);
                 if (userAtualizado) {
                     user = userAtualizado;
                     localStorage.setItem('usuario', JSON.stringify(user)); 
                 }
             }
-        } catch(e) {
-            console.log("Servidor fora ou erro na busca. Usando cache local.");
-        }
+        } catch(e) { console.log("Usando cache local."); }
 
-        // Preenche as caixinhas
+        // Preenche o formulário
         document.getElementById('nomePerfil').value = user.nome || '';
         document.getElementById('whatsappPerfil').value = user.whatsapp || '';
         document.getElementById('cargoPerfil').value = user.cargo || 'MEMBRO';
+
+        // Preenche a foto se existir, senão põe a inicial do nome
+        const fotoFinal = user.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nome)}&background=222&color=10b981`;
+        document.getElementById('avatarPreview').src = fotoFinal;
+        
+        // Atualiza a Sidebar
+        document.getElementById('sidebarAvatar').src = fotoFinal;
+        document.getElementById('sidebarUserName').innerText = user.nome.split(' ')[0];
+        document.getElementById('sidebarUserRole').innerText = user.cargo;
 
         if(user.cargo && user.cargo.toUpperCase().trim() === 'PASTOR') {
             document.getElementById('badgePastor').style.display = 'block';
@@ -164,15 +223,8 @@
 
     function habilitarEdicao(id) {
         const input = document.getElementById(id);
-        input.disabled = false;
-        input.classList.add('editing');
-        input.focus();
-        
-        // Põe o cursor no final do texto pra facilitar
-        const val = input.value;
-        input.value = '';
-        input.value = val;
-
+        input.disabled = false; input.classList.add('editing'); input.focus();
+        const val = input.value; input.value = ''; input.value = val;
         document.getElementById('areaSalvar').style.display = 'block';
     }
 
@@ -202,30 +254,24 @@
             nome: nome,
             whatsapp: whatsapp,
             cargo: user.cargo,
-            funcao: user.funcao
+            funcao: user.funcao,
+            fotoPerfil: imagemBase64 || user.fotoPerfil // Manda a foto nova ou mantém a antiga
         };
 
-        if (senha) {
-            dadosAtualizados.senha = senha;
-        }
+        if (senha) dadosAtualizados.senha = senha;
 
         const btn = document.querySelector('.btn-save');
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...'; btn.disabled = true;
 
         try {
-            // Se o usuário não tiver ID no cache, avisa para ele logar de novo
             if (!user.id) {
-                alert("Sessão expirada ou ID não encontrado. Por favor, clique em 'Sair' no menu, faça login novamente e tente salvar.");
-                btn.innerHTML = '<i class="fas fa-check-circle"></i> Salvar Alterações';
-                btn.disabled = false;
+                alert("Sessão expirada. Saia do sistema e faça login novamente.");
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Salvar Alterações'; btn.disabled = false;
                 return;
             }
 
             const res = await fetch(`/api/membros/${user.id}`, {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(dadosAtualizados)
+                method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(dadosAtualizados)
             });
 
             if (res.ok) {
@@ -238,17 +284,13 @@
                 alert("O servidor recusou a atualização: " + erro);
             }
         } catch (e) {
-            alert("Erro de conexão com o servidor. Verifique a internet.");
+            alert("Erro de conexão com o servidor.");
         } finally {
-            btn.innerHTML = '<i class="fas fa-check-circle"></i> Salvar Alterações';
-            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Salvar Alterações'; btn.disabled = false;
         }
     }
 
-    function sair() {
-        localStorage.removeItem('usuario');
-        window.location.href = 'index.html';
-    }
+    function sair() { localStorage.removeItem('usuario'); window.location.href = 'index.html'; }
 
     carregarDados();
 </script>
