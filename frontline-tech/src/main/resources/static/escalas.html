@@ -649,12 +649,16 @@
         ajustarAcessos();
     }
 
-    function enviarZap(id) {
+  function enviarZap(id) {
         const e = escalasDB.find(x => x.id == id);
         const d = e.data ? e.data.split('-').reverse().join('/') : 'Data Indefinida';
         const baseUrl = window.location.origin;
-        const linkPdf = `${baseUrl}/api/escalas/pdf?id=${id}`;
-        const mensagem = `🎵 *ESCALA: ${e.titulo}*\n📅 *Data:* ${d}\n\nBaixe o PDF com a equipe e os links de estudo clicando abaixo:\n🔗 ${linkPdf}`;
+        
+        // CORREÇÃO: Apontando para escala-wpp.html
+        const linkWeb = `${baseUrl}/escala-wpp.html?id=${id}`;
+        
+        const mensagem = `🎵 *ESCALA: ${e.titulo}*\n📅 *Data:* ${d}\n\nConfira a equipe escalada e o repertório (com links para estudo) clicando abaixo:\n🔗 ${linkWeb}`;
+        
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensagem)}`, '_blank');
     }
 
