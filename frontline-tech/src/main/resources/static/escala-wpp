@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be One Tech - Escala</title>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { --primary: #10b981; --bg: #000; --text: #fff; --text-dim: #aaa; }
+        body { font-family: 'Urbanist', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { max-width: 600px; width: 100%; background: #111; border: 1px solid #333; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .header { text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 20px; }
+        .header h1 { margin: 0 0 5px 0; font-size: 28px; }
+        .header p { color: var(--primary); margin: 0; font-weight: bold; letter-spacing: 1px; }
+        
+        .section-title { font-size: 16px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px dashed #333; padding-bottom: 5px; }
+        
+        .equipe-list { font-size: 16px; line-height: 1.8; margin-bottom: 30px; }
+        
+        .musica-card { background: #1a1a1a; border: 1px solid #222; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .musica-info h3 { margin: 0 0 5px 0; font-size: 18px; }
+        .musica-info p { margin: 0; font-size: 13px; color: var(--text-dim); }
+        .tom-badge { background: rgba(16, 185, 129, 0.1); color: var(--primary); padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        
+        .btn-print { display: block; width: 100%; padding: 15px; background: var(--primary); color: #000; text-align: center; border: none; border-radius: 8px; font-weight: bold; font-family: 'Urbanist', sans-serif; cursor: pointer; font-size: 16px; margin-top: 30px; transition: 0.3s; text-decoration: none;}
+        .btn-print:hover { transform: translateY(-2px); }
+
+        @media print {
+            body { background: white; color: black; }
+            .container { box-shadow: none; border: none; padding: 0; }
+            .btn-print { display: none; }
+            .musica-card { background: white; border: 1px solid #ccc; page-break-inside: avoid; }
+            .tom-badge { color: black; border: 1px solid black; }
+            .section-title { color: black; border-bottom: 1px solid black; }
+            .header p { color: black; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1 id="tituloEscala">Carregando...</h1>
+        <p id="dataEscala">Buscando dados no servidor</p>
+    </div>
+
+    <div class="section-title"><i class="fas fa-users"></i> Equipe Escalada</div>
+    <div class="equipe-list" id="listaEquipe">Aguarde...</div>
+
+    <div class="section-title"><i class="fas fa-music"></i> Repertório</div>
+    <div id="listaMusicas">Aguarde...</div>
+
+    <button class="btn-print" onclick="window.print()">
+        <i class="fas fa-file-pdf"></i> Salvar como PDF / Imprimir
+    </button>
+</div>
+
+<script>
+    async function carregarEscala() {
+        const params = new URLSearchParams(window.location.search);
+        const idEscala = params.get('id');
+
+        if (!idEscala) {
+            document.getElementById('tituloEscala').innerText = "Escala não encontrada";
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/escalas`);
+            const escalas = await res.json();
+            const escala = escalas.find(e => e.id == idEscala);
+
+            if (!escala) {
+                document.getElementById('tituloEscala').innerText = "Escala removida ou inexistente";
+                return;
+            }
+
+            document.getElementById('tituloEscala').innerText = escala.titulo || 'Sem Título';
+            document.getElementById('dataEscala').innerText = escala.data ? escala.data.split('-').reverse().join('/') : 'Data Indefinida';
+
+            if (escala.equipe) {
+                const linhas = escala.equipe.split('\n').filter(Boolean);
+                document.getElementById('listaEquipe').innerHTML = linhas.map(l => `<div><i class="fas fa-check" style="color: var(--primary); font-size: 12px; margin-right: 8px;"></i> ${l}</div>`).join('');
+            } else {
+                document.getElementById('listaEquipe').innerText = "Ninguém escalado.";
+            }
+
+            if (escala.repertorio) {
+                const musicas = escala.repertorio.split('\n').filter(Boolean);
+                document.getElementById('listaMusicas').innerHTML = musicas.map(linha => {
+                    let tituloPuro = linha;
+                    let tomInfo = 'C';
+                    if (linha.includes('(') && linha.includes(')')) {
+                        const openIdx = linha.lastIndexOf('(');
+                        tituloPuro = linha.substring(0, openIdx).trim();
+                        tomInfo = linha.substring(openIdx + 1, linha.length - 1).trim();
+                    }
+                    return `
+                        <div class="musica-card">
+                            <div class="musica-info">
+                                <h3>${tituloPuro}</h3>
+                            </div>
+                            <div class="tom-badge">${tomInfo}</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                document.getElementById('listaMusicas').innerText = "Nenhuma música definida.";
+            }
+
+        } catch (error) {
+            document.getElementById('tituloEscala').innerText = "Erro ao conectar no servidor";
+        }
+    }
+
+    carregarEscala();
+</script>
+
+</body>
+</html>
