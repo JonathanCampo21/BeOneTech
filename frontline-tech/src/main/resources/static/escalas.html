@@ -292,9 +292,6 @@
     }
 
     function ajustarAcessos() {
-        // ===============================================
-        // MUDANÇA: APENAS O DEV VÊ A GESTÃO DE USUÁRIOS!
-        // ===============================================
         if (cargoUser === 'DEV') {
             const linkAdmin = document.getElementById('linkAdmin');
             if (linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
@@ -649,20 +646,73 @@
         ajustarAcessos();
     }
 
-  function enviarZap(id) {
+    // ==========================================
+    // FUNÇÕES DE PDF E WHATSAPP CORRIGIDAS AQUI
+    // ==========================================
+
+    async function baixarPdfMensal() {
+        try {
+            const mes = dataFoco.getMonth() + 1;
+            const ano = dataFoco.getFullYear();
+            const res = await fetch(`/api/escalas/pdf/mensal?mes=${mes}&ano=${ano}`);
+            
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `escala-mensal-${mes}-${ano}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } else {
+                alert("Erro ao emitir escala mensal. O servidor Java retornou: " + res.status);
+            }
+        } catch (e) {
+            alert("Erro de conexão ao gerar o PDF mensal.");
+        }
+    }
+
+    async function baixarPdfIndividual(id) {
+        try {
+            const res = await fetch(`/api/escalas/pdf?id=${id}`);
+            
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `escala-culto-${id}.pdf`; 
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } else {
+                alert("O servidor recusou a emissão do PDF. Código: " + res.status);
+            }
+        } catch (e) {
+            alert("Erro de conexão ao tentar gerar o PDF.");
+        }
+    }
+
+    function enviarZap(id) {
         const e = escalasDB.find(x => x.id == id);
         const d = e.data ? e.data.split('-').reverse().join('/') : 'Data Indefinida';
         const baseUrl = window.location.origin;
-        
-        // CORREÇÃO: Apontando para escala-wpp.html
         const linkWeb = `${baseUrl}/escala-wpp.html?id=${id}`;
-        
         const mensagem = `🎵 *ESCALA: ${e.titulo}*\n📅 *Data:* ${d}\n\nConfira a equipe escalada e o repertório (com links para estudo) clicando abaixo:\n🔗 ${linkWeb}`;
-        
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensagem)}`, '_blank');
     }
 
-    function sair() { localStorage.removeItem('usuario'); window.location.href = 'login.html'; }
+    async function excluirEscala(id) {
+        if(confirm("Tem certeza que deseja apagar essa escala?")) {
+            await fetch(`/api/escalas/${id}`, { method: 'DELETE' });
+            carregarPagina();
+        }
+    }
+
+    function sair() { localStorage.removeItem('usuario'); window.location.href = 'index.html'; }
 
     carregarPagina();
 </script>
