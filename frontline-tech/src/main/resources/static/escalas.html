@@ -650,24 +650,29 @@
     // FUNÇÕES DE PDF E WHATSAPP CORRIGIDAS AQUI
     // ==========================================
 
-    async function baixarPdfMensal() {
+  async function baixarPdfMensal() {
         try {
-            const mes = dataFoco.getMonth() + 1;
+            const mesNum = dataFoco.getMonth() + 1;
             const ano = dataFoco.getFullYear();
-            const res = await fetch(`/api/escalas/pdf/mensal?mes=${mes}&ano=${ano}`);
+            
+            // CORREÇÃO: Deixa no formato "YYYY-MM" que o seu Java pede (ex: 2026-05)
+            const mesFormatado = `${ano}-${String(mesNum).padStart(2, '0')}`;
+            
+            // CORREÇÃO: Apontando para a rota certa do seu Java
+            const res = await fetch(`/api/escalas/pdf?mes=${mesFormatado}`);
             
             if (res.ok) {
                 const blob = await res.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `escala-mensal-${mes}-${ano}.pdf`;
+                a.download = `escala-mensal-${mesFormatado}.pdf`;
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
                 window.URL.revokeObjectURL(url);
             } else {
-                alert("Erro ao emitir escala mensal. O servidor Java retornou: " + res.status);
+                alert("Nenhuma escala encontrada para este mês ou erro no servidor. Código: " + res.status);
             }
         } catch (e) {
             alert("Erro de conexão ao gerar o PDF mensal.");
