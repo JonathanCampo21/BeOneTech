@@ -9,15 +9,37 @@
     <link rel="stylesheet" href="style.css">
     <script src="auth.js"></script>
     <style>
-        .profile-card { background: #111; border: 1px solid #333; border-radius: 15px; padding: 40px; max-width: 500px; margin: 0 auto; }
-        .input-group { margin-bottom: 20px; }
-        label { display: block; font-size: 12px; color: var(--text-dim); text-transform: uppercase; font-weight: bold; margin-bottom: 8px; }
-        input { width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 8px; outline: none; font-family: 'Urbanist', sans-serif; transition: 0.3s; }
-        input:focus { border-color: var(--primary); }
-        input:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-save { width: 100%; padding: 15px; background: var(--primary); color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Urbanist', sans-serif; font-size: 16px; transition: 0.3s; margin-top: 10px; }
-        .btn-save:hover { transform: translateY(-2px); opacity: 0.9; }
-        .cargo-badge { display: inline-block; padding: 5px 12px; background: rgba(16, 185, 129, 0.1); color: var(--primary); border-radius: 20px; font-size: 12px; font-weight: bold; margin-bottom: 20px; }
+        .profile-card { background: #111; border: 1px solid #333; border-radius: 15px; padding: 30px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        .profile-field { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333; transition: 0.3s; }
+        .field-data { flex: 1; }
+        .field-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
+        
+        /* Input que parece texto normal */
+        .field-input { width: 100%; background: transparent; border: none; color: white; font-size: 16px; font-family: 'Urbanist', sans-serif; outline: none; transition: 0.3s; padding: 0; }
+        .field-input:disabled { color: #fff; opacity: 1; }
+        
+        /* Quando o input estiver sendo editado */
+        .field-input.editing { background: #0a0a0a; border: 1px solid var(--primary); padding: 12px; border-radius: 6px; margin-top: 5px; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1); }
+        
+        .btn-edit { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 16px; transition: 0.2s; padding: 10px; border-radius: 6px; }
+        .btn-edit:hover { color: var(--primary); background: rgba(16, 185, 129, 0.1); }
+        
+        .btn-save-container { display: none; margin-top: 25px; }
+        .btn-save { width: 100%; padding: 15px; background: var(--primary); color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Urbanist', sans-serif; font-size: 16px; transition: 0.3s; }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3); }
+        
+        .senha-section { display: none; background: #1a1a1a; padding: 20px; border-radius: 8px; border: 1px solid #333; margin-top: 20px; animation: fadeIn 0.3s ease; }
+        .senha-section input { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 6px; outline: none; margin-bottom: 15px; font-family: 'Urbanist', sans-serif; }
+        .senha-section input:focus { border-color: var(--primary); }
+
+        .btn-outline { width: 100%; background: transparent; border: 1px solid var(--text-dim); color: var(--text-dim); padding: 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-family: 'Urbanist', sans-serif; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px;}
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+        .cargo-badge { display: inline-block; padding: 5px 12px; background: rgba(16, 185, 129, 0.1); color: var(--primary); border-radius: 20px; font-size: 12px; font-weight: bold; margin-bottom: 20px; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .admin-only { display: none !important; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -43,40 +65,55 @@
 
 <main class="main-content">
     <div style="text-align: center; margin-bottom: 30px;">
-        <h1>Configurações de Acesso</h1>
-        <p style="color: var(--text-dim);">Mantenha seus dados e senha atualizados.</p>
+        <h1>Meu Perfil</h1>
+        <p style="color: var(--text-dim);">Confira e atualize suas informações pessoais.</p>
     </div>
 
     <div class="profile-card">
         <div id="badgePastor" style="display:none; text-align: center;">
-            <div class="cargo-badge">PASTOR / GESTOR</div>
+            <div class="cargo-badge"><i class="fas fa-crown"></i> GESTOR</div>
         </div>
         
-        <div class="input-group">
-            <label>Nome Completo</label>
-            <input type="text" id="nomePerfil">
+        <div class="profile-field">
+            <div class="field-data">
+                <div class="field-label">Nome Completo</div>
+                <input type="text" id="nomePerfil" class="field-input" disabled>
+            </div>
+            <button class="btn-edit" onclick="habilitarEdicao('nomePerfil')" title="Editar Nome"><i class="fas fa-pen"></i></button>
         </div>
-        <div class="input-group">
-            <label>WhatsApp (Apenas números)</label>
-            <input type="text" id="whatsappPerfil">
+
+        <div class="profile-field">
+            <div class="field-data">
+                <div class="field-label">WhatsApp</div>
+                <input type="text" id="whatsappPerfil" class="field-input" disabled placeholder="Ex: 21999999999">
+            </div>
+            <button class="btn-edit" onclick="habilitarEdicao('whatsappPerfil')" title="Editar WhatsApp"><i class="fas fa-pen"></i></button>
         </div>
-        <div class="input-group">
-            <label>Cargo (Não editável)</label>
-            <input type="text" id="cargoPerfil" disabled>
+
+        <div class="profile-field" style="opacity: 0.6;">
+            <div class="field-data">
+                <div class="field-label">Cargo (Apenas Leitura)</div>
+                <input type="text" id="cargoPerfil" class="field-input" disabled>
+            </div>
+            <button class="btn-edit" style="visibility: hidden;"><i class="fas fa-lock"></i></button>
         </div>
         
-        <hr style="border: 0; border-top: 1px solid #222; margin: 30px 0;">
+        <hr style="border: 0; border-top: 1px solid #222; margin: 25px 0;">
         
-        <div class="input-group">
-            <label>Nova Senha</label>
-            <input type="password" id="senhaPerfil" placeholder="Deixe em branco para manter a atual">
-        </div>
-        <div class="input-group">
-            <label>Confirmar Nova Senha</label>
+        <button class="btn-outline" onclick="toggleSenha()">
+            <i class="fas fa-key"></i> Alterar Minha Senha
+        </button>
+
+        <div class="senha-section" id="senhaSection">
+            <div class="field-label">Nova Senha</div>
+            <input type="password" id="senhaPerfil" placeholder="Digite a nova senha">
+            <div class="field-label">Confirmar Nova Senha</div>
             <input type="password" id="confirmarSenhaPerfil" placeholder="Repita a nova senha">
         </div>
 
-        <button class="btn-save" onclick="atualizarPerfil()">Salvar Alterações</button>
+        <div class="btn-save-container" id="areaSalvar">
+            <button class="btn-save" onclick="atualizarPerfil()"><i class="fas fa-check-circle"></i> Salvar Alterações</button>
+        </div>
     </div>
 </main>
 
@@ -89,7 +126,6 @@
     const user = JSON.parse(localStorage.getItem('usuario'));
     if (!user) location.href = 'index.html';
 
-    // Preencher os campos ao carregar
     function carregarDados() {
         document.getElementById('nomePerfil').value = user.nome;
         document.getElementById('whatsappPerfil').value = user.whatsapp || '';
@@ -99,29 +135,57 @@
             document.getElementById('badgePastor').style.display = 'block';
         }
 
-        // Ajuste para Admin/Dev no menu
         const cargoUser = String(user.cargo).toUpperCase().trim();
         if (cargoUser === 'ADMIN' || cargoUser === 'DEV') {
             const linkAdmin = document.getElementById('linkAdmin');
-            if(linkAdmin) { linkAdmin.style.display = 'flex'; }
+            if(linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
+        }
+    }
+
+    function habilitarEdicao(id) {
+        const input = document.getElementById(id);
+        input.disabled = false;
+        input.classList.add('editing');
+        input.focus();
+        
+        // Põe o cursor no final do texto
+        const val = input.value;
+        input.value = '';
+        input.value = val;
+
+        document.getElementById('areaSalvar').style.display = 'block';
+    }
+
+    function toggleSenha() {
+        const section = document.getElementById('senhaSection');
+        if(section.style.display === 'block') {
+            section.style.display = 'none';
+        } else {
+            section.style.display = 'block';
+            document.getElementById('areaSalvar').style.display = 'block';
+            document.getElementById('senhaPerfil').focus();
         }
     }
 
     async function atualizarPerfil() {
-        const nome = document.getElementById('nomePerfil').value;
-        const whatsapp = document.getElementById('whatsappPerfil').value;
+        const nome = document.getElementById('nomePerfil').value.trim();
+        const whatsapp = document.getElementById('whatsappPerfil').value.trim();
         const senha = document.getElementById('senhaPerfil').value;
         const confirma = document.getElementById('confirmarSenhaPerfil').value;
 
         if (!nome) return alert("O nome não pode ficar vazio.");
-        if (senha && senha !== confirma) return alert("As senhas não coincidem!");
+        if (senha && senha !== confirma) return alert("As senhas digitadas não são iguais!");
 
         const dadosAtualizados = {
-            ...user, // Mantém o ID, Cargo e Funções originais
+            ...user,
             nome: nome,
             whatsapp: whatsapp,
-            senha: senha || user.senha // Se a senha estiver vazia, manda a que já estava (ou o back ignora)
+            senha: senha || user.senha
         };
+
+        const btn = document.querySelector('.btn-save');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+        btn.disabled = true;
 
         try {
             const res = await fetch(`/api/membros/${user.id}`, {
@@ -131,16 +195,23 @@
             });
 
             if (res.ok) {
-                // Atualiza o localStorage para refletir a mudança no site imediatamente
                 localStorage.setItem('usuario', JSON.stringify(dadosAtualizados));
-                alert("Perfil atualizado com sucesso!");
+                alert("Dados atualizados com sucesso!");
                 location.reload();
             } else {
-                alert("Erro ao atualizar perfil no servidor.");
+                alert("Erro ao atualizar o servidor.");
             }
         } catch (e) {
             alert("Erro de conexão.");
+        } finally {
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Salvar Alterações';
+            btn.disabled = false;
         }
+    }
+
+    function sair() {
+        localStorage.removeItem('usuario');
+        window.location.href = 'index.html';
     }
 
     carregarDados();
