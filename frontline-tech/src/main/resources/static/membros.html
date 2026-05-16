@@ -51,4 +51,228 @@
         <img src="https://ui-avatars.com/api/?name=User&background=222&color=fff" id="sidebarAvatar" alt="Avatar">
         <div class="sidebar-user-info">
             <strong id="sidebarUserName">Carregando...</strong>
-            <span id
+            <span id="sidebarUserRole">Membro</span>
+        </div>
+    </div>
+
+    <a href="inicio.html"><i class="fas fa-home"></i> Início</a>
+    <a href="dashboard.html"><i class="fas fa-lightbulb"></i> Sugestões</a>
+    <a href="louvores.html"><i class="fas fa-music"></i> Repertório</a>
+    <a href="membros.html" class="active"><i class="fas fa-users"></i> Membros</a>
+    <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
+    <a href="perfil.html"><i class="fas fa-user-circle"></i> Meu Perfil</a>
+    <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
+    <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
+</aside>
+
+<main class="main-content">
+    <div style="margin-bottom: 30px;">
+        <h1>Equipe do Ministério</h1>
+        <p style="color: var(--text-dim);">Visualize os membros e suas funções musicais.</p>
+    </div>
+
+    <div class="card boss-only" id="cardCadastro" style="background:#111; border:1px solid #333; padding:20px; border-radius:12px; margin-bottom:30px; overflow-x: auto;">
+        <h3 id="tituloFormMembro"><i class="fas fa-user-plus highlight"></i> Novo Membro</h3>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; margin-top:15px;">
+            <input type="text" id="nomeMembro" placeholder="Nome Completo">
+            <input type="text" id="whatsappMembro" placeholder="WhatsApp">
+            <select id="cargoMembro">
+                <option value="MEMBRO">Membro</option>
+                <option value="LIDER">Líder</option>
+                <option value="PASTOR">Pastor</option>
+                <option value="ADMIN">Admin</option>
+                <option value="DEV">Dev</option>
+            </select>
+        </div>
+        <div class="funcoes-grid" id="listaFuncoes"></div>
+        <button id="btnSalvarMembro" onclick="salvarMembro()" style="width:100%; padding:15px; background:var(--primary); border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-family: 'Urbanist', sans-serif;">Cadastrar Membro</button>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="buscaMembro" class="search-input" placeholder="Pesquisar por nome ou função..." onkeyup="renderizarListaMembros()">
+    </div>
+
+    <div id="containerMembros">
+        <p style="text-align: center; color: var(--text-dim);">Buscando equipe no servidor...</p>
+    </div>
+</main>
+
+<script>
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('overlay').classList.toggle('active');
+    }
+
+    const user = JSON.parse(localStorage.getItem('usuario'));
+    if (!user) { window.location.href = 'index.html'; }
+
+    const cargoUser = String(user.cargo).toUpperCase().trim();
+    const funcoesDisponiveis = ["Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado", "Ministro", "Diretor Musical"];
+    let funcoesSelecionadas = [];
+    let membrosDB = [];
+    let idMembroSendoEditado = null;
+
+    function carregarSidebar() {
+        const fotoFinal = user.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nome)}&background=222&color=10b981`;
+        document.getElementById('sidebarAvatar').src = fotoFinal;
+        document.getElementById('sidebarUserName').innerText = user.nome.split(' ')[0];
+        document.getElementById('sidebarUserRole').innerText = user.cargo;
+    }
+
+    function ajustarAcessos() {
+        if (cargoUser === 'ADMIN' || cargoUser === 'DEV') {
+            const linkAdmin = document.getElementById('linkAdmin');
+            if (linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
+        }
+        if (['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser)) {
+            document.querySelectorAll('.boss-only').forEach(el => el.classList.remove('boss-only'));
+        }
+    }
+
+    function carregarOpcoesFuncoes() {
+        document.getElementById('listaFuncoes').innerHTML = funcoesDisponiveis.map(f => `
+            <div class="funcao-checkbox" onclick="toggleFuncao(this, '${f}')">${f}</div>
+        `).join('');
+    }
+
+    function toggleFuncao(el, funcao) {
+        if (funcoesSelecionadas.includes(funcao)) {
+            funcoesSelecionadas = funcoesSelecionadas.filter(f => f !== funcao);
+            el.classList.remove('active');
+        } else {
+            funcoesSelecionadas.push(funcao);
+            el.classList.add('active');
+        }
+    }
+
+    async function carregarMembros() {
+        try {
+            const res = await fetch('/api/membros');
+            membrosDB = await res.json();
+            renderizarListaMembros(); 
+        } catch (e) {
+            document.getElementById('containerMembros').innerHTML = '<p style="color:red; text-align:center;">Erro ao conectar com o banco de dados.</p>';
+        }
+    }
+
+    function renderizarListaMembros() {
+        const container = document.getElementById('containerMembros');
+        const termoBusca = document.getElementById('buscaMembro').value.toLowerCase();
+        const isBoss = ['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser);
+
+        let filtrados = membrosDB.filter(m => 
+            m.nome.toLowerCase().includes(termoBusca) || 
+            (m.funcao && m.funcao.toLowerCase().includes(termoBusca))
+        );
+
+        filtrados.sort((a, b) => a.nome.localeCompare(b.nome));
+
+        if (filtrados.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: var(--text-dim);">Nenhum membro encontrado.</p>';
+            return;
+        }
+
+        container.innerHTML = filtrados.map(m => {
+            const cargoStr = (m.cargo && typeof m.cargo === 'string') ? m.cargo.toUpperCase() : 'MEMBRO';
+            const cargoFormatado = cargoStr.toLowerCase();
+
+            let tagsHtml = '';
+            if (cargoStr === 'PASTOR') tagsHtml += `<span class="tag-funcao">Gestor</span>`;
+            if (m.funcao && m.funcao.trim() !== '') {
+                tagsHtml += m.funcao.split(',').map(f => `<span class="tag-funcao">${f.trim()}</span>`).join('');
+            }
+            if (tagsHtml === '') tagsHtml = '<span style="font-size:11px; color:#444">Sem função</span>';
+
+            // Puxa a foto do banco, se não tiver gera uma com a inicial do nome
+            const fotoMembro = m.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.nome)}&background=222&color=10b981`;
+
+            return `
+            <div class="membro-card">
+                <img src="${fotoMembro}" class="membro-avatar" alt="Foto">
+                
+                <div class="membro-info-text">
+                    <strong style="font-size:18px;">${m.nome}</strong>
+                    <small style="color:var(--text-dim); margin-left: 5px;">(${cargoFormatado})</small>
+                    <div style="margin-top:8px;">
+                        ${tagsHtml}
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    ${m.whatsapp ? `<a href="https://wa.me/55${m.whatsapp.replace(/\D/g,'')}" target="_blank" style="color:#25d366; font-size:20px;"><i class="fab fa-whatsapp"></i></a>` : ''}
+                    ${isBoss ? `
+                        <button onclick="prepararEdicaoMembro(${m.id})" style="background:none; border:1px solid #3b82f6; color:#3b82f6; padding:8px; border-radius:6px; cursor:pointer;"><i class="fas fa-edit"></i></button>
+                        <button onclick="excluirMembro(${m.id})" style="background:none; border:1px solid #ef4444; color:#ef4444; padding:8px; border-radius:6px; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                    ` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function prepararEdicaoMembro(id) {
+        const m = membrosDB.find(item => item.id == id);
+        if(!m) return;
+        idMembroSendoEditado = id;
+        document.getElementById('nomeMembro').value = m.nome;
+        document.getElementById('whatsappMembro').value = m.whatsapp || '';
+        document.getElementById('cargoMembro').value = m.cargo || 'MEMBRO';
+        funcoesSelecionadas = m.funcao ? m.funcao.split(',').map(f => f.trim()) : [];
+        document.querySelectorAll('.funcao-checkbox').forEach(el => {
+            el.classList.toggle('active', funcoesSelecionadas.includes(el.innerText));
+        });
+        document.getElementById('tituloFormMembro').innerHTML = '<i class="fas fa-edit highlight"></i> Editando Membro';
+        document.getElementById('btnSalvarMembro').innerText = 'Atualizar Dados';
+        document.querySelector('.main-content').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function salvarMembro() {
+        const nome = document.getElementById('nomeMembro').value;
+        const cargo = document.getElementById('cargoMembro').value;
+        const whatsapp = document.getElementById('whatsappMembro').value;
+        const funcao = funcoesSelecionadas.join(', ');
+
+        if(!nome) return alert("Nome é obrigatório");
+
+        const metodo = idMembroSendoEditado ? 'PUT' : 'POST';
+        const url = idMembroSendoEditado ? `/api/membros/${idMembroSendoEditado}` : '/api/membros';
+
+        // Se estiver editando, tenta não apagar a foto e a senha que já estão lá
+        let payload = { nome, cargo, whatsapp, funcao };
+        if (!idMembroSendoEditado) {
+            payload.senha = '123'; // Senha padrão para novos membros
+        } else {
+            const membroExistente = membrosDB.find(item => item.id == idMembroSendoEditado);
+            if (membroExistente) {
+                payload.fotoPerfil = membroExistente.fotoPerfil; // Mantém a foto na edição
+                payload.senha = membroExistente.senha; // Mantém a senha
+            }
+        }
+
+        const res = await fetch(url, {
+            method: metodo,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        
+        if(res.ok) location.reload();
+    }
+
+    async function excluirMembro(id) {
+        if(confirm("Deseja remover este membro?")) {
+            await fetch(`/api/membros/${id}`, { method: 'DELETE' });
+            carregarMembros();
+        }
+    }
+
+    function sair() {
+        localStorage.removeItem('usuario');
+        window.location.href = 'index.html';
+    }
+
+    carregarSidebar();
+    ajustarAcessos();
+    carregarOpcoesFuncoes();
+    carregarMembros();
+</script>
+</body>
+</html>
