@@ -133,12 +133,23 @@
         } catch(e) { console.log("Carregando apenas do cache."); }
     }
 
+    // ==========================================
+    // CONTROLE DE ACESSOS CORRIGIDO
+    // ==========================================
     function ajustarAcessos() {
+        // 1. APENAS DEV vê o link de Gestão de Usuários
         if (cargoUser === 'DEV') {
             const linkAdmin = document.getElementById('linkAdmin');
             if (linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
         }
         
+        // 2. ADMIN e DEV podem ver o botão de Zerar Ranking
+        if (cargoUser === 'ADMIN' || cargoUser === 'DEV') {
+            const btnZerar = document.getElementById('btnZerar');
+            if (btnZerar) { btnZerar.classList.remove('admin-only'); btnZerar.style.display = 'flex'; }
+        }
+        
+        // 3. Chefia vê a coluna de ações na tabela e botão de Tela Pública
         if (['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser)) {
             document.querySelectorAll('.boss-only').forEach(el => {
                 el.classList.remove('boss-only');
