@@ -6,16 +6,13 @@
     <title>Be One Tech - Ranking de Sugestões</title>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
     <link rel="stylesheet" href="style.css">
     <script src="auth.js"></script>
 
     <style>
         /* CSS ESPECÍFICO DESTA TELA */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
-
         .card { background: #111; border: 1px solid #333; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); overflow-x: auto; border-left: 4px solid var(--primary); }
-
         table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 500px; }
         th, td { padding: 15px 12px; text-align: left; border-bottom: 1px solid #222; }
         th { color: var(--text-dim); font-size: 13px; text-transform: uppercase; }
@@ -27,6 +24,14 @@
         .btn-zerar:hover { background: #ef4444; color: white; }
 
         .admin-only, .boss-only { display: none !important; }
+
+        /* ESTILO DO USUÁRIO NA SIDEBAR (CLICÁVEL) */
+        .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 10px 15px; border: 1px solid transparent; border-bottom: 1px solid #222; margin-bottom: 15px; cursor: pointer; transition: 0.3s; border-radius: 8px;}
+        .sidebar-user:hover { background: #1a1a1a; border-color: var(--primary); }
+        .sidebar-user img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+        .sidebar-user-info { display: flex; flex-direction: column; }
+        .sidebar-user-info strong { color: white; font-size: 14px; }
+        .sidebar-user-info span { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -40,12 +45,20 @@
 
 <aside class="sidebar" id="sidebar">
     <h2>Be One <span class="highlight">Tech</span></h2>
+
+    <div class="sidebar-user" id="sidebarUserBox" onclick="window.location.href='perfil.html'" title="Acessar Meu Perfil">
+        <img src="https://ui-avatars.com/api/?name=User&background=222&color=fff" id="sidebarAvatar" alt="Avatar">
+        <div class="sidebar-user-info">
+            <strong id="sidebarUserName">Carregando...</strong>
+            <span id="sidebarUserRole">Membro</span>
+        </div>
+    </div>
+
     <a href="inicio.html"><i class="fas fa-home"></i> Início</a>
     <a href="dashboard.html" class="active"><i class="fas fa-lightbulb"></i> Sugestões</a>
     <a href="louvores.html"><i class="fas fa-music"></i> Repertório</a>
     <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
     <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
-    <a href="perfil.html"><i class="fas fa-user-circle"></i> Meu Perfil</a>
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
     <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
 </aside>
@@ -91,13 +104,27 @@
     const user = JSON.parse(localStorage.getItem('usuario')) || {cargo: 'MEMBRO'};
     const cargoUser = String(user.cargo).toUpperCase().trim();
 
+    function carregarSidebar() {
+        const fotoFinal = user.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nome)}&background=222&color=10b981`;
+        document.getElementById('sidebarAvatar').src = fotoFinal;
+        
+        const cargoFormatado = String(user.cargo).toUpperCase().trim();
+        let primeiroNome = user.nome.split(' ')[0];
+        if (cargoFormatado === 'PASTOR') { primeiroNome = "Pr. " + primeiroNome; }
+
+        document.getElementById('sidebarUserName').innerText = primeiroNome;
+        document.getElementById('sidebarUserRole').innerText = user.cargo;
+    }
+
     function ajustarAcessos() {
-        if (cargoUser === 'ADMIN' || cargoUser === 'DEV') {
-            document.querySelectorAll('.admin-only').forEach(el => {
-                el.classList.remove('admin-only');
-                el.style.display = el.tagName === 'A' ? 'flex' : 'inline-block';
-            });
+        // ===============================================
+        // MUDANÇA: APENAS O DEV VÊ A GESTÃO DE USUÁRIOS!
+        // ===============================================
+        if (cargoUser === 'DEV') {
+            const linkAdmin = document.getElementById('linkAdmin');
+            if (linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
         }
+        
         if (['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser)) {
             document.querySelectorAll('.boss-only').forEach(el => {
                 el.classList.remove('boss-only');
@@ -148,7 +175,7 @@
         window.location.href = 'index.html';
     }
 
-    ajustarAcessos();
+    carregarSidebar();
     carregarRanking();
 </script>
 </body>
