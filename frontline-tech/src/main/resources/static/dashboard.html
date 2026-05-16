@@ -103,15 +103,12 @@
     const user = JSON.parse(localStorage.getItem('usuario')) || {cargo: 'MEMBRO'};
     const cargoUser = String(user.cargo).toUpperCase().trim();
 
-    // ==========================================
-    // NOVA FUNÇÃO HÍBRIDA À PROVA DE FALHAS
-    // ==========================================
     async function carregarSidebar() {
         try {
             const userLogado = JSON.parse(localStorage.getItem('usuario'));
             if (!userLogado) return;
 
-            // Renderiza instantaneamente pra evitar tela congelada
+            // Renderiza instantaneamente
             let fotoFinal = userLogado.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userLogado.nome || 'User')}&background=222&color=10b981`;
             const avatarElem = document.getElementById('sidebarAvatar');
             const nameElem = document.getElementById('sidebarUserName');
@@ -153,9 +150,6 @@
         }
     }
 
-    // ==========================================
-    // CONTROLE DE ACESSOS CORRIGIDO
-    // ==========================================
     function ajustarAcessos() {
         // 1. APENAS DEV vê o link de Gestão de Usuários
         if (cargoUser === 'DEV') {
@@ -197,7 +191,7 @@
                     </tr>
                 `).join('');
 
-            ajustarAcessos();
+            ajustarAcessos(); // Roda de novo para aplicar as regras nas linhas da tabela que acabaram de nascer
         } catch (error) { console.error("Erro ao carregar ranking:", error); }
     }
 
@@ -220,7 +214,11 @@
         window.location.href = 'login.html';
     }
 
+    // A MÁGICA TÁ AQUI: Roda o acesso e a sidebar instantaneamente ao carregar a página!
+    ajustarAcessos(); 
     carregarSidebar();
+    
+    // E só depois vai buscar o ranking na internet
     carregarRanking();
 </script>
 </body>
