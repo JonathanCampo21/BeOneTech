@@ -49,9 +49,10 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* ESTILO DO USUÁRIO NA SIDEBAR */
-        .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 15px; border-bottom: 1px solid #222; margin-bottom: 15px; }
-        .sidebar-user img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+        /* ESTILO DO USUÁRIO NA SIDEBAR (AGORA CLICÁVEL) */
+        .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 10px 15px; border: 1px solid transparent; border-bottom: 1px solid #222; margin-bottom: 15px; cursor: pointer; transition: 0.3s; border-radius: 8px;}
+        .sidebar-user:hover { background: #1a1a1a; border-color: var(--primary); }
+        .sidebar-user img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
         .sidebar-user-info { display: flex; flex-direction: column; }
         .sidebar-user-info strong { color: white; font-size: 14px; }
         .sidebar-user-info span { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
@@ -79,7 +80,7 @@
 <aside class="sidebar" id="sidebar">
     <h2>Be One <span class="highlight">Tech</span></h2>
     
-    <div class="sidebar-user" id="sidebarUserBox">
+    <div class="sidebar-user" id="sidebarUserBox" onclick="window.location.href='perfil.html'" title="Acessar Meu Perfil">
         <img src="https://ui-avatars.com/api/?name=User&background=222&color=fff" id="sidebarAvatar" alt="Avatar">
         <div class="sidebar-user-info">
             <strong id="sidebarUserName">Carregando...</strong>
@@ -92,7 +93,6 @@
     <a href="louvores.html"><i class="fas fa-music"></i> Repertório</a>
     <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
     <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
-    <a href="perfil.html" class="active"><i class="fas fa-user-circle"></i> Meu Perfil</a>
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
     <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
 </aside>
@@ -193,48 +193,38 @@
             imageToCrop.src = event.target.result;
             document.getElementById('cropModal').classList.add('active');
 
-            // Se já existir um cropper anterior, destrói para criar um novo
             if (cropper) {
                 cropper.destroy();
             }
 
-            // Inicia a ferramenta de corte na proporção 1:1 (Quadrado perfeito para a foto redonda)
             cropper = new Cropper(imageToCrop, {
                 aspectRatio: 1,
                 viewMode: 1,
                 dragMode: 'move',
                 autoCropArea: 1,
-                cropBoxResizable: false, // Força a ficar sempre quadrado
+                cropBoxResizable: false, 
                 toggleDragModeOnDblclick: false
             });
         };
         reader.readAsDataURL(file);
     });
 
-    // FECHAR TELA DE CORTE (CANCELAR)
     function fecharCrop() {
         document.getElementById('cropModal').classList.remove('active');
-        document.getElementById('fotoUpload').value = ''; // Limpa o input file
+        document.getElementById('fotoUpload').value = ''; 
         if (cropper) cropper.destroy();
     }
 
-    // CONFIRMAR O CORTE DA FOTO
     function confirmarCrop() {
         if (!cropper) return;
 
-        // Pega a área selecionada em formato Canvas com resolução boa
-        const canvas = cropper.getCroppedCanvas({
-            width: 400,
-            height: 400
-        });
-
-        // Converte pra Base64
+        const canvas = cropper.getCroppedCanvas({ width: 400, height: 400 });
         imagemBase64 = canvas.toDataURL('image/jpeg', 0.8);
-        
-        // Atualiza a visualização
         document.getElementById('avatarPreview').src = imagemBase64;
         
-        // Mostra o botão salvar e fecha o modal
+        // Atualiza a foto da sidebar também em tempo real
+        document.getElementById('sidebarAvatar').src = imagemBase64;
+
         document.getElementById('areaSalvar').style.display = 'block';
         fecharCrop();
     }
@@ -258,17 +248,21 @@
 
         const fotoFinal = user.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nome)}&background=222&color=10b981`;
         document.getElementById('avatarPreview').src = fotoFinal;
-        
         document.getElementById('sidebarAvatar').src = fotoFinal;
-        document.getElementById('sidebarUserName').innerText = user.nome.split(' ')[0];
-        document.getElementById('sidebarUserRole').innerText = user.cargo;
-
-        if(user.cargo && user.cargo.toUpperCase().trim() === 'PASTOR') {
+        
+        // LÓGICA DO PR.
+        const cargoFormatado = String(user.cargo).toUpperCase().trim();
+        let primeiroNome = user.nome.split(' ')[0];
+        
+        if (cargoFormatado === 'PASTOR') {
+            primeiroNome = "Pr. " + primeiroNome;
             document.getElementById('badgePastor').style.display = 'block';
         }
 
-        const cargoUser = String(user.cargo).toUpperCase().trim();
-        if (cargoUser === 'ADMIN' || cargoUser === 'DEV') {
+        document.getElementById('sidebarUserName').innerText = primeiroNome;
+        document.getElementById('sidebarUserRole').innerText = user.cargo;
+
+        if (cargoFormatado === 'ADMIN' || cargoFormatado === 'DEV') {
             const linkAdmin = document.getElementById('linkAdmin');
             if(linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
         }
