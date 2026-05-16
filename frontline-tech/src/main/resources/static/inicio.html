@@ -231,31 +231,49 @@
     // FUNÇÃO INTELIGENTE DE CARREGAR FOTO
     // ==========================================
     async function carregarSidebar() {
-        // 1. Mostrar a foto do cache rápido
-        let fotoFinal = user.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nome || 'Visitante')}&background=222&color=10b981`;
+        // 1. Puxa do cache (que agora vem completão do Login com ID, Nome e Foto)
+        const userLogado = JSON.parse(localStorage.getItem('usuario'));
+        
+        // Se por algum motivo não tiver usuário ou ID, nem tenta carregar
+        if (!userLogado || !userLogado.id) return;
+
+        // 2. Carrega a tela instantaneamente com os dados do cache rápido
+        let fotoFinal = userLogado.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userLogado.nome)}&background=222&color=10b981`;
         document.getElementById('sidebarAvatar').src = fotoFinal;
         
-        let primeiroNome = user.nome ? user.nome.split(' ')[0] : 'Visitante';
-        if (cargoUser === 'PASTOR') { primeiroNome = "Pr. " + primeiroNome; }
+        let primeiroNome = userLogado.nome ? userLogado.nome.split(' ')[0] : 'Visitante';
+        
+        // [ATENÇÃO] Mantenha essa verificação do Pr. em todas as telas, EXCETO no usuarios.html
+        if (String(userLogado.cargo).toUpperCase().trim() === 'PASTOR') { 
+            primeiroNome = "Pr. " + primeiroNome; 
+        }
 
         document.getElementById('sidebarUserName').innerText = primeiroNome;
-        document.getElementById('sidebarUserRole').innerText = user.cargo;
+        document.getElementById('sidebarUserRole').innerText = userLogado.cargo;
 
-        // 2. Buscar no banco pra ver se a foto atualizou
+        // 3. Busca no banco de dados EXCLUSIVAMENTE PELO ID (Sem gambiarra de nome)
         try {
-            if (!user.id) return;
             const res = await fetch('/api/membros');
             if (res.ok) {
                 const membros = await res.json();
-                const userAtualizado = membros.find(m => m.id === user.id);
-                if (userAtualizado && userAtualizado.fotoPerfil) {
-                    document.getElementById('sidebarAvatar').src = userAtualizado.fotoPerfil;
+                
+                // Busca direta e certeira pelo ID
+                const userAtualizado = membros.find(m => m.id === userLogado.id);
+                
+                if (userAtualizado) {
+                    // Se o usuário tiver uma foto cadastrada no banco, atualiza na tela
+                    if (userAtualizado.fotoPerfil) {
+                        document.getElementById('sidebarAvatar').src = userAtualizado.fotoPerfil;
+                    }
+                    
+                    // Salva a versão mais recente no cache para as próximas abas abrirem instantaneamente
                     localStorage.setItem('usuario', JSON.stringify(userAtualizado));
                 }
             }
-        } catch(e) { console.log("Usando apenas cache local."); }
+        } catch(e) { 
+            console.log("Servidor offline ou erro: mantendo dados do cache local."); 
+        }
     }
-
     function agruparEquipe(equipeStr) {
         if (!equipeStr) return [];
         const linhas = equipeStr.split('\n').filter(Boolean);
