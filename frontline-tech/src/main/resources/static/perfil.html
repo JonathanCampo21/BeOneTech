@@ -1,137 +1,35 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Be One Tech - Meu Perfil</title>
-    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <script src="auth.js"></script>
-    <style>
-        .profile-card { background: #111; border: 1px solid #333; border-radius: 15px; padding: 30px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
-        .profile-field { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333; transition: 0.3s; }
-        .field-data { flex: 1; }
-        .field-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
-        
-        /* Input que parece texto normal */
-        .field-input { width: 100%; background: transparent; border: none; color: white; font-size: 16px; font-family: 'Urbanist', sans-serif; outline: none; transition: 0.3s; padding: 0; }
-        .field-input:disabled { color: #fff; opacity: 1; }
-        
-        /* Quando o input estiver sendo editado */
-        .field-input.editing { background: #0a0a0a; border: 1px solid var(--primary); padding: 12px; border-radius: 6px; margin-top: 5px; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1); }
-        
-        .btn-edit { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 16px; transition: 0.2s; padding: 10px; border-radius: 6px; }
-        .btn-edit:hover { color: var(--primary); background: rgba(16, 185, 129, 0.1); }
-        
-        .btn-save-container { display: none; margin-top: 25px; }
-        .btn-save { width: 100%; padding: 15px; background: var(--primary); color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Urbanist', sans-serif; font-size: 16px; transition: 0.3s; }
-        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3); }
-        
-        .senha-section { display: none; background: #1a1a1a; padding: 20px; border-radius: 8px; border: 1px solid #333; margin-top: 20px; animation: fadeIn 0.3s ease; }
-        .senha-section input { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 6px; outline: none; margin-bottom: 15px; font-family: 'Urbanist', sans-serif; }
-        .senha-section input:focus { border-color: var(--primary); }
-
-        .btn-outline { width: 100%; background: transparent; border: 1px solid var(--text-dim); color: var(--text-dim); padding: 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-family: 'Urbanist', sans-serif; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px;}
-        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
-
-        .cargo-badge { display: inline-block; padding: 5px 12px; background: rgba(16, 185, 129, 0.1); color: var(--primary); border-radius: 20px; font-size: 12px; font-weight: bold; margin-bottom: 20px; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .admin-only { display: none !important; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
-</head>
-<body>
-
-<div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
-
-<header class="mobile-header">
-    <button class="hamburger-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
-    <h2>Be One <span class="highlight">Tech</span></h2>
-</header>
-
-<aside class="sidebar" id="sidebar">
-    <h2>Be One <span class="highlight">Tech</span></h2>
-    <a href="inicio.html"><i class="fas fa-home"></i> Início</a>
-    <a href="dashboard.html"><i class="fas fa-lightbulb"></i> Sugestões</a>
-    <a href="louvores.html"><i class="fas fa-music"></i> Repertório</a>
-    <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
-    <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
-    <a href="perfil.html" class="active"><i class="fas fa-user-circle"></i> Meu Perfil</a>
-    <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
-    <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
-</aside>
-
-<main class="main-content">
-    <div style="text-align: center; margin-bottom: 30px;">
-        <h1>Meu Perfil</h1>
-        <p style="color: var(--text-dim);">Confira e atualize suas informações pessoais.</p>
-    </div>
-
-    <div class="profile-card">
-        <div id="badgePastor" style="display:none; text-align: center;">
-            <div class="cargo-badge"><i class="fas fa-crown"></i> GESTOR</div>
-        </div>
-        
-        <div class="profile-field">
-            <div class="field-data">
-                <div class="field-label">Nome Completo</div>
-                <input type="text" id="nomePerfil" class="field-input" disabled>
-            </div>
-            <button class="btn-edit" onclick="habilitarEdicao('nomePerfil')" title="Editar Nome"><i class="fas fa-pen"></i></button>
-        </div>
-
-        <div class="profile-field">
-            <div class="field-data">
-                <div class="field-label">WhatsApp</div>
-                <input type="text" id="whatsappPerfil" class="field-input" disabled placeholder="Ex: 21999999999">
-            </div>
-            <button class="btn-edit" onclick="habilitarEdicao('whatsappPerfil')" title="Editar WhatsApp"><i class="fas fa-pen"></i></button>
-        </div>
-
-        <div class="profile-field" style="opacity: 0.6;">
-            <div class="field-data">
-                <div class="field-label">Cargo (Apenas Leitura)</div>
-                <input type="text" id="cargoPerfil" class="field-input" disabled>
-            </div>
-            <button class="btn-edit" style="visibility: hidden;"><i class="fas fa-lock"></i></button>
-        </div>
-        
-        <hr style="border: 0; border-top: 1px solid #222; margin: 25px 0;">
-        
-        <button class="btn-outline" onclick="toggleSenha()">
-            <i class="fas fa-key"></i> Alterar Minha Senha
-        </button>
-
-        <div class="senha-section" id="senhaSection">
-            <div class="field-label">Nova Senha</div>
-            <input type="password" id="senhaPerfil" placeholder="Digite a nova senha">
-            <div class="field-label">Confirmar Nova Senha</div>
-            <input type="password" id="confirmarSenhaPerfil" placeholder="Repita a nova senha">
-        </div>
-
-        <div class="btn-save-container" id="areaSalvar">
-            <button class="btn-save" onclick="atualizarPerfil()"><i class="fas fa-check-circle"></i> Salvar Alterações</button>
-        </div>
-    </div>
-</main>
-
 <script>
     function toggleMenu() {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('overlay').classList.toggle('active');
     }
 
-    const user = JSON.parse(localStorage.getItem('usuario'));
-    if (!user) location.href = 'index.html';
+    let user = JSON.parse(localStorage.getItem('usuario'));
+    if (!user || !user.id) location.href = 'index.html';
 
-    function carregarDados() {
-        document.getElementById('nomePerfil').value = user.nome;
+    // FUNÇÃO MELHORADA: Busca os dados fresquinhos do banco!
+    async function carregarDados() {
+        try {
+            const res = await fetch('/api/membros');
+            if (res.ok) {
+                const membros = await res.json();
+                // Acha você na lista do banco de dados
+                const userAtualizado = membros.find(m => m.id === user.id);
+                if (userAtualizado) {
+                    user = userAtualizado;
+                    // Atualiza a memória do celular com o zap novo
+                    localStorage.setItem('usuario', JSON.stringify(user)); 
+                }
+            }
+        } catch(e) {
+            console.log("Buscando do cache local.");
+        }
+
+        document.getElementById('nomePerfil').value = user.nome || '';
         document.getElementById('whatsappPerfil').value = user.whatsapp || '';
-        document.getElementById('cargoPerfil').value = user.cargo;
+        document.getElementById('cargoPerfil').value = user.cargo || 'MEMBRO';
 
-        if(user.cargo.toUpperCase().trim() === 'PASTOR') {
+        if(user.cargo && user.cargo.toUpperCase().trim() === 'PASTOR') {
             document.getElementById('badgePastor').style.display = 'block';
         }
 
@@ -148,7 +46,7 @@
         input.classList.add('editing');
         input.focus();
         
-        // Põe o cursor no final do texto
+        // Coloca o cursor no fim do texto
         const val = input.value;
         input.value = '';
         input.value = val;
@@ -159,7 +57,10 @@
     function toggleSenha() {
         const section = document.getElementById('senhaSection');
         if(section.style.display === 'block') {
+            // Se fechar, apaga o que estava digitado pra não enviar sem querer
             section.style.display = 'none';
+            document.getElementById('senhaPerfil').value = '';
+            document.getElementById('confirmarSenhaPerfil').value = '';
         } else {
             section.style.display = 'block';
             document.getElementById('areaSalvar').style.display = 'block';
@@ -169,19 +70,26 @@
 
     async function atualizarPerfil() {
         const nome = document.getElementById('nomePerfil').value.trim();
-        const whatsapp = document.getElementById('whatsappPerfil').value.trim();
+        // Pega o zap e remove os espaços ou traços caso o usuário digite
+        const whatsapp = document.getElementById('whatsappPerfil').value.replace(/\D/g, ''); 
         const senha = document.getElementById('senhaPerfil').value;
         const confirma = document.getElementById('confirmarSenhaPerfil').value;
 
         if (!nome) return alert("O nome não pode ficar vazio.");
         if (senha && senha !== confirma) return alert("As senhas digitadas não são iguais!");
 
+        // PACOTE INTELIGENTE: Só as informações que importam
         const dadosAtualizados = {
-            ...user,
             nome: nome,
             whatsapp: whatsapp,
-            senha: senha || user.senha
+            cargo: user.cargo,
+            funcao: user.funcao
         };
+
+        // Só envia a senha se a pessoa preencheu a caixa de nova senha
+        if (senha) {
+            dadosAtualizados.senha = senha;
+        }
 
         const btn = document.querySelector('.btn-save');
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
@@ -195,14 +103,17 @@
             });
 
             if (res.ok) {
-                localStorage.setItem('usuario', JSON.stringify(dadosAtualizados));
+                const salvo = await res.json();
+                localStorage.setItem('usuario', JSON.stringify(salvo));
                 alert("Dados atualizados com sucesso!");
                 location.reload();
             } else {
-                alert("Erro ao atualizar o servidor.");
+                // Se o Java der erro agora, ele vai cuspir o motivo real na tela
+                const erro = await res.text();
+                alert("O servidor recusou a atualização: " + erro);
             }
         } catch (e) {
-            alert("Erro de conexão.");
+            alert("Erro de conexão com o servidor. Verifique a internet.");
         } finally {
             btn.innerHTML = '<i class="fas fa-check-circle"></i> Salvar Alterações';
             btn.disabled = false;
@@ -216,5 +127,3 @@
 
     carregarDados();
 </script>
-</body>
-</html>
