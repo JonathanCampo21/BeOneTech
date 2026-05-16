@@ -112,11 +112,13 @@
                 // Java liberou! Pega os dados e o Token JWT
                 const dados = await res.json();
 
-                // Guarda o Token e os Dados do Usuário
+                // Guarda o Token e os Dados do Usuário (AGORA COM O ID E FOTO!)
                 localStorage.setItem('token', dados.token);
                 localStorage.setItem('usuario', JSON.stringify({
+                    id: dados.id,
                     nome: dados.nome,
-                    cargo: dados.cargo || 'MEMBRO'
+                    cargo: dados.cargo || 'MEMBRO',
+                    fotoPerfil: dados.fotoPerfil
                 }));
 
                 // Entra no sistema
