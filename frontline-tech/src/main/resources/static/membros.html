@@ -137,7 +137,6 @@
             const res = await fetch('/api/membros');
             membrosDB = await res.json();
             renderizarListaMembros(); 
-            ajustarAcessos();
         } catch (e) {
             document.getElementById('containerMembros').innerHTML = '<p style="color:red; text-align:center;">Erro ao conectar com o banco de dados.</p>';
         }
@@ -246,6 +245,13 @@
         }
     }
 
+    function sair() {
+        localStorage.removeItem('usuario');
+        window.location.href = 'index.html';
+    }
+
+    // Chama ajustarAcessos() IMEDIATAMENTE para o botão não piscar
+    ajustarAcessos();
     carregarOpcoesFuncoes();
     carregarMembros();
 </script>
