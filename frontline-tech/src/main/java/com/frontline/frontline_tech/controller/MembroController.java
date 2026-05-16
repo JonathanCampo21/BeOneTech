@@ -31,9 +31,6 @@ public class MembroController {
         membroRepository.deleteById(id);
     }
 
-    // ==========================================
-    // NOVO: MÉTODO PARA EDITAR O MEMBRO
-    // ==========================================
     @PutMapping("/{id}")
     public ResponseEntity<Membro> atualizarMembro(@PathVariable Long id, @RequestBody Membro membroAtualizado) {
         return membroRepository.findById(id)
@@ -41,9 +38,12 @@ public class MembroController {
                     membro.setNome(membroAtualizado.getNome());
                     membro.setFuncao(membroAtualizado.getFuncao());
                     membro.setCargo(membroAtualizado.getCargo());
-                    
-                    // AQUI ESTAVA FALTANDO ESSA LINHA PARA SALVAR O WHATSAPP!
                     membro.setWhatsapp(membroAtualizado.getWhatsapp());
+
+                    // =====================================
+                    // NOVO: SALVANDO A FOTO QUE VEIO DA TELA
+                    // =====================================
+                    membro.setFotoPerfil(membroAtualizado.getFotoPerfil());
 
                     // Atualiza a senha APENAS se o usuário digitou uma nova
                     if (membroAtualizado.getSenha() != null && !membroAtualizado.getSenha().isEmpty()) {
