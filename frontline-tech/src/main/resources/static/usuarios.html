@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="style.css">
     <script src="auth.js"></script>
     <style>
-        /* CSS ESPECÍFICO DESTA TELA */
         .card { background: #111; border: 1px solid #333; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); overflow-x: auto; }
         .form-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr 0.8fr; gap: 15px; margin-top: 15px; }
         input, select { padding:12px; background:#1a1a1a; border:1px solid #333; color:white; border-radius:6px; outline: none; font-family: 'Urbanist', sans-serif; width: 100%;}
@@ -25,7 +24,6 @@
         .badge-membro { background: #222; color: #aaa; border-color: #333; }
         .vinculo-tag { font-size: 11px; color: var(--primary); background: rgba(16, 185, 129, 0.1); padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
         
-        /* ESTILO DO USUÁRIO NA SIDEBAR (CLICÁVEL) */
         .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 10px 15px; border: 1px solid transparent; border-bottom: 1px solid #222; margin-bottom: 15px; cursor: pointer; transition: 0.3s; border-radius: 8px;}
         .sidebar-user:hover { background: #1a1a1a; border-color: var(--primary); }
         .sidebar-user img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
@@ -133,11 +131,30 @@
         window.location.href = 'inicio.html';
     }
 
-    function carregarSidebar() {
-        const fotoFinal = userLogado.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userLogado.nome)}&background=222&color=10b981`;
+    // ==========================================
+    // FUNÇÃO INTELIGENTE DE CARREGAR FOTO
+    // ==========================================
+    async function carregarSidebar() {
+        let fotoFinal = userLogado.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userLogado.nome || 'Visitante')}&background=222&color=10b981`;
         document.getElementById('sidebarAvatar').src = fotoFinal;
-        document.getElementById('sidebarUserName').innerText = userLogado.nome ? userLogado.nome.split(' ')[0] : 'DEV';
+        
+        let primeiroNome = userLogado.nome ? userLogado.nome.split(' ')[0] : 'DEV';
+
+        document.getElementById('sidebarUserName').innerText = primeiroNome;
         document.getElementById('sidebarUserRole').innerText = userLogado.cargo;
+
+        try {
+            if (!userLogado.id) return;
+            const res = await fetch('/api/membros');
+            if (res.ok) {
+                const membros = await res.json();
+                const userAtualizado = membros.find(m => m.id === userLogado.id);
+                if (userAtualizado && userAtualizado.fotoPerfil) {
+                    document.getElementById('sidebarAvatar').src = userAtualizado.fotoPerfil;
+                    localStorage.setItem('usuario', JSON.stringify(userAtualizado));
+                }
+            }
+        } catch(e) { console.log("Usando apenas cache local."); }
     }
 
     async function carregarDados() {
@@ -202,7 +219,7 @@
 
     function sair() {
         localStorage.removeItem('usuario');
-        window.location.href = 'login.html'; // Trocado para jogar para a tela de login!
+        window.location.href = 'login.html'; 
     }
 
     carregarSidebar();
