@@ -71,7 +71,6 @@
     <a href="louvores.html"><i class="fas fa-music"></i> Repertório</a>
     <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
     <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
-    <a href="perfil.html"><i class="fas fa-user-circle"></i> Meu Perfil</a>
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
     <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
 </aside>
@@ -115,7 +114,7 @@
     }
 
     function ajustarAcessos() {
-        if (['ADMIN', 'DEV'].includes(cargoUser)) {
+        if (cargoUser === 'DEV') {
             const linkAdmin = document.getElementById('linkAdmin');
             if (linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
         }
@@ -186,7 +185,7 @@
         enviarVotoBackend(tituloOriginal, ministroOriginal);
     }
 
-    // Função central que comunica com o Back-end
+    // Função central que comunica com o Back-end (Lógica duplicada foi unificada e corrigida)
     async function enviarVotoBackend(titulo, ministro) {
         let meusVotos = JSON.parse(localStorage.getItem('votosBeOneTech') || '[]');
         const tituloMinusculo = titulo.toLowerCase();
@@ -203,11 +202,17 @@
         };
 
         try {
-            await fetch('/api/musicas', {
+            const res = await fetch('/api/musicas', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(m)
             });
+
+            if (!res.ok) {
+                const erroTexto = await res.text();
+                alert("O Servidor recusou a sugestão: " + erroTexto);
+                return;
+            }
 
             // Salva no celular que a pessoa já votou nessa música
             meusVotos.push(tituloMinusculo);
@@ -216,10 +221,11 @@
             document.getElementById('titulo').value = '';
             document.getElementById('ministro').value = '';
             
+            alert("Sugestão enviada com sucesso!");
             await carregar(); // Recarrega a tela para mostrar o voto subindo!
 
         } catch (e) {
-            alert("Erro ao conectar com o servidor. Tente novamente.");
+            alert("Erro de conexão (o servidor pode estar fora do ar). Tente novamente.");
         }
     }
 
@@ -236,51 +242,9 @@
 
     function sair() {
         localStorage.removeItem('usuario');
-        window.location.href = 'index.html';
+        window.location.href = 'login.html';
     }
 
-async function enviarVotoBackend(titulo, ministro) {
-        let meusVotos = JSON.parse(localStorage.getItem('votosBeOneTech') || '[]');
-        const tituloMinusculo = titulo.toLowerCase();
-
-        if (meusVotos.includes(tituloMinusculo)) {
-            alert("Você já votou neste louvor!");
-            return;
-        }
-
-        const m = {
-            titulo: titulo,
-            ministro: ministro || 'Não informado'
-        };
-
-        try {
-            const res = await fetch('/api/musicas', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(m)
-            });
-
-            // NOVA LÓGICA DE VERIFICAÇÃO DE ERRO
-            if (!res.ok) {
-                const erroTexto = await res.text();
-                alert("O Servidor recusou a sugestão: " + erroTexto);
-                return;
-            }
-
-            meusVotos.push(tituloMinusculo);
-            localStorage.setItem('votosBeOneTech', JSON.stringify(meusVotos));
-
-            document.getElementById('titulo').value = '';
-            document.getElementById('ministro').value = '';
-            
-            alert("Sugestão enviada com sucesso!");
-            await carregar(); 
-
-        } catch (e) {
-            alert("Erro de conexão (o servidor pode estar fora do ar).");
-        }
-    }
-    
     ajustarAcessos();
     carregar();
 </script>
