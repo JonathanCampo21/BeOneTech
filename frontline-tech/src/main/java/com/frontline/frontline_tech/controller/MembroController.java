@@ -41,6 +41,9 @@ public class MembroController {
                     membro.setNome(membroAtualizado.getNome());
                     membro.setFuncao(membroAtualizado.getFuncao());
                     membro.setCargo(membroAtualizado.getCargo());
+                    
+                    // AQUI ESTAVA FALTANDO ESSA LINHA PARA SALVAR O WHATSAPP!
+                    membro.setWhatsapp(membroAtualizado.getWhatsapp());
 
                     // Atualiza a senha APENAS se o usuário digitou uma nova
                     if (membroAtualizado.getSenha() != null && !membroAtualizado.getSenha().isEmpty()) {
