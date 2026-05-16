@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Lob;
 
 @Entity
 public class Membro {
@@ -16,7 +18,14 @@ public class Membro {
     private String funcao;   // Ex: Vocal, Bateria
     private String cargo;    // LIDER, PASTOR, MEMBRO
     private String whatsapp; // Número do Zap
-    private String senha;    // NOVO: Campo para armazenar a senha de acesso
+    private String senha;    // Campo para armazenar a senha de acesso
+
+    // =====================================
+    // NOVO: CAMPO GIGANTE PARA A FOTO BASE64
+    // =====================================
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String fotoPerfil;
 
     // --- Getters e Setters ---
 
@@ -60,12 +69,20 @@ public class Membro {
         this.whatsapp = whatsapp;
     }
 
-    // NOVO: Getter e Setter para Senha
     public String getSenha() {
         return senha;
     }
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    // --- Getters e Setters da Foto ---
+    public String getFotoPerfil() {
+        return fotoPerfil;
+    }
+
+    public void setFotoPerfil(String fotoPerfil) {
+        this.fotoPerfil = fotoPerfil;
     }
 }
