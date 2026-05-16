@@ -1,88 +1,54 @@
-package com.frontline.frontline_tech.model;
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be One Tech - Membros</title>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="auth.js"></script>
+    <style>
+        /* CSS ESPECÍFICO DESTA TELA */
+        .funcoes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin: 15px 0; }
+        .funcao-checkbox { background: #1a1a1a; border: 1px solid #333; padding: 10px; border-radius: 6px; cursor: pointer; text-align: center; font-size: 13px; transition: 0.3s; color: #a1a1aa; }
+        .funcao-checkbox.active { background: var(--primary); color: black; border-color: var(--primary); font-weight: bold; }
+        
+        .membro-card { background: #111; border: 1px solid #333; padding: 20px; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; transition: 0.3s;}
+        .membro-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+        .membro-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); background: #222; flex-shrink: 0; }
+        .membro-info-text { flex: 1; }
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import jakarta.persistence.Lob;
+        .tag-funcao { background: #222; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 11px; margin-right: 5px; border: 1px solid #333; font-weight: bold;}
+        input, select { padding:12px; background:#1a1a1a; border:1px solid #333; color:white; border-radius:6px; outline: none; font-family: 'Urbanist', sans-serif; width: 100%;}
+        .admin-only, .boss-only { display: none !important; }
+        
+        .search-container { display: flex; margin-bottom: 20px; width: 100%; }
+        .search-input { width: 100%; background: #1a1a1a; border: 1px solid #333; padding: 12px 20px; border-radius: 8px; color: white; font-family: 'Urbanist', sans-serif; transition: 0.3s; }
+        .search-input:focus { border-color: var(--primary); outline: none; }
 
-@Entity
-public class Membro {
+        /* ESTILO DO USUÁRIO NA SIDEBAR */
+        .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 15px; border-bottom: 1px solid #222; margin-bottom: 15px; }
+        .sidebar-user img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+        .sidebar-user-info { display: flex; flex-direction: column; }
+        .sidebar-user-info strong { color: white; font-size: 14px; }
+        .sidebar-user-info span { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
+    </style>
+</head>
+<body>
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+<div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
 
-    private String nome;
-    private String funcao;   // Ex: Vocal, Bateria
-    private String cargo;    // LIDER, PASTOR, MEMBRO
-    private String whatsapp; // Número do Zap
-    private String senha;    // Campo para armazenar a senha de acesso
+<header class="mobile-header">
+    <button class="hamburger-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+    <h2>Be One <span class="highlight">Tech</span></h2>
+</header>
 
-    // =====================================
-    // NOVO: CAMPO GIGANTE PARA A FOTO BASE64
-    // =====================================
-    @Lob
-    @Column(columnDefinition = "LONGTEXT")
-    private String fotoPerfil;
+<aside class="sidebar" id="sidebar">
+    <h2>Be One <span class="highlight">Tech</span></h2>
 
-    // --- Getters e Setters ---
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getFuncao() {
-        return funcao;
-    }
-
-    public void setFuncao(String funcao) {
-        this.funcao = funcao;
-    }
-
-    public String getCargo() {
-        return cargo;
-    }
-
-    public void setCargo(String cargo) {
-        this.cargo = cargo;
-    }
-
-    public String getWhatsapp() {
-        return whatsapp;
-    }
-
-    public void setWhatsapp(String whatsapp) {
-        this.whatsapp = whatsapp;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
-    }
-
-    // --- Getters e Setters da Foto ---
-    public String getFotoPerfil() {
-        return fotoPerfil;
-    }
-
-    public void setFotoPerfil(String fotoPerfil) {
-        this.fotoPerfil = fotoPerfil;
-    }
-}
+    <div class="sidebar-user" id="sidebarUserBox">
+        <img src="https://ui-avatars.com/api/?name=User&background=222&color=fff" id="sidebarAvatar" alt="Avatar">
+        <div class="sidebar-user-info">
+            <strong id="sidebarUserName">Carregando...</strong>
+            <span id
