@@ -264,7 +264,7 @@
         linhas.forEach(linha => {
             let nome = linha;
             let funcao = '';
-            if (linha.includes('(') && linha.includes(')')) {
+            if (linha.includes('(') && line.includes(')')) {
                 const openIdx = linha.lastIndexOf('(');
                 const closeIdx = linha.lastIndexOf(')');
                 nome = linha.substring(0, openIdx).trim();
