@@ -6,6 +6,10 @@
     <title>Be One Tech - Meu Perfil</title>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
     <link rel="stylesheet" href="style.css">
     <script src="auth.js"></script>
     <style>
@@ -51,6 +55,16 @@
         .sidebar-user-info { display: flex; flex-direction: column; }
         .sidebar-user-info strong { color: white; font-size: 14px; }
         .sidebar-user-info span { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
+
+        /* TELA DE CORTE DA FOTO (MODAL) */
+        .crop-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 3000; align-items: center; justify-content: center; flex-direction: column; }
+        .crop-modal.active { display: flex; }
+        .crop-container { width: 90%; max-width: 400px; height: 400px; background: #000; margin-bottom: 20px; }
+        .crop-container img { max-width: 100%; display: block; }
+        .crop-actions { display: flex; gap: 15px; width: 90%; max-width: 400px; }
+        .crop-btn { flex: 1; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; font-family: 'Urbanist', sans-serif; border: none; font-size: 16px; transition: 0.2s;}
+        .crop-btn.cancel { background: transparent; color: #ef4444; border: 1px solid #ef4444; }
+        .crop-btn.confirm { background: var(--primary); color: black; }
     </style>
 </head>
 <body>
@@ -82,6 +96,18 @@
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
     <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
 </aside>
+
+<div class="crop-modal" id="cropModal">
+    <h3 style="color: white; margin-bottom: 10px;"><i class="fas fa-crop-alt highlight"></i> Ajustar Foto</h3>
+    <p style="color: var(--text-dim); margin-bottom: 20px; font-size: 14px;">Mova e dê zoom para enquadrar no círculo.</p>
+    <div class="crop-container">
+        <img id="imageToCrop" src="">
+    </div>
+    <div class="crop-actions">
+        <button class="crop-btn cancel" onclick="fecharCrop()">Cancelar</button>
+        <button class="crop-btn confirm" onclick="confirmarCrop()"><i class="fas fa-check"></i> Cortar</button>
+    </div>
+</div>
 
 <main class="main-content">
     <div style="text-align: center; margin-bottom: 30px;">
@@ -153,35 +179,65 @@
     let user = JSON.parse(localStorage.getItem('usuario'));
     if (!user) { window.location.href = 'index.html'; }
 
-    let imagemBase64 = null; // Guarda a foto se a pessoa alterar
+    let imagemBase64 = null; 
+    let cropper = null; // Instância do Cropper.js
 
-    // LÓGICA DE RECORTAR E SALVAR A FOTO
+    // LÓGICA DE ABRIR A TELA DE CORTAR FOTO
     document.getElementById('fotoUpload').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if(!file) return;
 
         const reader = new FileReader();
         reader.onload = function(event) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                canvas.width = 300; canvas.height = 300; // Resolução da foto de perfil
-                const ctx = canvas.getContext('2d');
-                
-                // Corta quadrado perfeito no centro
-                const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
-                const x = (canvas.width / scale - img.width) / 2;
-                const y = (canvas.height / scale - img.height) / 2;
-                ctx.drawImage(img, x, y, img.width, img.height, 0, 0, canvas.width, canvas.height);
-                
-                imagemBase64 = canvas.toDataURL('image/jpeg', 0.6); // 60% de qualidade pra não pesar o banco
-                document.getElementById('avatarPreview').src = imagemBase64;
-                document.getElementById('areaSalvar').style.display = 'block'; // Mostra botão de salvar
-            };
-            img.src = event.target.result;
+            const imageToCrop = document.getElementById('imageToCrop');
+            imageToCrop.src = event.target.result;
+            document.getElementById('cropModal').classList.add('active');
+
+            // Se já existir um cropper anterior, destrói para criar um novo
+            if (cropper) {
+                cropper.destroy();
+            }
+
+            // Inicia a ferramenta de corte na proporção 1:1 (Quadrado perfeito para a foto redonda)
+            cropper = new Cropper(imageToCrop, {
+                aspectRatio: 1,
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 1,
+                cropBoxResizable: false, // Força a ficar sempre quadrado
+                toggleDragModeOnDblclick: false
+            });
         };
         reader.readAsDataURL(file);
     });
+
+    // FECHAR TELA DE CORTE (CANCELAR)
+    function fecharCrop() {
+        document.getElementById('cropModal').classList.remove('active');
+        document.getElementById('fotoUpload').value = ''; // Limpa o input file
+        if (cropper) cropper.destroy();
+    }
+
+    // CONFIRMAR O CORTE DA FOTO
+    function confirmarCrop() {
+        if (!cropper) return;
+
+        // Pega a área selecionada em formato Canvas com resolução boa
+        const canvas = cropper.getCroppedCanvas({
+            width: 400,
+            height: 400
+        });
+
+        // Converte pra Base64
+        imagemBase64 = canvas.toDataURL('image/jpeg', 0.8);
+        
+        // Atualiza a visualização
+        document.getElementById('avatarPreview').src = imagemBase64;
+        
+        // Mostra o botão salvar e fecha o modal
+        document.getElementById('areaSalvar').style.display = 'block';
+        fecharCrop();
+    }
 
     async function carregarDados() {
         try {
@@ -196,16 +252,13 @@
             }
         } catch(e) { console.log("Usando cache local."); }
 
-        // Preenche o formulário
         document.getElementById('nomePerfil').value = user.nome || '';
         document.getElementById('whatsappPerfil').value = user.whatsapp || '';
         document.getElementById('cargoPerfil').value = user.cargo || 'MEMBRO';
 
-        // Preenche a foto se existir, senão põe a inicial do nome
         const fotoFinal = user.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nome)}&background=222&color=10b981`;
         document.getElementById('avatarPreview').src = fotoFinal;
         
-        // Atualiza a Sidebar
         document.getElementById('sidebarAvatar').src = fotoFinal;
         document.getElementById('sidebarUserName').innerText = user.nome.split(' ')[0];
         document.getElementById('sidebarUserRole').innerText = user.cargo;
@@ -255,7 +308,7 @@
             whatsapp: whatsapp,
             cargo: user.cargo,
             funcao: user.funcao,
-            fotoPerfil: imagemBase64 || user.fotoPerfil // Manda a foto nova ou mantém a antiga
+            fotoPerfil: imagemBase64 || user.fotoPerfil
         };
 
         if (senha) dadosAtualizados.senha = senha;
