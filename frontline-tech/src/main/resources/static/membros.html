@@ -1,292 +1,56 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Be One Tech - Membros</title>
-    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <script src="auth.js"></script>
-    <style>
-        .funcoes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin: 15px 0; }
-        .funcao-checkbox { background: #1a1a1a; border: 1px solid #333; padding: 10px; border-radius: 6px; cursor: pointer; text-align: center; font-size: 13px; transition: 0.3s; color: #a1a1aa; }
-        .funcao-checkbox.active { background: var(--primary); color: black; border-color: var(--primary); font-weight: bold; }
-        
-        .membro-card { background: #111; border: 1px solid #333; padding: 20px; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; transition: 0.3s;}
-        .membro-card:hover { border-color: var(--primary); transform: translateY(-2px); }
-        .membro-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); background: #222; flex-shrink: 0; }
-        .membro-info-text { flex: 1; }
-
-        .tag-funcao { background: #222; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 11px; margin-right: 5px; border: 1px solid #333; font-weight: bold;}
-        input, select { padding:12px; background:#1a1a1a; border:1px solid #333; color:white; border-radius:6px; outline: none; font-family: 'Urbanist', sans-serif; width: 100%;}
-        .admin-only, .boss-only { display: none !important; }
-        
-        .search-container { display: flex; margin-bottom: 20px; width: 100%; }
-        .search-input { width: 100%; background: #1a1a1a; border: 1px solid #333; padding: 12px 20px; border-radius: 8px; color: white; font-family: 'Urbanist', sans-serif; transition: 0.3s; }
-        .search-input:focus { border-color: var(--primary); outline: none; }
-
-        .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 10px 15px; border: 1px solid transparent; border-bottom: 1px solid #222; margin-bottom: 15px; cursor: pointer; transition: 0.3s; border-radius: 8px;}
-        .sidebar-user:hover { background: #1a1a1a; border-color: var(--primary); }
-        .sidebar-user img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
-        .sidebar-user-info { display: flex; flex-direction: column; }
-        .sidebar-user-info strong { color: white; font-size: 14px; }
-        .sidebar-user-info span { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
-    </style>
-</head>
-<body>
-
-<div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
-
-<header class="mobile-header">
-    <button class="hamburger-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
-    <h2>Be One <span class="highlight">Tech</span></h2>
-</header>
-
-<aside class="sidebar" id="sidebar">
-    <h2>Be One <span class="highlight">Tech</span></h2>
-
-    <div class="sidebar-user" id="sidebarUserBox" onclick="window.location.href='perfil.html'" title="Acessar Meu Perfil">
-        <img src="https://ui-avatars.com/api/?name=User&background=222&color=fff" id="sidebarAvatar" alt="Avatar">
-        <div class="sidebar-user-info">
-            <strong id="sidebarUserName">Carregando...</strong>
-            <span id="sidebarUserRole">Membro</span>
-        </div>
-    </div>
-
-    <a href="inicio.html"><i class="fas fa-home"></i> Início</a>
-    <a href="dashboard.html"><i class="fas fa-lightbulb"></i> Sugestões</a>
-    <a href="louvores.html"><i class="fas fa-music"></i> Repertório</a>
-    <a href="membros.html" class="active"><i class="fas fa-users"></i> Membros</a>
-    <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
-    <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
-    <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
-</aside>
-
-<main class="main-content">
-    <div style="margin-bottom: 30px;">
-        <h1>Equipe do Ministério</h1>
-        <p style="color: var(--text-dim);">Visualize os membros e suas funções musicais.</p>
-    </div>
-
-    <div class="card boss-only" id="cardCadastro" style="background:#111; border:1px solid #333; padding:20px; border-radius:12px; margin-bottom:30px; overflow-x: auto;">
-        <h3 id="tituloFormMembro"><i class="fas fa-user-plus highlight"></i> Novo Membro</h3>
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; margin-top:15px;">
-            <input type="text" id="nomeMembro" placeholder="Nome Completo">
-            <input type="text" id="whatsappMembro" placeholder="WhatsApp">
-            <select id="cargoMembro">
-                <option value="MEMBRO">Membro</option>
-                <option value="LIDER">Líder</option>
-                <option value="PASTOR">Pastor</option>
-                <option value="ADMIN">Admin</option>
-                <option value="DEV">Dev</option>
-            </select>
-        </div>
-        <div class="funcoes-grid" id="listaFuncoes"></div>
-        <button id="btnSalvarMembro" onclick="salvarMembro()" style="width:100%; padding:15px; background:var(--primary); border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-family: 'Urbanist', sans-serif;">Cadastrar Membro</button>
-    </div>
-
-    <div class="search-container">
-        <input type="text" id="buscaMembro" class="search-input" placeholder="Pesquisar por nome ou função..." onkeyup="renderizarListaMembros()">
-    </div>
-
-    <div id="containerMembros">
-        <p style="text-align: center; color: var(--text-dim);">Buscando equipe no servidor...</p>
-    </div>
-</main>
-
-<script>
-    function toggleMenu() {
-        document.getElementById('sidebar').classList.toggle('active');
-        document.getElementById('overlay').classList.toggle('active');
-    }
-
-    const user = JSON.parse(localStorage.getItem('usuario'));
-    if (!user) { window.location.href = 'index.html'; }
-
-    const cargoUser = String(user.cargo).toUpperCase().trim();
-    const funcoesDisponiveis = ["Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado", "Ministro", "Diretor Musical"];
-    let funcoesSelecionadas = [];
-    let membrosDB = [];
-    let idMembroSendoEditado = null;
-
-   async function carregarSidebar() {
-        // 1. Puxa do cache (que agora vem completão do Login com ID, Nome e Foto)
-        const userLogado = JSON.parse(localStorage.getItem('usuario'));
-        
-        // Se por algum motivo não tiver usuário ou ID, nem tenta carregar
-        if (!userLogado || !userLogado.id) return;
-
-        // 2. Carrega a tela instantaneamente com os dados do cache rápido
-        let fotoFinal = userLogado.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userLogado.nome)}&background=222&color=10b981`;
-        document.getElementById('sidebarAvatar').src = fotoFinal;
-        
-        let primeiroNome = userLogado.nome ? userLogado.nome.split(' ')[0] : 'Visitante';
-        
-        // [ATENÇÃO] Mantenha essa verificação do Pr. em todas as telas, EXCETO no usuarios.html
-        if (String(userLogado.cargo).toUpperCase().trim() === 'PASTOR') { 
-            primeiroNome = "Pr. " + primeiroNome; 
-        }
-
-        document.getElementById('sidebarUserName').innerText = primeiroNome;
-        document.getElementById('sidebarUserRole').innerText = userLogado.cargo;
-
-        // 3. Busca no banco de dados EXCLUSIVAMENTE PELO ID (Sem gambiarra de nome)
+async function carregarSidebar() {
         try {
+            // 1. Puxa os dados básicos que temos certeza que vêm do Login
+            const userLogado = JSON.parse(localStorage.getItem('usuario'));
+            if (!userLogado) return;
+
+            // 2. Renderiza o nome e o cargo INSTANTANEAMENTE (nunca mais fica travado!)
+            let fotoFinal = userLogado.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userLogado.nome || 'User')}&background=222&color=10b981`;
+            
+            const avatarElem = document.getElementById('sidebarAvatar');
+            const nameElem = document.getElementById('sidebarUserName');
+            const roleElem = document.getElementById('sidebarUserRole');
+
+            if (avatarElem) avatarElem.src = fotoFinal;
+            
+            if (nameElem) {
+                // Se for a tela de usuários (que é só sua), mantém o nome puro sem Pr.
+                if (window.location.pathname.includes('usuarios.html')) {
+                    nameElem.innerText = userLogado.nome ? userLogado.nome.split(' ')[0] : 'DEV';
+                } else {
+                    let primeiroNome = userLogado.nome ? userLogado.nome.split(' ')[0] : 'Visitante';
+                    if (String(userLogado.cargo).toUpperCase().trim() === 'PASTOR') { 
+                        primeiroNome = "Pr. " + primeiroNome; 
+                    }
+                    nameElem.innerText = primeiroNome;
+                }
+            }
+            
+            if (roleElem) roleElem.innerText = userLogado.cargo || 'Membro';
+
+            // 3. ATUALIZAÇÃO INTELIGENTE EM SEGUNDO PLANO
             const res = await fetch('/api/membros');
             if (res.ok) {
                 const membros = await res.json();
                 
-                // Busca direta e certeira pelo ID
-                const userAtualizado = membros.find(m => m.id === userLogado.id);
-                
+                // Busca das duas formas: tenta por ID, se não tiver, pareia pelo Nome!
+                let userAtualizado = null;
+                if (userLogado.id) {
+                    userAtualizado = membros.find(m => m.id === userLogado.id);
+                } else if (userLogado.nome) {
+                    userAtualizado = membros.find(m => m.nome.trim().toLowerCase() === userLogado.nome.trim().toLowerCase());
+                }
+
                 if (userAtualizado) {
-                    // Se o usuário tiver uma foto cadastrada no banco, atualiza na tela
-                    if (userAtualizado.fotoPerfil) {
-                        document.getElementById('sidebarAvatar').src = userAtualizado.fotoPerfil;
+                    // Se achou a foto no banco, atualiza ela de mansinho na tela
+                    if (userAtualizado.fotoPerfil && avatarElem) {
+                        avatarElem.src = userAtualizado.fotoPerfil;
                     }
-                    
-                    // Salva a versão mais recente no cache para as próximas abas abrirem instantaneamente
+                    // Salva o objeto completo (agora com o ID garantido) no localStorage
                     localStorage.setItem('usuario', JSON.stringify(userAtualizado));
                 }
             }
         } catch(e) { 
-            console.log("Servidor offline ou erro: mantendo dados do cache local."); 
+            console.log("Erro ao sincronizar sidebar com o banco de dados. Usando cache local."); 
         }
     }
-    function ajustarAcessos() {
-        if (cargoUser === 'DEV') {
-            const linkAdmin = document.getElementById('linkAdmin');
-            if (linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
-        }
-        if (['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser)) {
-            document.querySelectorAll('.boss-only').forEach(el => el.classList.remove('boss-only'));
-        }
-    }
-
-    function carregarOpcoesFuncoes() {
-        document.getElementById('listaFuncoes').innerHTML = funcoesDisponiveis.map(f => `
-            <div class="funcao-checkbox" onclick="toggleFuncao(this, '${f}')">${f}</div>
-        `).join('');
-    }
-
-    function toggleFuncao(el, funcao) {
-        if (funcoesSelecionadas.includes(funcao)) {
-            funcoesSelecionadas = funcoesSelecionadas.filter(f => f !== funcao);
-            el.classList.remove('active');
-        } else {
-            funcoesSelecionadas.push(funcao);
-            el.classList.add('active');
-        }
-    }
-
-    async function carregarMembros() {
-        try {
-            const res = await fetch('/api/membros');
-            membrosDB = await res.json();
-            renderizarListaMembros(); 
-        } catch (e) { document.getElementById('containerMembros').innerHTML = '<p style="color:red; text-align:center;">Erro ao conectar.</p>'; }
-    }
-
-    function renderizarListaMembros() {
-        const container = document.getElementById('containerMembros');
-        const termoBusca = document.getElementById('buscaMembro').value.toLowerCase();
-        const isBoss = ['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser);
-
-        let filtrados = membrosDB.filter(m => 
-            m.nome.toLowerCase().includes(termoBusca) || (m.funcao && m.funcao.toLowerCase().includes(termoBusca))
-        );
-
-        filtrados.sort((a, b) => a.nome.localeCompare(b.nome));
-
-        if (filtrados.length === 0) { container.innerHTML = '<p style="text-align: center; color: var(--text-dim);">Nenhum membro encontrado.</p>'; return; }
-
-        container.innerHTML = filtrados.map(m => {
-            const cargoStr = (m.cargo && typeof m.cargo === 'string') ? m.cargo.toUpperCase() : 'MEMBRO';
-            const cargoFormatado = cargoStr.toLowerCase();
-
-            let tagsHtml = '';
-            if (cargoStr === 'PASTOR') tagsHtml += `<span class="tag-funcao">Gestor</span>`;
-            if (m.funcao && m.funcao.trim() !== '') {
-                tagsHtml += m.funcao.split(',').map(f => `<span class="tag-funcao">${f.trim()}</span>`).join('');
-            }
-            if (tagsHtml === '') tagsHtml = '<span style="font-size:11px; color:#444">Sem função</span>';
-
-            const fotoMembro = m.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.nome)}&background=222&color=10b981`;
-
-            return `
-            <div class="membro-card">
-                <img src="${fotoMembro}" class="membro-avatar" alt="Foto">
-                <div class="membro-info-text">
-                    <strong style="font-size:18px;">${m.nome}</strong>
-                    <small style="color:var(--text-dim); margin-left: 5px;">(${cargoFormatado})</small>
-                    <div style="margin-top:8px;">${tagsHtml}</div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    ${m.whatsapp ? `<a href="https://wa.me/55${m.whatsapp.replace(/\D/g,'')}" target="_blank" style="color:#25d366; font-size:20px;"><i class="fab fa-whatsapp"></i></a>` : ''}
-                    ${isBoss ? `
-                        <button onclick="prepararEdicaoMembro(${m.id})" style="background:none; border:1px solid #3b82f6; color:#3b82f6; padding:8px; border-radius:6px; cursor:pointer;"><i class="fas fa-edit"></i></button>
-                        <button onclick="excluirMembro(${m.id})" style="background:none; border:1px solid #ef4444; color:#ef4444; padding:8px; border-radius:6px; cursor:pointer;"><i class="fas fa-trash"></i></button>
-                    ` : ''}
-                </div>
-            </div>`;
-        }).join('');
-    }
-
-    function prepararEdicaoMembro(id) {
-        const m = membrosDB.find(item => item.id == id);
-        if(!m) return;
-        idMembroSendoEditado = id;
-        document.getElementById('nomeMembro').value = m.nome;
-        document.getElementById('whatsappMembro').value = m.whatsapp || '';
-        document.getElementById('cargoMembro').value = m.cargo || 'MEMBRO';
-        funcoesSelecionadas = m.funcao ? m.funcao.split(',').map(f => f.trim()) : [];
-        document.querySelectorAll('.funcao-checkbox').forEach(el => {
-            el.classList.toggle('active', funcoesSelecionadas.includes(el.innerText));
-        });
-        document.getElementById('tituloFormMembro').innerHTML = '<i class="fas fa-edit highlight"></i> Editando Membro';
-        document.getElementById('btnSalvarMembro').innerText = 'Atualizar Dados';
-        document.querySelector('.main-content').scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    async function salvarMembro() {
-        const nome = document.getElementById('nomeMembro').value;
-        const cargo = document.getElementById('cargoMembro').value;
-        const whatsapp = document.getElementById('whatsappMembro').value;
-        const funcao = funcoesSelecionadas.join(', ');
-
-        if(!nome) return alert("Nome é obrigatório");
-
-        const metodo = idMembroSendoEditado ? 'PUT' : 'POST';
-        const url = idMembroSendoEditado ? `/api/membros/${idMembroSendoEditado}` : '/api/membros';
-
-        let payload = { nome, cargo, whatsapp, funcao };
-        if (!idMembroSendoEditado) { payload.senha = '123'; } 
-        else {
-            const membroExistente = membrosDB.find(item => item.id == idMembroSendoEditado);
-            if (membroExistente) {
-                payload.fotoPerfil = membroExistente.fotoPerfil; 
-                payload.senha = membroExistente.senha; 
-            }
-        }
-
-        const res = await fetch(url, { method: metodo, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-        if(res.ok) location.reload();
-    }
-
-    async function excluirMembro(id) {
-        if(confirm("Deseja remover este membro?")) {
-            await fetch(`/api/membros/${id}`, { method: 'DELETE' });
-            carregarMembros();
-        }
-    }
-
-    function sair() { localStorage.removeItem('usuario'); window.location.href = 'login.html'; }
-
-    carregarSidebar();
-    ajustarAcessos();
-    carregarOpcoesFuncoes();
-    carregarMembros();
-</script>
-</body>
-</html>
