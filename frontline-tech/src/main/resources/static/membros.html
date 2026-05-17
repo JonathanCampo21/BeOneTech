@@ -16,9 +16,37 @@
         .membro-card { background: #111; border: 1px solid #333; padding: 20px; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; transition: 0.3s;}
         .membro-card:hover { border-color: var(--primary); transform: translateY(-2px); }
         .membro-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); background: #222; flex-shrink: 0; }
-        .membro-info-text { flex: 1; }
+        
+        /* AJUSTE PARA AS TAGS QUEBRAREM DE LINHA SEM EMPURRAR OS BOTÕES */
+        .membro-info-text { 
+            flex: 1; 
+            min-width: 0; /* Permite que o bloco de texto encolha e as tags quebrem linha */
+        }
+        
+        .membro-info-text > div {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 8px;
+        }
 
-        .tag-funcao { background: #222; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 11px; margin-right: 5px; border: 1px solid #333; font-weight: bold;}
+        .tag-funcao { 
+            background: #222; 
+            color: var(--primary); 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 11px; 
+            border: 1px solid #333; 
+            font-weight: bold;
+            white-space: nowrap; /* Impede que a palavra quebre no meio */
+            margin: 0 !important;
+        }
+
+        /* Trava a caixa de botões (WhatsApp, Edit, Lixeira) para nunca ser esmagada */
+        .membro-card > div:last-child {
+            flex-shrink: 0; 
+        }
+
         input, select { padding:12px; background:#1a1a1a; border:1px solid #333; color:white; border-radius:6px; outline: none; font-family: 'Urbanist', sans-serif; width: 100%;}
         .admin-only, .boss-only { display: none !important; }
         
@@ -83,7 +111,7 @@
             </select>
         </div>
         <div class="funcoes-grid" id="listaFuncoes"></div>
-        <button id="btnSalvarMembro" onclick="salvarMembro()" style="width:100%; padding:15px; background:var(--primary); border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-family: 'Urbanist', sans-serif;">Cadastrar Membro</button>
+        <button id="btnSalvarMembro" onclick="salvarMembro()" style="width:100%; padding:15px; background:var(--primary); color:#000; border:none; border-radius:6px; font-weight:900; font-size:16px; cursor:pointer; font-family: 'Urbanist', sans-serif;">Cadastrar Membro</button>
     </div>
 
     <div class="search-container">
@@ -226,7 +254,7 @@
                 <div class="membro-info-text">
                     <strong style="font-size:18px;">${m.nome}</strong>
                     <small style="color:var(--text-dim); margin-left: 5px;">(${cargoFormatado})</small>
-                    <div style="margin-top:8px;">${tagsHtml}</div>
+                    <div>${tagsHtml}</div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     ${m.whatsapp ? `<a href="https://wa.me/55${m.whatsapp.replace(/\D/g,'')}" target="_blank" style="color:#25d366; font-size:20px;"><i class="fab fa-whatsapp"></i></a>` : ''}
@@ -296,3 +324,4 @@
 </script>
 </body>
 </html>
+
