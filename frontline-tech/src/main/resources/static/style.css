@@ -32,7 +32,23 @@ body {
             z-index: 1000;
             background: #050505; /* Garante que o fundo não fique transparente ao rolar */
             padding-top: max(15px, env(safe-area-inset-top)); /* Proteção mágica pro iPhone */
+        } 
+
+        /* CORREÇÃO DA SIDEBAR NO CELULAR (BOTÃO SAIR) */
+        .sidebar {
+            height: 100dvh; /* Usa a altura dinâmica real da tela, fugindo da barra do navegador */
+            overflow-y: auto; /* Permite rolar o menu pra cima e pra baixo com o dedo */
+            padding-bottom: max(30px, env(safe-area-inset-bottom)); /* Protege contra aquela barrinha de fechar app do iPhone */
+            display: flex;
+            flex-direction: column;
         }
+
+        .btn-sair {
+            margin-top: auto; /* Empurra o botão de sair lá pro final do menu, mas respeitando o limite da tela */
+            position: relative; /* Evita que o botão fique preso ou escondido */
+        }
+
+
 
 
 /* =========================================
