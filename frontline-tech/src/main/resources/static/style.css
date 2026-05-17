@@ -25,6 +25,16 @@ body {
 *::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
 *::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
+        /* DEIXA O CABEÇALHO COLADO NO TOPO E PROTEGE CONTRA O 'NOTCH' DO IPHONE */
+        .mobile-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #050505; /* Garante que o fundo não fique transparente ao rolar */
+            padding-top: max(15px, env(safe-area-inset-top)); /* Proteção mágica pro iPhone */
+        }
+
+
 /* =========================================
    SIDEBAR FIXA (USA GPU)
    ========================================= */
