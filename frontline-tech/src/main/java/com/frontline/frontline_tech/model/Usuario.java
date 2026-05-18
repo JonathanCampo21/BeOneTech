@@ -1,6 +1,7 @@
 package com.frontline.frontline_tech.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime; // <--- Import da data e hora
 
 @Entity
 public class Usuario {
@@ -17,6 +18,9 @@ public class Usuario {
     private String senha;
 
     private String cargo; // Vai guardar: LIDER, MEMBRO, PASTOR ou DEV
+
+    // ---> NOVO CAMPO: O radar que vai guardar o último clique do usuário
+    private LocalDateTime ultimaAtividade;
 
     // --- Getters e Setters ---
 
@@ -58,5 +62,14 @@ public class Usuario {
 
     public void setCargo(String cargo) {
         this.cargo = cargo;
+    }
+
+    // --- Novos Getters e Setters do Radar ---
+    public LocalDateTime getUltimaAtividade() {
+        return ultimaAtividade;
+    }
+
+    public void setUltimaAtividade(LocalDateTime ultimaAtividade) {
+        this.ultimaAtividade = ultimaAtividade;
     }
 }
