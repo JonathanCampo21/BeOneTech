@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Column;
 import jakarta.persistence.Lob;
+import java.time.LocalDateTime; // <-- IMPORT DA DATA/HORA
 
 @Entity
 public class Membro {
@@ -21,7 +22,12 @@ public class Membro {
     private String senha;    // Campo para armazenar a senha de acesso
 
     // =====================================
-    // NOVO: CAMPO GIGANTE PARA A FOTO BASE64
+    // NOVO: CAMPO DO RADAR DE ACESSOS
+    // =====================================
+    private LocalDateTime ultimaAtividade;
+
+    // =====================================
+    // CAMPO GIGANTE PARA A FOTO BASE64
     // =====================================
     @Lob
     @Column(columnDefinition = "LONGTEXT")
@@ -77,12 +83,20 @@ public class Membro {
         this.senha = senha;
     }
 
-    // --- Getters e Setters da Foto ---
     public String getFotoPerfil() {
         return fotoPerfil;
     }
 
     public void setFotoPerfil(String fotoPerfil) {
         this.fotoPerfil = fotoPerfil;
+    }
+
+    // --- Getters e Setters da Ultima Atividade (Radar) ---
+    public LocalDateTime getUltimaAtividade() {
+        return ultimaAtividade;
+    }
+
+    public void setUltimaAtividade(LocalDateTime ultimaAtividade) {
+        this.ultimaAtividade = ultimaAtividade;
     }
 }
