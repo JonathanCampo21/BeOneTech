@@ -4,6 +4,7 @@ import com.frontline.frontline_tech.security.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod; // <--- Import importante que adicionei aqui!
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -40,8 +41,11 @@ public class SecurityConfig {
                         // 2. PORTA DO LOGIN: A rota de fazer login tem que ser pública, senão ninguém entra
                         .requestMatchers("/api/auth/login").permitAll()
 
-                        // -> NOVO: Libera a API de sugestões (Músicas) para a galera votar sem estar logada
+                        // -> Libera a API de sugestões (Músicas) para a galera votar sem estar logada
                         .requestMatchers("/api/musicas/**").permitAll()
+
+                        // -> NOVO (SOLUÇÃO WHATSAPP): Libera apenas LEITURA (GET) para escalas e louvores
+                        .requestMatchers(HttpMethod.GET, "/api/escalas/**", "/api/louvores/**").permitAll()
 
                         // 3. A CATRACA: Daqui pra baixo, TUDO dentro de /api exige o Token!
                         .requestMatchers("/api/**").authenticated()
