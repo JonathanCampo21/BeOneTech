@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="style.css">
     <script src="auth.js"></script>
     <style>
-        /* CSS ESPECÍFICO DESTA TELA */
         .card { background: #111; border: 1px solid #333; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); overflow-x: auto; }
         .form-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr 0.8fr; gap: 15px; margin-top: 15px; }
         input, select { padding:12px; background:#1a1a1a; border:1px solid #333; color:white; border-radius:6px; outline: none; font-family: 'Urbanist', sans-serif; width: 100%;}
@@ -32,38 +31,37 @@
         .sidebar-user-info strong { color: white; font-size: 14px; }
         .sidebar-user-info span { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
 
-        /* =========================================
-           A MÁGICA DA RESPONSIVIDADE PARA O CELULAR
-           ========================================= */
         @media (max-width: 768px) {
-            /* Transforma a grid horizontal em uma pilha vertical (um embaixo do outro) */
-            .form-row { 
-                grid-template-columns: 1fr; 
-                gap: 10px;
-            }
-            
-            /* Ajusta a tabela para não esmagar o texto e permitir rolagem horizontal */
-            table { 
-                display: block; 
-                overflow-x: auto; 
-                white-space: nowrap; /* Impede as palavras de quebrarem no meio da sílaba */
-            }
-            
-            th, td { 
-                padding: 12px 10px; 
-                font-size: 13px; 
-            }
-            
-            .btn { 
-                width: 100%; 
-                margin-top: 5px; 
-            }
+            .form-row { grid-template-columns: 1fr; gap: 10px; }
+            table { display: block; overflow-x: auto; white-space: nowrap; }
+            th, td { padding: 12px 10px; font-size: 13px; }
+            .btn { width: 100%; margin-top: 5px; }
         }
+
+        /* ESTILOS DO MODAL DO RADAR */
+        .radar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; }
+        .radar-overlay.active { display: block; }
+        .radar-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; background: #111; z-index: 2001; width: 90%; max-width: 500px; transition: 0.3s; padding: 20px; border: 1px solid #3b82f6; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .radar-modal.active { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     </style>
 </head>
 <body>
 
 <div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<div class="radar-overlay" id="historicoOverlay" onclick="fecharHistorico()"></div>
+<div class="radar-modal" id="historicoModal">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">
+        <div>
+            <h2 style="margin: 0;"><i class="fas fa-satellite-dish" style="color: #3b82f6;"></i> Radar de Acessos</h2>
+            <small style="color: #3b82f6;">Monitoramento em Tempo Real</small>
+        </div>
+        <button onclick="fecharHistorico()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="listaHistorico" style="display: flex; flex-direction: column; gap: 10px; max-height: 60vh; overflow-y: auto;">
+        <p style="text-align: center; color: gray;">Buscando radar...</p>
+    </div>
+</div>
 
 <header class="mobile-header">
     <button class="hamburger-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
@@ -91,9 +89,17 @@
 </aside>
 
 <main class="main-content">
-    <div style="margin-bottom: 30px;">
-        <h1>Controle de Acessos & Vínculos</h1>
-        <p style="color: var(--text-dim);">Cadastre logins e vincule-os aos membros para notificações automáticas.</p>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <h1 style="margin: 0;">Controle de Acessos</h1>
+            <p style="color: var(--text-dim); margin-top: 5px;">Cadastre logins e vincule-os aos membros.</p>
+        </div>
+        <div>
+            <button onclick="abrirHistorico()" class="btn" style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; color: #3b82f6;">
+                <i class="fas fa-satellite-dish"></i> Radar de Acessos
+            </button>
+        </div>
     </div>
 
     <div class="card" style="border-left: 5px solid var(--primary);">
@@ -153,9 +159,6 @@
     const cargoUser = String(userLogado.cargo).toUpperCase().trim();
     let membrosDB = [];
 
-    // ==========================================
-    // SEGURANÇA: APENAS O 'DEV' PODE ACESSAR AQUI
-    // ==========================================
     if (cargoUser !== 'DEV') {
         window.location.href = 'inicio.html';
     }
@@ -246,6 +249,86 @@
     function sair() {
         localStorage.removeItem('usuario');
         window.location.href = 'login.html'; 
+    }
+
+    // ==========================================
+    // FUNÇÕES DO RADAR DE ACESSOS
+    // ==========================================
+    function abrirHistorico() {
+        document.getElementById('historicoOverlay').classList.add('active');
+        document.getElementById('historicoModal').classList.add('active');
+        carregarRadar();
+    }
+
+    function fecharHistorico() {
+        document.getElementById('historicoOverlay').classList.remove('active');
+        document.getElementById('historicoModal').classList.remove('active');
+    }
+
+    async function carregarRadar() {
+        const container = document.getElementById('listaHistorico');
+        
+        try {
+            const res = await fetch('/api/membros');
+            let membros = await res.json();
+            
+            // Filtra só quem tem cargo diferente de MEMBRO (só quem loga de fato)
+            membros = membros.filter(m => m.cargo && m.cargo.toUpperCase() !== 'MEMBRO');
+
+            // Ordena: quem acessou por último fica no topo
+            membros.sort((a, b) => {
+                const dataA = a.ultimaAtividade ? new Date(a.ultimaAtividade) : new Date(0);
+                const dataB = b.ultimaAtividade ? new Date(b.ultimaAtividade) : new Date(0);
+                return dataB - dataA;
+            });
+            
+            const agora = new Date();
+
+            container.innerHTML = membros.map(m => {
+                let statusColor = 'gray';
+                let statusTexto = 'Nunca acessou';
+                let bolinha = 'fa-user-clock';
+
+                if (m.ultimaAtividade) {
+                    const ultimoAcesso = new Date(m.ultimaAtividade);
+                    const diferencaEmMilissegundos = agora - ultimoAcesso;
+                    const minutosInativo = Math.floor(diferencaEmMilissegundos / 1000 / 60);
+
+                    if (minutosInativo <= 5) {
+                        statusColor = '#10b981'; // Verde (Online)
+                        statusTexto = 'Online agora';
+                        bolinha = 'fa-circle';
+                    } else if (minutosInativo < 60) {
+                        statusTexto = `Visto há ${minutosInativo} min`;
+                    } else if (minutosInativo < 1440) {
+                        const horas = Math.floor(minutosInativo / 60);
+                        statusTexto = `Visto há ${horas}h`;
+                    } else {
+                        const dias = Math.floor(minutosInativo / 1440);
+                        statusTexto = `Visto há ${dias} dias`;
+                    }
+                }
+
+                return `
+                <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <img src="${m.fotoPerfil || 'https://ui-avatars.com/api/?name='+encodeURIComponent(m.nome)+'&background=222&color=fff'}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid ${statusColor};">
+                        <div>
+                            <strong style="color: white; font-size: 15px;">${m.nome}</strong>
+                            <div style="font-size: 11px; color: ${statusColor}; margin-top: 3px; font-weight: bold;">
+                                <i class="fas ${bolinha}"></i> ${statusTexto}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size: 10px; color: gray; text-transform: uppercase; background: #222; padding: 4px 8px; border-radius: 4px;">
+                        ${m.cargo}
+                    </div>
+                </div>`;
+            }).join('');
+            
+        } catch(e) {
+            container.innerHTML = '<p style="color:red; text-align:center;">Erro ao conectar com o radar.</p>';
+        }
     }
 
     carregarSidebar();
