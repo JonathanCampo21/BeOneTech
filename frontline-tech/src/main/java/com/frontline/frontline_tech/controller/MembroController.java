@@ -4,7 +4,6 @@ import com.frontline.frontline_tech.model.Membro;
 import com.frontline.frontline_tech.repository.MembroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate; // <-- IMPORT NOVO PARA A MARRETA
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,24 +15,6 @@ public class MembroController {
 
     @Autowired
     private MembroRepository membroRepository;
-
-    // =========================================================
-    // ---> FERRAMENTA SECRETA PARA FORÇAR A CRIAÇÃO DA TABELA <---
-    // =========================================================
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @GetMapping("/setup-db")
-    public ResponseEntity<String> setupBancoDeDados() {
-        try {
-            // Dá a ordem direta pro banco de dados em SQL puro (AGORA COM PRIMARY KEY!)
-            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS membro_departamentos (membro_id BIGINT NOT NULL, departamento VARCHAR(255), PRIMARY KEY (membro_id, departamento))");
-            return ResponseEntity.ok("Tabela 'membro_departamentos' forçada e criada com sucesso! Pode testar o login.");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Erro ao marretar o banco: " + e.getMessage());
-        }
-    }
-    // =========================================================
 
     // ATUALIZADO: Agora aceita o filtro por departamento do Front-end
     @GetMapping
@@ -64,7 +45,7 @@ public class MembroController {
                     membro.setCargo(membroAtualizado.getCargo());
                     membro.setWhatsapp(membroAtualizado.getWhatsapp());
 
-                    // ---> NOVO: Atualiza a lista de departamentos que o membro faz parte
+                    // ---> Atualiza a lista de departamentos que o membro faz parte
                     membro.setDepartamentos(membroAtualizado.getDepartamentos());
 
                     // SALVANDO A FOTO QUE VEIO DA TELA
