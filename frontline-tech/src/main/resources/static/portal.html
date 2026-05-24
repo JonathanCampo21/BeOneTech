@@ -97,13 +97,11 @@
     <h1>Bem-vindo, <span id="nomeUser">Líder</span>!</h1>
     <p class="subtitle">Selecione o ministério que deseja acessar</p>
 
-    <div class="portal-grid" id="gridDepartamentos">
-        </div>
+    <div class="portal-grid" id="gridDepartamentos"></div>
 
     <button class="btn-sair" onclick="sair()"><i class="fas fa-sign-out-alt"></i> Sair do Sistema</button>
 
 <script>
-    // As configurações de cores e ícones que você definiu!
     const DEPARTAMENTOS_CONFIG = {
         "LOUVOR": { cor: "#FF3300", icone: "fa-music" },
         "MIDIA": { cor: "#190B28", icone: "fa-camera" },
@@ -116,28 +114,26 @@
     const userLogado = JSON.parse(localStorage.getItem('usuario')) || {};
     const cargoUser = String(userLogado.cargo || 'MEMBRO').toUpperCase().trim();
     
-    // Pegar o primeiro nome
     document.getElementById('nomeUser').innerText = userLogado.nome ? userLogado.nome.split(' ')[0] : 'Visitante';
 
     function renderizarPortal() {
         const grid = document.getElementById('gridDepartamentos');
-        
-        // Se for Pastor, Admin ou Dev, ele vê TUDO. Se não, vê só as listas que estão no perfil dele.
         let deptsParaMostrar = [];
         
+        // Se for Pastor, Dev ou Admin, abre as portas de tudo
         if (['PASTOR', 'DEV', 'ADMIN'].includes(cargoUser)) {
-            deptsParaMostrar = Object.keys(DEPARTAMENTOS_CONFIG); // Puxa todos
+            deptsParaMostrar = Object.keys(DEPARTAMENTOS_CONFIG);
         } else {
-            // Se for um membro comum, pega a lista de departamentos dele. Se estiver vazio, libera LOUVOR como fallback.
+            // Se for líder ou membro multi-área, renderiza apenas o que ele gerencia
             deptsParaMostrar = (userLogado.departamentos && userLogado.departamentos.length > 0) ? userLogado.departamentos : ["LOUVOR"];
         }
 
         grid.innerHTML = deptsParaMostrar.map(dept => {
-            const config = DEPARTAMENTOS_CONFIG[dept] || { cor: "#3b82f6", icone: "fa-star" }; // Fallback de segurança
+            const config = DEPARTAMENTOS_CONFIG[dept] || { cor: "#3b82f6", icone: "fa-star" };
             
             return `
-                <div class="dept-card" style="border-color: ${config.cor};" onmouseover="this.style.background='${config.cor}20'" onmouseout="this.style.background='#111'" onclick="entrarDepartamento('${dept}', '${config.cor}')">
-                    <div class="dept-icon" style="color: ${config.cor}; border: 1px solid ${config.cor};">
+                <div class="dept-card" style="border-color: ${config.cor}40;" onmouseover="this.style.borderColor='${config.cor}'; this.style.background='${config.cor}15'" onmouseout="this.style.borderColor='${config.cor}40'; this.style.background='#111'" onclick="entrarDepartamento('${dept}', '${config.cor}')">
+                    <div class="dept-icon" style="color: ${config.cor}; border: 1px solid ${config.cor}50; background: ${config.cor}05;">
                         <i class="fas ${config.icone}"></i>
                     </div>
                     <div class="dept-name" style="color: ${config.cor};">${dept}</div>
@@ -147,11 +143,8 @@
     }
 
     function entrarDepartamento(nomeDept, corDept) {
-        // Salva na memória do navegador qual departamento o cara escolheu e a cor!
         localStorage.setItem('departamentoAtual', nomeDept);
         localStorage.setItem('corAtual', corDept);
-        
-        // Redireciona pra tela inicial do sistema
         window.location.href = 'inicio.html';
     }
 
