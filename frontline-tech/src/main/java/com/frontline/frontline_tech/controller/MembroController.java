@@ -36,11 +36,12 @@ public class MembroController {
         }
         
         String nomeFormatado = nome.trim();
-        Optional<Membro> membroOpt = membroRepository.findAll().stream()
+        Optional<Membro> membroExistenteOpt = membroRepository.findAll().stream()
                 .filter(m -> m.getNome() != null && m.getNome().trim().equalsIgnoreCase(nomeFormatado))
                 .findFirst();
                 
-        return miembroOpt.map(ResponseEntity::ok)
+        // CORRIGIDO: Agora usando o nome correto da variável mapeada acima
+        return membroExistenteOpt.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
