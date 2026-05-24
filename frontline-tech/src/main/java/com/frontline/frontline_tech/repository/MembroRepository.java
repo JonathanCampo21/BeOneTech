@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional; // <-- Precisamos desta importação de volta!
+import java.util.Optional;
 
 @Repository
 public interface MembroRepository extends JpaRepository<Membro, Long> {
@@ -13,9 +13,12 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
     // O método antigo que o sistema já usava (NÃO PODEMOS APAGAR)
     Optional<Membro> findByNome(String nome);
 
-    // Os novos métodos para listar em ordem alfabética
+    // Os métodos para listar em ordem alfabética
     List<Membro> findAllByOrderByNomeAsc();
 
-    // O novo método para pesquisar e ordenar
+    // O método para pesquisar e ordenar
     List<Membro> findByNomeContainingIgnoreCaseOrderByNomeAsc(String nome);
+
+    // ---> NOVO: Busca apenas os membros que tenham o departamento especificado na lista deles!
+    List<Membro> findByDepartamentosContainingOrderByNomeAsc(String departamento);
 }
