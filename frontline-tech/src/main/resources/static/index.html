@@ -7,6 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    
+    <script src="auth.js"></script>
 
     <style>
         /* =========================================
@@ -72,7 +74,7 @@
     <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
     <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
-    <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
+    <a href="#" onclick="sairSistema()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
 </aside>
 
 <main class="main-content">
@@ -238,11 +240,6 @@
                 alert("Erro ao apagar.");
             }
         }
-    }
-
-    function sair() {
-        localStorage.removeItem('usuario');
-        window.location.href = 'login.html';
     }
 
     ajustarAcessos();
