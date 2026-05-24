@@ -12,13 +12,18 @@ public class Escala {
     private String titulo; // Ex: Culto de Celebração
     private String data; // Ex: 15/05/2026
 
+    // =====================================
+    // NOVO: DEPARTAMENTO DA ESCALA
+    // =====================================
+    private String departamento; // Ex: LOUVOR, MIDIA, SALT, etc.
+
     @Column(columnDefinition = "TEXT")
     private String repertorio;
 
     @Column(columnDefinition = "TEXT")
     private String equipe;
 
-    // NOVO CAMPO: Guardará as confirmações (Verde/Vermelho) em JSON
+    // Guardará as confirmações (Verde/Vermelho) em JSON
     @Column(columnDefinition = "TEXT")
     private String confirmacoes;
 
@@ -41,4 +46,8 @@ public class Escala {
 
     public String getConfirmacoes() { return confirmacoes; }
     public void setConfirmacoes(String confirmacoes) { this.confirmacoes = confirmacoes; }
+
+    // --- Novos Getters e Setters do Departamento ---
+    public String getDepartamento() { return departamento; }
+    public void setDepartamento(String departamento) { this.departamento = departamento; }
 }
