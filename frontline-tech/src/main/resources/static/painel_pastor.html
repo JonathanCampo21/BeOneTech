@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Be One Tech - Painel Executivo</title>
+    <title>Be One Tech - Visão Geral</title>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -30,7 +30,7 @@
 <body>
 
     <div class="header">
-        <h1><i class="fas fa-chart-pie"></i> Visão Executiva <span style="color: gray; font-size: 14px; margin-left: 10px;" id="nomePastor"></span></h1>
+        <h1><i class="fas fa-chart-pie"></i> Visão Geral do Ministério Be One <span style="color: gray; font-size: 14px; margin-left: 10px;" id="nomePastor"></span></h1>
         <button class="btn-sair" onclick="sair()"><i class="fas fa-sign-out-alt"></i> Sair</button>
     </div>
 
@@ -45,7 +45,8 @@
         window.location.href = 'login.html'; // Proteção extra
     }
     
-    document.getElementById('nomePastor').innerText = "| " + (userLogado.nome ? userLogado.nome.split(' ')[0] : 'Pastor');
+    // ALTERADO: Adicionado o "Pr. " antes do nome
+    document.getElementById('nomePastor').innerText = "| Pr. " + (userLogado.nome ? userLogado.nome.split(' ')[0] : 'Pastor');
 
     const DEPARTAMENTOS_CONFIG = {
         "LOUVOR": { cor: "#FF3300", icone: "fa-music", desc: "Escalas, Repertórios e Sugestões" },
