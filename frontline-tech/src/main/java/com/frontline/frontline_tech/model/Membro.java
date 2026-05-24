@@ -6,7 +6,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Column;
 import jakarta.persistence.Lob;
-import java.time.LocalDateTime; // <-- IMPORT DA DATA/HORA
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.FetchType;
+import java.time.LocalDateTime; 
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 public class Membro {
@@ -16,13 +22,22 @@ public class Membro {
     private Long id;
 
     private String nome;
-    private String funcao;   // Ex: Vocal, Bateria
+    private String funcao;   // Ex: Vocal, Bateria, Câmera
     private String cargo;    // LIDER, PASTOR, MEMBRO
     private String whatsapp; // Número do Zap
     private String senha;    // Campo para armazenar a senha de acesso
 
     // =====================================
-    // NOVO: CAMPO DO RADAR DE ACESSOS
+    // NOVO: LISTA DE DEPARTAMENTOS DO MEMBRO
+    // =====================================
+    // Usamos EAGER para o Java sempre carregar os departamentos junto com o membro no login
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "membro_departamentos", joinColumns = @JoinColumn(name = "membro_id"))
+    @Column(name = "departamento")
+    private List<String> departamentos = new ArrayList<>();
+
+    // =====================================
+    // CAMPO DO RADAR DE ACESSOS
     // =====================================
     private LocalDateTime ultimaAtividade;
 
@@ -35,68 +50,31 @@ public class Membro {
 
     // --- Getters e Setters ---
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
 
-    public String getNome() {
-        return nome;
-    }
+    public String getFuncao() { return funcao; }
+    public void setFuncao(String funcao) { this.funcao = funcao; }
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+    public String getCargo() { return cargo; }
+    public void setCargo(String cargo) { this.cargo = cargo; }
 
-    public String getFuncao() {
-        return funcao;
-    }
+    public String getWhatsapp() { return whatsapp; }
+    public void setWhatsapp(String whatsapp) { this.whatsapp = whatsapp; }
 
-    public void setFuncao(String funcao) {
-        this.funcao = funcao;
-    }
+    public String getSenha() { return senha; }
+    public void setSenha(String senha) { this.senha = senha; }
 
-    public String getCargo() {
-        return cargo;
-    }
+    public String getFotoPerfil() { return fotoPerfil; }
+    public void setFotoPerfil(String fotoPerfil) { this.fotoPerfil = fotoPerfil; }
 
-    public void setCargo(String cargo) {
-        this.cargo = cargo;
-    }
+    public LocalDateTime getUltimaAtividade() { return ultimaAtividade; }
+    public void setUltimaAtividade(LocalDateTime ultimaAtividade) { this.ultimaAtividade = ultimaAtividade; }
 
-    public String getWhatsapp() {
-        return whatsapp;
-    }
-
-    public void setWhatsapp(String whatsapp) {
-        this.whatsapp = whatsapp;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
-    }
-
-    public String getFotoPerfil() {
-        return fotoPerfil;
-    }
-
-    public void setFotoPerfil(String fotoPerfil) {
-        this.fotoPerfil = fotoPerfil;
-    }
-
-    // --- Getters e Setters da Ultima Atividade (Radar) ---
-    public LocalDateTime getUltimaAtividade() {
-        return ultimaAtividade;
-    }
-
-    public void setUltimaAtividade(LocalDateTime ultimaAtividade) {
-        this.ultimaAtividade = ultimaAtividade;
-    }
+    // --- Novos Getters e Setters dos Departamentos ---
+    public List<String> getDepartamentos() { return departamentos; }
+    public void setDepartamentos(List<String> departamentos) { this.departamentos = departamentos; }
 }
