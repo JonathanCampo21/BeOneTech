@@ -73,3 +73,56 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 });
+
+// ====================================================================
+// ---> LÓGICA CAMALEÃO: MULTI-DEPARTAMENTOS <---
+// ====================================================================
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Pega as escolhas salvas na memória
+    const departamentoAtual = localStorage.getItem('departamentoAtual') || 'LOUVOR';
+    const corAtual = localStorage.getItem('corAtual') || '#FF3300';
+    const userLogado = JSON.parse(localStorage.getItem('usuario')) || {};
+
+    // 2. INJETA A COR NO CSS DA PÁGINA INTEIRA
+    document.documentElement.style.setProperty('--primary', corAtual);
+
+    // 3. ATUALIZA O NOME DO DEPARTAMENTO NO MENU (Se existir o elemento)
+    // Supondo que você crie um <span id="nomeDeptBadge"> no seu HTML depois
+    const badgeDept = document.getElementById('nomeDeptBadge');
+    if (badgeDept) {
+        badgeDept.innerText = departamentoAtual;
+        badgeDept.style.color = corAtual;
+    }
+
+    // 4. ESCONDE AS ABAS DO LOUVOR PARA OS OUTROS DEPARTAMENTOS
+    // Como você usa FontAwesome, vamos procurar os links pelo ícone ou pelo texto
+    if (departamentoAtual !== 'LOUVOR') {
+        const linksMenu = document.querySelectorAll('.sidebar a');
+        
+        linksMenu.forEach(link => {
+            const textoLink = link.innerText.toUpperCase();
+            // Se o botão for de Repertório ou Sugestões, a gente "apaga" ele da tela
+            if (textoLink.includes('REPERTÓRIO') || textoLink.includes('SUGESTÕES')) {
+                link.style.display = 'none';
+            }
+        });
+    }
+});
+
+// ====================================================================
+// ---> FUNÇÃO ATUALIZADA PARA O BOTÃO DE VOLTAR/SAIR <---
+// ====================================================================
+function sairSistema() {
+    const user = JSON.parse(localStorage.getItem('usuario')) || {};
+    
+    // Se for Pastor, DEV ou cara de 2 ministérios, o "Sair" joga ele de volta pro Portal/Dashboard
+    if (user.cargo === 'PASTOR') {
+        window.location.href = 'painel_pastor.html';
+    } else if (['DEV', 'ADMIN'].includes(user.cargo) || (user.departamentos && user.departamentos.length > 1)) {
+        window.location.href = 'portal.html';
+    } else {
+        // Se for membro normal de 1 área só, sai de verdade pro login
+        localStorage.clear();
+        window.location.href = 'login.html';
+    }
+}
