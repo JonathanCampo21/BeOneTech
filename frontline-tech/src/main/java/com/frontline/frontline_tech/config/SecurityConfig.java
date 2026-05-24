@@ -4,7 +4,7 @@ import com.frontline.frontline_tech.security.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod; // <--- Import importante que adicionei aqui!
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,7 +20,7 @@ import java.util.List;
 public class SecurityConfig {
 
     @Autowired
-    private SecurityFilter securityFilter; // <--- Injeta o nosso Segurança aqui!
+    private SecurityFilter securityFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -33,19 +33,23 @@ public class SecurityConfig {
                     config.setAllowedHeaders(List.of("*"));
                     return config;
                 }))
-                // AQUI FICA A NOSSA NOVA CATRACA
                 .authorizeHttpRequests(auth -> auth
                         // 1. TELA ABERTA: O Front-end não precisa de token para carregar visualmente
                         .requestMatchers("/", "/index.html", "/*.html", "/style.css", "/*.js", "/images/**", "/static/**").permitAll()
 
-                        // 2. PORTA DO LOGIN: A rota de fazer login tem que ser pública, senão ninguém entra
+                        // 2. PORTA DO LOGIN: A rota de fazer login tem que ser pública
                         .requestMatchers("/api/auth/login").permitAll()
 
-                        // -> Libera a API de sugestões (Músicas) para a galera votar sem estar logada
+                        // -> Libera a API de sugestões (Músicas)
                         .requestMatchers("/api/musicas/**").permitAll()
 
                         // -> NOVO (SOLUÇÃO WHATSAPP): Libera apenas LEITURA (GET) para escalas e louvores
                         .requestMatchers(HttpMethod.GET, "/api/escalas/**", "/api/louvores/**").permitAll()
+
+                        // ==========================================================
+                        // ---> A NOSSA PORTA LATERAL PARA MARRETAR O BANCO <---
+                        // ==========================================================
+                        .requestMatchers(HttpMethod.GET, "/api/membros/setup-db").permitAll()
 
                         // 3. A CATRACA: Daqui pra baixo, TUDO dentro de /api exige o Token!
                         .requestMatchers("/api/**").authenticated()
