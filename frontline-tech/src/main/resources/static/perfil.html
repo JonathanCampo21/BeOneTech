@@ -94,7 +94,7 @@
     <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
     <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
-    <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
+    <a href="#" onclick="sairSistema()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
 </aside>
 
 <div class="crop-modal" id="cropModal">
@@ -178,11 +178,11 @@
 
     let user = JSON.parse(localStorage.getItem('usuario'));
     if (!user) { window.location.href = 'index.html'; }
+    const deptAtual = localStorage.getItem('departamentoAtual') || 'LOUVOR';
 
     let imagemBase64 = null; 
-    let cropper = null; // Instância do Cropper.js
+    let cropper = null; 
 
-    // LÓGICA DE ABRIR A TELA DE CORTAR FOTO
     document.getElementById('fotoUpload').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if(!file) return;
@@ -193,9 +193,7 @@
             imageToCrop.src = event.target.result;
             document.getElementById('cropModal').classList.add('active');
 
-            if (cropper) {
-                cropper.destroy();
-            }
+            if (cropper) { cropper.destroy(); }
 
             cropper = new Cropper(imageToCrop, {
                 aspectRatio: 1,
@@ -221,8 +219,6 @@
         const canvas = cropper.getCroppedCanvas({ width: 400, height: 400 });
         imagemBase64 = canvas.toDataURL('image/jpeg', 0.8);
         document.getElementById('avatarPreview').src = imagemBase64;
-        
-        // Atualiza a foto da sidebar também em tempo real
         document.getElementById('sidebarAvatar').src = imagemBase64;
 
         document.getElementById('areaSalvar').style.display = 'block';
@@ -231,7 +227,7 @@
 
     async function carregarDados() {
         try {
-            const res = await fetch('/api/membros');
+            const res = await fetch(`/api/membros?departamento=${deptAtual}`);
             if (res.ok) {
                 const membros = await res.json();
                 const userAtualizado = membros.find(m => m.nome === user.nome || m.id === user.id);
@@ -250,7 +246,6 @@
         document.getElementById('avatarPreview').src = fotoFinal;
         document.getElementById('sidebarAvatar').src = fotoFinal;
         
-        // LÓGICA DO PR.
         const cargoFormatado = String(user.cargo).toUpperCase().trim();
         let primeiroNome = user.nome.split(' ')[0];
         
@@ -297,12 +292,14 @@
         if (!nome) return alert("O nome não pode ficar vazio.");
         if (senha && senha !== confirma) return alert("As senhas digitadas não são iguais!");
 
+        // ATUALIZADO: Preserva as áreas de atuação do membro pra não ser expulso do sistema
         const dadosAtualizados = {
             nome: nome,
             whatsapp: whatsapp,
             cargo: user.cargo,
             funcao: user.funcao,
-            fotoPerfil: imagemBase64 || user.fotoPerfil
+            fotoPerfil: imagemBase64 || user.fotoPerfil,
+            departamentos: user.departamentos || [deptAtual] 
         };
 
         if (senha) dadosAtualizados.senha = senha;
@@ -336,8 +333,6 @@
             btn.innerHTML = '<i class="fas fa-check-circle"></i> Salvar Alterações'; btn.disabled = false;
         }
     }
-
-    function sair() { localStorage.removeItem('usuario'); window.location.href = 'login.html'; }
 
     carregarDados();
 </script>
