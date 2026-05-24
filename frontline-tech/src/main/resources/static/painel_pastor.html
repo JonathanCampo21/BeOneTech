@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be One Tech - Painel Executivo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { --primary: #10b981; --text-dim: #a0a0a0; }
+        body { background-color: #050505; color: #fff; font-family: 'Urbanist', sans-serif; margin: 0; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { margin: 0; font-size: 24px; display: flex; align-items: center; gap: 10px; }
+        .header h1 i { color: var(--primary); }
+        .btn-sair { background: none; border: 1px solid #ef4444; color: #ef4444; padding: 8px 15px; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+        .btn-sair:hover { background: rgba(239, 68, 68, 0.1); }
+        
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .dept-card { background: #111; border: 1px solid #333; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .dept-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .dept-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .dept-icon { font-size: 24px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(255,255,255,0.05); }
+        .dept-title { font-weight: bold; font-size: 18px; text-transform: uppercase; }
+        .dept-action { font-size: 13px; color: var(--text-dim); display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #222; padding-top: 15px; margin-top: 10px; }
+        
+        /* A cor no fundo do card pra dar um charme */
+        .glow { position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; border-radius: 50%; filter: blur(40px); opacity: 0.3; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1><i class="fas fa-chart-pie"></i> Visão Executiva <span style="color: gray; font-size: 14px; margin-left: 10px;" id="nomePastor"></span></h1>
+        <button class="btn-sair" onclick="sair()"><i class="fas fa-sign-out-alt"></i> Sair</button>
+    </div>
+
+    <p style="color: var(--text-dim); margin-bottom: 25px;">Selecione o ministério abaixo para visualizar as escalas e gerenciar a equipe.</p>
+
+    <div class="dashboard-grid" id="gridDepartamentos">
+        </div>
+
+<script>
+    const userLogado = JSON.parse(localStorage.getItem('usuario')) || {};
+    if(userLogado.cargo !== 'PASTOR' && userLogado.cargo !== 'DEV') {
+        window.location.href = 'login.html'; // Proteção extra
+    }
+    
+    document.getElementById('nomePastor').innerText = "| " + (userLogado.nome ? userLogado.nome.split(' ')[0] : 'Pastor');
+
+    const DEPARTAMENTOS_CONFIG = {
+        "LOUVOR": { cor: "#FF3300", icone: "fa-music", desc: "Escalas, Repertórios e Sugestões" },
+        "MIDIA": { cor: "#190B28", icone: "fa-camera", desc: "Escalas de Transmissão e Foto" },
+        "SALT": { cor: "#121831", icone: "fa-users", desc: "Escalas e Gestão de Membros" },
+        "27+": { cor: "#10251A", icone: "fa-plus-circle", desc: "Escalas e Gestão de Membros" },
+        "JOIN": { cor: "#2F3C64", icone: "fa-handshake", desc: "Escalas e Recepção" },
+        "KIDS": { cor: "#FDD835", icone: "fa-child", desc: "Escalas do Ministério Infantil" }
+    };
+
+    function renderizarDashboard() {
+        const grid = document.getElementById('gridDepartamentos');
+        const departamentos = Object.keys(DEPARTAMENTOS_CONFIG);
+
+        grid.innerHTML = departamentos.map(dept => {
+            const config = DEPARTAMENTOS_CONFIG[dept];
+            return `
+                <div class="dept-card" style="border-color: ${config.cor}40;" onmouseover="this.style.borderColor='${config.cor}'" onmouseout="this.style.borderColor='${config.cor}40'" onclick="acessarArea('${dept}', '${config.cor}')">
+                    <div class="glow" style="background: ${config.cor};"></div>
+                    <div class="dept-header">
+                        <div class="dept-icon" style="color: ${config.cor};"><i class="fas ${config.icone}"></i></div>
+                        <div class="dept-title" style="color: ${config.cor};">${dept}</div>
+                    </div>
+                    <p style="font-size: 13px; color: #888; margin: 0;">${config.desc}</p>
+                    <div class="dept-action">
+                        <span>Acessar Painel</span>
+                        <i class="fas fa-arrow-right" style="color: ${config.cor};"></i>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function acessarArea(nomeDept, corDept) {
+        // Salva a escolha do Pastor e redireciona pro sistema
+        localStorage.setItem('departamentoAtual', nomeDept);
+        localStorage.setItem('corAtual', corDept);
+        window.location.href = 'inicio.html';
+    }
+
+    function sair() {
+        localStorage.removeItem('usuario');
+        localStorage.removeItem('token');
+        localStorage.removeItem('departamentoAtual');
+        localStorage.removeItem('corAtual');
+        window.location.href = 'login.html'; 
+    }
+
+    renderizarDashboard();
+</script>
+</body>
+</html>
