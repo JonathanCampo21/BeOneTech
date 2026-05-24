@@ -16,9 +16,14 @@ public class MembroController {
     @Autowired
     private MembroRepository membroRepository;
 
+    // ATUALIZADO: Agora aceita o filtro por departamento do Front-end
     @GetMapping
-    public List<Membro> listarMembros() {
-        return membroRepository.findAll();
+    public List<Membro> listarMembros(@RequestParam(required = false) String departamento) {
+        if (departamento != null && !departamento.trim().isEmpty()) {
+            return membroRepository.findByDepartamentosContainingOrderByNomeAsc(departamento);
+        }
+        // Se não pedir departamento (ex: o Pastor), devolve todo mundo em ordem alfabética
+        return membroRepository.findAllByOrderByNomeAsc();
     }
 
     @PostMapping
@@ -40,9 +45,10 @@ public class MembroController {
                     membro.setCargo(membroAtualizado.getCargo());
                     membro.setWhatsapp(membroAtualizado.getWhatsapp());
 
-                    // =====================================
-                    // NOVO: SALVANDO A FOTO QUE VEIO DA TELA
-                    // =====================================
+                    // ---> NOVO: Atualiza a lista de departamentos que o membro faz parte
+                    membro.setDepartamentos(membroAtualizado.getDepartamentos());
+
+                    // SALVANDO A FOTO QUE VEIO DA TELA
                     membro.setFotoPerfil(membroAtualizado.getFotoPerfil());
 
                     // Atualiza a senha APENAS se o usuário digitou uma nova
