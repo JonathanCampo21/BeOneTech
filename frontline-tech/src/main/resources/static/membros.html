@@ -88,16 +88,16 @@
     <a href="membros.html" class="active"><i class="fas fa-users"></i> Membros</a>
     <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
-    <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
+    <a href="#" onclick="sairSistema()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
 </aside>
 
 <main class="main-content">
     <div style="margin-bottom: 30px;">
-        <h1>Equipe do Ministério</h1>
-        <p style="color: var(--text-dim);">Visualize os membros e suas funções musicais.</p>
+        <h1 style="display: flex; align-items: center; gap: 10px;">Equipe do Ministério <span id="nomeDeptBadge" class="highlight" style="font-size: 14px; border: 1px solid var(--primary); padding: 3px 8px; border-radius: 12px;"></span></h1>
+        <p style="color: var(--text-dim);">Visualize os membros e suas funções.</p>
     </div>
 
-    <div class="card boss-only" id="cardCadastro" style="background:#111; border:1px solid #333; padding:20px; border-radius:12px; margin-bottom:30px; overflow-x: auto;">
+    <div class="card boss-only" id="cardCadastro" style="background:#111; border:1px solid #333; padding:20px; border-radius:12px; margin-bottom:30px; overflow-x: auto; border-left: 5px solid var(--primary);">
         <h3 id="tituloFormMembro"><i class="fas fa-user-plus highlight"></i> Novo Membro</h3>
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; margin-top:15px;">
             <input type="text" id="nomeMembro" placeholder="Nome Completo">
@@ -133,20 +133,19 @@
     if (!user) { window.location.href = 'index.html'; }
 
     const cargoUser = String(user.cargo).toUpperCase().trim();
-    const funcoesDisponiveis = ["Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado", "Ministro", "Diretor Musical"];
+    // Pega o departamento salvo
+    const deptAtual = localStorage.getItem('departamentoAtual') || 'LOUVOR';
+
+    const funcoesDisponiveis = ["Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado", "Ministro", "Diretor Musical", "Foto", "Vídeo", "Transmissão", "Projeção", "Som", "Recepção", "Professor(a)", "Apoio"];
     let funcoesSelecionadas = [];
     let membrosDB = [];
     let idMembroSendoEditado = null;
 
-    // ==========================================
-    // NOVA FUNÇÃO HÍBRIDA À PROVA DE FALHAS
-    // ==========================================
     async function carregarSidebar() {
         try {
             const userLogado = JSON.parse(localStorage.getItem('usuario'));
             if (!userLogado) return;
 
-            // Renderiza instantaneamente pra evitar tela congelada
             let fotoFinal = userLogado.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userLogado.nome || 'User')}&background=222&color=10b981`;
             const avatarElem = document.getElementById('sidebarAvatar');
             const nameElem = document.getElementById('sidebarUserName');
@@ -164,8 +163,7 @@
             
             if (roleElem) roleElem.innerText = userLogado.cargo || 'Membro';
 
-            // Atualiza inteligentemente em background
-            const res = await fetch('/api/membros');
+            const res = await fetch(`/api/membros?departamento=${deptAtual}`);
             if (res.ok) {
                 const membros = await res.json();
                 let userAtualizado = null;
@@ -216,7 +214,8 @@
 
     async function carregarMembros() {
         try {
-            const res = await fetch('/api/membros');
+            // ATUALIZADO: Busca só os membros deste departamento!
+            const res = await fetch(`/api/membros?departamento=${deptAtual}`);
             membrosDB = await res.json();
             renderizarListaMembros(); 
         } catch (e) { document.getElementById('containerMembros').innerHTML = '<p style="color:red; text-align:center;">Erro ao conectar.</p>'; }
@@ -295,17 +294,32 @@
         const url = idMembroSendoEditado ? `/api/membros/${idMembroSendoEditado}` : '/api/membros';
 
         let payload = { nome, cargo, whatsapp, funcao };
-        if (!idMembroSendoEditado) { payload.senha = '123'; } 
+        
+        if (!idMembroSendoEditado) { 
+            payload.senha = '123'; 
+            // ATUALIZADO: Salva o membro garantindo que ele vá para o departamento atual
+            payload.departamentos = [deptAtual]; 
+        } 
         else {
             const membroExistente = membrosDB.find(item => item.id == idMembroSendoEditado);
             if (membroExistente) {
                 payload.fotoPerfil = membroExistente.fotoPerfil; 
                 payload.senha = membroExistente.senha; 
+                // Mantém os departamentos que ele já tinha
+                payload.departamentos = membroExistente.departamentos; 
             }
         }
 
         const res = await fetch(url, { method: metodo, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-        if(res.ok) location.reload();
+        if(res.ok) {
+            idMembroSendoEditado = null;
+            document.getElementById('nomeMembro').value = '';
+            document.getElementById('whatsappMembro').value = '';
+            funcoesSelecionadas = [];
+            carregarMembros();
+            document.getElementById('tituloFormMembro').innerHTML = '<i class="fas fa-user-plus highlight"></i> Novo Membro';
+            document.getElementById('btnSalvarMembro').innerText = 'Cadastrar Membro';
+        }
     }
 
     async function excluirMembro(id) {
@@ -315,8 +329,6 @@
         }
     }
 
-    function sair() { localStorage.removeItem('usuario'); window.location.href = 'login.html'; }
-
     carregarSidebar();
     ajustarAcessos();
     carregarOpcoesFuncoes();
@@ -324,4 +336,3 @@
 </script>
 </body>
 </html>
-
