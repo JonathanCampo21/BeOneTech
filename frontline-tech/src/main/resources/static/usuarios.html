@@ -10,7 +10,7 @@
     <script src="auth.js"></script>
     <style>
         .card { background: #111; border: 1px solid #333; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); overflow-x: auto; }
-        .form-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr 0.8fr; gap: 15px; margin-top: 15px; }
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px; }
         input, select { padding:12px; background:#1a1a1a; border:1px solid #333; color:white; border-radius:6px; outline: none; font-family: 'Urbanist', sans-serif; width: 100%;}
         .btn { padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: 'Urbanist', sans-serif; transition: 0.2s; border: none; display: flex; align-items: center; justify-content: center; gap: 8px;}
         .btn-primary { background: var(--primary); color: #000; }
@@ -85,7 +85,7 @@
     <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
     <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
     <a href="usuarios.html" class="active"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
-    <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
+    <a href="#" onclick="sairSistema()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
 </aside>
 
 <main class="main-content">
@@ -224,31 +224,39 @@
         if(!idMembro || !senha) return alert("Selecione um membro e defina uma senha!");
 
         const membro = membrosDB.find(m => m.id == idMembro);
-        membro.cargo = cargo; membro.senha = senha;
+        membro.cargo = cargo; 
+        membro.senha = senha;
 
-        const res = await fetch(`/api/membros/${idMembro}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(membro) });
-        if(res.ok) { alert("Acesso configurado com sucesso!"); location.reload(); }
+        // ATUALIZADO: O Objeto 'membro' completo mantém o array 'departamentos' intacto na requisição PUT
+        const res = await fetch(`/api/membros/${idMembro}`, { 
+            method: 'PUT', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify(membro) 
+        });
+        
+        if(res.ok) { 
+            alert("Acesso configurado com sucesso!"); 
+            document.getElementById('selectMembro').value = '';
+            document.getElementById('novaSenha').value = '';
+            document.getElementById('tituloForm').innerHTML = '<i class="fas fa-user-plus highlight"></i> Criar Novo Acesso';
+            carregarDados(); 
+        }
     }
 
     function prepararEdicao(id) {
         const u = membrosDB.find(m => m.id == id);
         document.getElementById('selectMembro').value = u.id;
         document.getElementById('novoCargo').value = u.cargo;
-        document.getElementById('novaSenha').value = u.senha;
+        document.getElementById('novaSenha').value = u.senha || '';
         document.getElementById('tituloForm').innerHTML = '<i class="fas fa-edit highlight"></i> Editando Acesso';
         document.querySelector('.main-content').scrollTo({top:0, behavior:'smooth'});
     }
 
     async function excluir(id) {
-        if(confirm("Isso removerá o acesso e o cadastro do membro. Confirma?")) {
+        if(confirm("Issoft removerá o acesso e o cadastro do membro. Confirma?")) {
             await fetch(`/api/membros/${id}`, { method: 'DELETE' });
             carregarDados();
         }
-    }
-
-    function sair() {
-        localStorage.removeItem('usuario');
-        window.location.href = 'login.html'; 
     }
 
     // ==========================================
@@ -272,10 +280,8 @@
             const res = await fetch('/api/membros');
             let membros = await res.json();
             
-            // Filtra só quem tem cargo diferente de MEMBRO (só quem loga de fato)
             membros = membros.filter(m => m.cargo && m.cargo.toUpperCase() !== 'MEMBRO');
 
-            // Ordena: quem acessou por último fica no topo
             membros.sort((a, b) => {
                 const dataA = a.ultimaAtividade ? new Date(a.ultimaAtividade) : new Date(0);
                 const dataB = b.ultimaAtividade ? new Date(b.ultimaAtividade) : new Date(0);
@@ -295,7 +301,7 @@
                     const minutosInativo = Math.floor(diferencaEmMilissegundos / 1000 / 60);
 
                     if (minutosInativo <= 5) {
-                        statusColor = '#10b981'; // Verde (Online)
+                        statusColor = '#10b981';
                         statusTexto = 'Online agora';
                         bolinha = 'fa-circle';
                     } else if (minutosInativo < 60) {
