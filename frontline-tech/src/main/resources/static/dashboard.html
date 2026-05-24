@@ -59,7 +59,7 @@
     <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
     <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
-    <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
+    <a href="#" onclick="sairSistema()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
 </aside>
 
 <main class="main-content">
@@ -207,11 +207,6 @@
             await fetch(`/api/musicas/${id}`, { method: 'DELETE' });
             carregarRanking();
         }
-    }
-
-    function sair() {
-        localStorage.removeItem('usuario');
-        window.location.href = 'login.html';
     }
 
     // A MÁGICA TÁ AQUI: Roda o acesso e a sidebar instantaneamente ao carregar a página!
