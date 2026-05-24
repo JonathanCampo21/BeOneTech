@@ -24,8 +24,12 @@ public class EscalaController {
     @Autowired
     private PdfService pdfService;
 
+    // ATUALIZADO: Agora ele aceita filtrar pelo departamento se o Front-end pedir!
     @GetMapping
-    public List<Escala> listarEscalas() {
+    public List<Escala> listarEscalas(@RequestParam(required = false) String departamento) {
+        if (departamento != null && !departamento.trim().isEmpty()) {
+            return escalaRepository.findByDepartamento(departamento);
+        }
         return escalaRepository.findAll();
     }
 
@@ -42,6 +46,9 @@ public class EscalaController {
                     escala.setData(escalaAtualizada.getData());
                     escala.setEquipe(escalaAtualizada.getEquipe());
                     escala.setRepertorio(escalaAtualizada.getRepertorio());
+                    
+                    // NOVO: Atualiza o departamento se houver alteração
+                    escala.setDepartamento(escalaAtualizada.getDepartamento());
 
                     // PRESERVA AS CONFIRMAÇÕES DA EQUIPE
                     escala.setConfirmacoes(escalaAtualizada.getConfirmacoes());
@@ -57,9 +64,11 @@ public class EscalaController {
         escalaRepository.deleteById(id);
     }
 
+    // ATUALIZADO: O PDF agora respeita o departamento (para não imprimir a escala da Mídia junto com o Louvor)
     @GetMapping("/pdf")
     public ResponseEntity<byte[]> baixarEscalaPdf(
             @RequestParam(required = false) String mes,
+            @RequestParam(required = false) String departamento,
             @RequestParam(required = false) Long id) {
         try {
             List<Escala> escalasParaImprimir;
@@ -72,16 +81,26 @@ public class EscalaController {
                 escalasParaImprimir = List.of(escala);
                 nomeArquivo = "Escala_" + escala.getData() + ".pdf";
 
-            } else if (mes != null) {
-                List<Escala> todas = escalaRepository.findAll();
-                escalasParaImprimir = todas.stream()
-                        .filter(e -> e.getData() != null && e.getData().startsWith(mes))
-                        .collect(Collectors.toList());
-
-                nomeArquivo = "Escalas_Mes_" + mes + ".pdf";
-
             } else {
-                escalasParaImprimir = escalaRepository.findAll();
+                // Filtra pelo departamento primeiro, se houver
+                List<Escala> baseList;
+                if (departamento != null && !departamento.trim().isEmpty()) {
+                    baseList = escalaRepository.findByDepartamento(departamento);
+                    nomeArquivo = "Escalas_" + departamento + ".pdf";
+                } else {
+                    baseList = escalaRepository.findAll();
+                }
+
+                // Depois filtra pelo mês, se houver
+                if (mes != null && !mes.trim().isEmpty()) {
+                    escalasParaImprimir = baseList.stream()
+                            .filter(e -> e.getData() != null && e.getData().startsWith(mes))
+                            .collect(Collectors.toList());
+                    
+                    nomeArquivo = "Escalas_" + (departamento != null ? departamento + "_" : "") + "Mes_" + mes + ".pdf";
+                } else {
+                    escalasParaImprimir = baseList;
+                }
             }
 
             if (escalasParaImprimir.isEmpty()) {
