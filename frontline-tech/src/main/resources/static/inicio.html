@@ -111,12 +111,15 @@
     <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
     <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
-    <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
+    <a href="#" onclick="sairSistema()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
 </aside>
 
 <main class="main-content">
     <div class="welcome-box">
-        <h1 id="txtBoasVindas">Bem-vindo, <span class="highlight">...</span></h1>
+        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <h1 id="txtBoasVindas" style="margin: 0;">Bem-vindo(a)</h1>
+            <span id="nomeDeptBadge" style="font-size: 12px; border: 1px solid var(--primary); padding: 5px 10px; border-radius: 15px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;"></span>
+        </div>
         <p style="color: var(--text-dim); margin-top: 10px;" id="subtxtBoasVindas">Carregando informações do ministério...</p>
     </div>
 
@@ -153,7 +156,7 @@
             <ul style="list-style: none; color: var(--text-dim); line-height: 1.8;">
                 <li><i class="fas fa-check-circle highlight" style="margin-right: 10px;"></i> Consulte a aba <strong>Escalas</strong> para confirmar quando você tocará/cantará.</li>
                 <li><i class="fas fa-check-circle highlight" style="margin-right: 10px;"></i> Registre suas indisponibilidades no calendário da equipe.</li>
-                <li><i class="fas fa-check-circle highlight" style="margin-right: 10px;"></i> Estude os arranjos oficiais na aba de <strong>Repertório</strong>.</li>
+                <li><i class="fas fa-check-circle highlight" style="margin-right: 10px;"></i> Estude os arranjos oficiais na aba de <strong>Repertório</strong> se estiver disponível.</li>
             </ul>
         </div>
     </div>
@@ -221,21 +224,21 @@
 
     const user = JSON.parse(localStorage.getItem('usuario')) || {nome: 'Visitante', cargo: 'MEMBRO'};
     const cargoUser = String(user.cargo).toUpperCase().trim();
+    
+    // VARIÁVEL CHAVE DO DEPARTAMENTO
+    const deptAtual = localStorage.getItem('departamentoAtual') || 'LOUVOR';
+
     let todasEscalas = [];
     let escalaAtualAberta = null;
     let louvoresGlobais = [];
 
     const DEFAULT_IMG = "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80";
 
-    // ==========================================
-    // NOVA FUNÇÃO HÍBRIDA À PROVA DE FALHAS
-    // ==========================================
     async function carregarSidebar() {
         try {
             const userLogado = JSON.parse(localStorage.getItem('usuario'));
             if (!userLogado) return;
 
-            // Renderiza instantaneamente pra evitar tela congelada
             let fotoFinal = userLogado.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userLogado.nome || 'User')}&background=222&color=10b981`;
             const avatarElem = document.getElementById('sidebarAvatar');
             const nameElem = document.getElementById('sidebarUserName');
@@ -253,8 +256,7 @@
             
             if (roleElem) roleElem.innerText = userLogado.cargo || 'Membro';
 
-            // Atualiza inteligentemente em background
-            const res = await fetch('/api/membros');
+            const res = await fetch(`/api/membros?departamento=${deptAtual}`);
             if (res.ok) {
                 const membros = await res.json();
                 let userAtualizado = null;
@@ -328,9 +330,12 @@
 
     async function carregarTudo() {
         try {
+            // ATUALIZADO: Filtra as escalas pelo departamento
             const [resEscalas, resLouvores] = await Promise.all([
-                fetch('/api/escalas'), fetch('/api/louvores')
+                fetch(`/api/escalas?departamento=${deptAtual}`), 
+                fetch('/api/louvores')
             ]);
+            
             if(resLouvores.ok) louvoresGlobais = await resLouvores.json();
             if(resEscalas.ok) {
                 todasEscalas = await resEscalas.json();
@@ -343,9 +348,13 @@
 
     async function carregarDadosServidor() {
         try {
+            // ATUALIZADO: Contadores exclusivos do departamento
             const [resMembros, resEscalas, resFaltas] = await Promise.all([
-                fetch('/api/membros'), fetch('/api/escalas'), fetch('/api/indisponibilidade')
+                fetch(`/api/membros?departamento=${deptAtual}`), 
+                fetch(`/api/escalas?departamento=${deptAtual}`), 
+                fetch('/api/indisponibilidade')
             ]);
+            
             const dataAtual = new Date(); const mesAtual = dataAtual.getMonth(); const anoAtual = dataAtual.getFullYear();
 
             if (resMembros.ok) { const membros = await resMembros.json(); animarNumero('countMembros', membros.length); }
@@ -533,8 +542,6 @@
         if(url && url.trim() !== "") { btn.href = url; btn.classList.remove('disabled'); }
         else { btn.removeAttribute('href'); btn.classList.add('disabled'); }
     }
-
-    function sair() { localStorage.removeItem('usuario'); window.location.href = 'login.html'; }
 
     inicializarPainel();
 </script>
