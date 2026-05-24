@@ -26,8 +26,8 @@ public class MembroController {
     @GetMapping("/setup-db")
     public ResponseEntity<String> setupBancoDeDados() {
         try {
-            // Dá a ordem direta pro banco de dados em SQL puro
-            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS membro_departamentos (membro_id BIGINT NOT NULL, departamento VARCHAR(255))");
+            // Dá a ordem direta pro banco de dados em SQL puro (AGORA COM PRIMARY KEY!)
+            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS membro_departamentos (membro_id BIGINT NOT NULL, departamento VARCHAR(255), PRIMARY KEY (membro_id, departamento))");
             return ResponseEntity.ok("Tabela 'membro_departamentos' forçada e criada com sucesso! Pode testar o login.");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Erro ao marretar o banco: " + e.getMessage());
