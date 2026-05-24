@@ -110,13 +110,13 @@
     <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
     <a href="escalas.html" class="active"><i class="fas fa-calendar-alt"></i> Escalas</a>
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
-    <a href="#" onclick="sair()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
+    <a href="#" onclick="sairSistema()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
 </aside>
 
 <main class="main-content">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div>
-            <h2 style="margin: 0;">Gestão de Escalas</h2>
+            <h2 style="margin: 0;">Gestão de Escalas <span id="nomeDeptBadge" style="font-size: 12px; border: 1px solid var(--primary); padding: 3px 8px; border-radius: 12px; margin-left: 10px; vertical-align: middle;"></span></h2>
             <p style="color: var(--text-dim); margin-top: 5px; font-size: 14px;" class="boss-only">Organize a equipe e acompanhe as ausências.</p>
         </div>
 
@@ -239,6 +239,9 @@
 
     const user = JSON.parse(localStorage.getItem('usuario')) || {nome: 'Visitante', cargo: 'MEMBRO'};
     const cargoUser = String(user.cargo).toUpperCase().trim();
+    
+    // VARIÁVEL CHAVE: Descobre qual departamento estamos gerenciando agora
+    const deptAtual = localStorage.getItem('departamentoAtual') || 'LOUVOR';
 
     let dataFoco = new Date();
     let modoMarcarAusencia = false;
@@ -248,49 +251,21 @@
     const DEFAULT_IMG = "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80";
 
    async function carregarSidebar() {
-        // 1. Puxa do cache (que agora vem completão do Login com ID, Nome e Foto)
         const userLogado = JSON.parse(localStorage.getItem('usuario'));
-        
-        // Se por algum motivo não tiver usuário ou ID, nem tenta carregar
         if (!userLogado || !userLogado.id) return;
 
-        // 2. Carrega a tela instantaneamente com os dados do cache rápido
         let fotoFinal = userLogado.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userLogado.nome)}&background=222&color=10b981`;
         document.getElementById('sidebarAvatar').src = fotoFinal;
         
         let primeiroNome = userLogado.nome ? userLogado.nome.split(' ')[0] : 'Visitante';
-        
-        // [ATENÇÃO] Mantenha essa verificação do Pr. em todas as telas, EXCETO no usuarios.html
         if (String(userLogado.cargo).toUpperCase().trim() === 'PASTOR') { 
             primeiroNome = "Pr. " + primeiroNome; 
         }
 
         document.getElementById('sidebarUserName').innerText = primeiroNome;
         document.getElementById('sidebarUserRole').innerText = userLogado.cargo;
-
-        // 3. Busca no banco de dados EXCLUSIVAMENTE PELO ID (Sem gambiarra de nome)
-        try {
-            const res = await fetch('/api/membros');
-            if (res.ok) {
-                const membros = await res.json();
-                
-                // Busca direta e certeira pelo ID
-                const userAtualizado = membros.find(m => m.id === userLogado.id);
-                
-                if (userAtualizado) {
-                    // Se o usuário tiver uma foto cadastrada no banco, atualiza na tela
-                    if (userAtualizado.fotoPerfil) {
-                        document.getElementById('sidebarAvatar').src = userAtualizado.fotoPerfil;
-                    }
-                    
-                    // Salva a versão mais recente no cache para as próximas abas abrirem instantaneamente
-                    localStorage.setItem('usuario', JSON.stringify(userAtualizado));
-                }
-            }
-        } catch(e) { 
-            console.log("Servidor offline ou erro: mantendo dados do cache local."); 
-        }
     }
+
     function agruparEquipe(equipeStr) {
         if (!equipeStr) return [];
         const linhas = equipeStr.split('\n').filter(Boolean);
@@ -343,9 +318,16 @@
 
     async function carregarDadosDoServidor() {
         try {
+            // ATUALIZADO: Agora busca apenas os membros e as escalas DAQUELE departamento!
+            const queryDept = `?departamento=${deptAtual}`;
+
             const [resF, resE, resM, resL] = await Promise.all([
-                fetch('/api/indisponibilidade'), fetch('/api/escalas'), fetch('/api/membros'), fetch('/api/louvores')
+                fetch('/api/indisponibilidade'), 
+                fetch(`/api/escalas${queryDept}`), 
+                fetch(`/api/membros${queryDept}`), 
+                fetch('/api/louvores')
             ]);
+            
             if(resF.ok) faltasDB = await resF.json();
             if(resE.ok) escalasDB = await resE.json();
             if(resM.ok) membrosDB = await resM.json();
@@ -513,7 +495,16 @@
             if(escalaAntiga && escalaAntiga.confirmacoes) confirmacoesAtuais = escalaAntiga.confirmacoes;
         }
 
-        const dados = JSON.stringify({ titulo: t, data: d, equipe: equipeSel.join('\n'), repertorio: louvorSel.join('\n'), confirmacoes: confirmacoesAtuais });
+        // ATUALIZADO: Agora salva enviando o Departamento junto pro banco de dados!
+        const dados = JSON.stringify({ 
+            titulo: t, 
+            data: d, 
+            equipe: equipeSel.join('\n'), 
+            repertorio: louvorSel.join('\n'), 
+            confirmacoes: confirmacoesAtuais,
+            departamento: deptAtual 
+        });
+
         const url = idEscalaSendoEditada ? `/api/escalas/${idEscalaSendoEditada}` : '/api/escalas';
         const metodo = idEscalaSendoEditada ? 'PUT' : 'POST';
 
@@ -684,20 +675,21 @@
             const ano = dataFoco.getFullYear();
             const mesFormatado = `${ano}-${String(mesNum).padStart(2, '0')}`;
             
-            const res = await fetch(`/api/escalas/pdf?mes=${mesFormatado}`);
+            // ATUALIZADO: Passa o departamento para o PDF também!
+            const res = await fetch(`/api/escalas/pdf?mes=${mesFormatado}&departamento=${deptAtual}`);
             
             if (res.ok) {
                 const blob = await res.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `escala-mensal-${mesFormatado}.pdf`;
+                a.download = `escala-${deptAtual}-mensal-${mesFormatado}.pdf`;
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
                 window.URL.revokeObjectURL(url);
             } else {
-                alert("Nenhuma escala encontrada para este mês ou erro no servidor. Código: " + res.status);
+                alert("Nenhuma escala encontrada para este mês ou erro no servidor.");
             }
         } catch (e) {
             alert("Erro de conexão ao gerar o PDF mensal.");
@@ -706,20 +698,20 @@
 
     async function baixarPdfIndividual(id) {
         try {
-            const res = await fetch(`/api/escalas/pdf?id=${id}`);
+            const res = await fetch(`/api/escalas/pdf?id=${id}&departamento=${deptAtual}`);
             
             if (res.ok) {
                 const blob = await res.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `escala-culto-${id}.pdf`; 
+                a.download = `escala-${deptAtual}-culto-${id}.pdf`; 
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
                 window.URL.revokeObjectURL(url);
             } else {
-                alert("O servidor recusou a emissão do PDF. Código: " + res.status);
+                alert("O servidor recusou a emissão do PDF.");
             }
         } catch (e) {
             alert("Erro de conexão ao tentar gerar o PDF.");
@@ -731,7 +723,7 @@
         const d = e.data ? e.data.split('-').reverse().join('/') : 'Data Indefinida';
         const baseUrl = window.location.origin;
         const linkWeb = `${baseUrl}/escala-wpp.html?id=${id}`;
-        const mensagem = `🎵 *ESCALA: ${e.titulo}*\n📅 *Data:* ${d}\n\nConfira a equipe escalada e o repertório (com links para estudo) clicando abaixo:\n🔗 ${linkWeb}`;
+        const mensagem = `🎵 *ESCALA ${deptAtual}: ${e.titulo}*\n📅 *Data:* ${d}\n\nConfira a equipe escalada clicando abaixo:\n🔗 ${linkWeb}`;
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensagem)}`, '_blank');
     }
 
@@ -741,8 +733,6 @@
             carregarPagina();
         }
     }
-
-    function sair() { localStorage.removeItem('usuario'); window.location.href = 'login.html'; }
 
     carregarPagina();
 </script>
