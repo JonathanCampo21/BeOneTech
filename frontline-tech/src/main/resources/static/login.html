@@ -85,6 +85,15 @@
         }
     });
 
+    const DEPARTAMENTOS_CONFIG = {
+        "LOUVOR": { cor: "#FF3300" },
+        "MIDIA": { cor: "#190B28" },
+        "SALT": { cor: "#121831" },
+        "27+": { cor: "#10251A" },
+        "JOIN": { cor: "#2F3C64" },
+        "KIDS": { cor: "#FDD835" }
+    };
+
     async function fazerLogin() {
         const usuarioInput = document.getElementById('usuario').value.trim();
         const senhaInput = document.getElementById('senha').value.trim();
@@ -101,7 +110,6 @@
         btn.disabled = true;
 
         try {
-            // Bate na porta da nova API de autenticação do Java!
             const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -109,22 +117,46 @@
             });
 
             if (res.ok) {
-                // Java liberou! Pega os dados e o Token JWT
                 const dados = await res.json();
+                const departamentosUser = dados.departamentos || [];
+                const cargoUser = String(dados.cargo || 'MEMBRO').toUpperCase().trim();
 
-                // Guarda o Token e os Dados do Usuário (AGORA COM O ID E FOTO!)
+                // Guarda o Token e os Dados do Usuário (COM OS DEPARTAMENTOS)
                 localStorage.setItem('token', dados.token);
                 localStorage.setItem('usuario', JSON.stringify({
                     id: dados.id,
                     nome: dados.nome,
-                    cargo: dados.cargo || 'MEMBRO',
-                    fotoPerfil: dados.fotoPerfil
+                    cargo: cargoUser,
+                    fotoPerfil: dados.fotoPerfil,
+                    departamentos: departamentosUser
                 }));
 
-                // Entra no sistema
                 document.body.style.opacity = '0';
                 document.body.style.transition = '0.3s';
-                setTimeout(() => { window.location.href = 'inicio.html'; }, 300);
+
+                setTimeout(() => {
+                    // ---> REGRA DE DIRECIONAMENTO INTELIGENTE <---
+                    
+                    // 1. Se for Pastor, vai pro painel executivo
+                    if (cargoUser === 'PASTOR') {
+                        window.location.href = 'painel_pastor.html';
+                    } 
+                    // 2. Se for DEV/ADMIN ou tiver mais de 1 departamento, vai pro Portal escolher
+                    else if (['DEV', 'ADMIN'].includes(cargoUser) || departamentosUser.length > 1) {
+                        window.location.href = 'portal.html';
+                    } 
+                    // 3. Se for membro normal/líder com apenas 1 departamento, vai direto pro início dele
+                    else {
+                        const deptUnico = departamentosUser.length === 1 ? departamentosUser[0] : "LOUVOR";
+                        const configCor = DEPARTAMENTOS_CONFIG[deptUnico] ? DEPARTAMENTOS_CONFIG[deptUnico].cor : "#FF3300";
+                        
+                        // Salva qual é a área e a cor pro sistema pintar sozinho
+                        localStorage.setItem('departamentoAtual', deptUnico);
+                        localStorage.setItem('corAtual', configCor);
+                        
+                        window.location.href = 'inicio.html';
+                    }
+                }, 300);
 
             } else {
                 const erroTxt = await res.text();
