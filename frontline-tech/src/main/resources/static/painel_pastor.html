@@ -45,7 +45,7 @@
         window.location.href = 'login.html'; // Proteção extra
     }
     
-    // ALTERADO: Adicionado o "Pr. " antes do nome
+    // Coloca o "Pr. " antes do nome
     document.getElementById('nomePastor').innerText = "| Pr. " + (userLogado.nome ? userLogado.nome.split(' ')[0] : 'Pastor');
 
     const DEPARTAMENTOS_CONFIG = {
@@ -88,6 +88,7 @@
     }
 
     function sair() {
+        // Logout TOTAL do sistema
         localStorage.removeItem('usuario');
         localStorage.removeItem('token');
         localStorage.removeItem('departamentoAtual');
