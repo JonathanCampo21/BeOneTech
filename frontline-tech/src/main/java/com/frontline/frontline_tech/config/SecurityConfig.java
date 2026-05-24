@@ -43,13 +43,8 @@ public class SecurityConfig {
                         // -> Libera a API de sugestões (Músicas)
                         .requestMatchers("/api/musicas/**").permitAll()
 
-                        // -> NOVO (SOLUÇÃO WHATSAPP): Libera apenas LEITURA (GET) para escalas e louvores
+                        // -> Libera apenas LEITURA (GET) para escalas e louvores
                         .requestMatchers(HttpMethod.GET, "/api/escalas/**", "/api/louvores/**").permitAll()
-
-                        // ==========================================================
-                        // ---> A NOSSA PORTA LATERAL PARA MARRETAR O BANCO <---
-                        // ==========================================================
-                        .requestMatchers(HttpMethod.GET, "/api/membros/setup-db").permitAll()
 
                         // 3. A CATRACA: Daqui pra baixo, TUDO dentro de /api exige o Token!
                         .requestMatchers("/api/**").authenticated()
