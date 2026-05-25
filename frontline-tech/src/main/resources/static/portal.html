@@ -4,13 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Be One Tech - Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="auth.js"></script>
+    
     <style>
+        :root {
+            --bg-color: #050505;
+            --text-main: #ffffff;
+            --text-dim: #a1a1aa;
+        }
+
         body {
-            background-color: #000;
-            color: #fff;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             font-family: 'Urbanist', sans-serif;
             margin: 0;
             display: flex;
@@ -18,145 +24,248 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 20px;
+            overflow: hidden; /* Evita barra de rolagem desnecessária */
         }
 
-        h1 {
-            font-size: 28px;
-            margin-bottom: 5px;
+        /* ANIMAÇÃO DE ENTRADA SUAVE */
+        @keyframes portalEntrada {
+            0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .portal-wrapper {
             text-align: center;
-        }
-
-        p.subtitle {
-            color: #888;
-            margin-bottom: 40px;
-            text-align: center;
-        }
-
-        .portal-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
             width: 100%;
             max-width: 800px;
+            padding: 20px;
+            /* Aplica a animação no container inteiro */
+            animation: portalEntrada 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
+        h1 { font-size: 36px; margin-bottom: 5px; font-weight: 900; }
+        p.subtitle { color: var(--text-dim); margin-bottom: 50px; font-size: 16px; }
+
+        .dept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        /* O CARD INTELIGENTE */
         .dept-card {
-            background: #111;
-            border: 2px solid #333;
-            border-radius: 12px;
-            padding: 30px 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            position: relative;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 20px;
+            height: 160px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
-        }
-
-        .dept-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-        }
-
-        .dept-icon {
-            font-size: 30px;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.1);
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            /* Estado padrão: Opaco e meio apagado */
+            opacity: 0.6;
+            filter: grayscale(80%);
         }
 
-        .dept-name {
-            font-weight: bold;
-            font-size: 16px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        /* A IMAGEM DE FUNDO BORRADA */
+        .dept-card .bg-image {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0; /* Escondida por padrão */
+            filter: blur(5px) brightness(0.3); /* Borrada e escura pra dar contraste */
+            transition: all 0.5s ease;
+            z-index: 1;
+        }
+
+        /* O CONTEÚDO (Ícone e Texto) */
+        .dept-card .content {
+            position: relative;
+            z-index: 2; /* Fica por cima da imagem */
+            transition: all 0.4s ease;
+        }
+
+        .dept-card i {
+            font-size: 45px;
+            color: #555;
+            margin-bottom: 15px;
+            transition: all 0.4s ease;
+        }
+
+        .dept-card h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #888;
+            transition: all 0.4s ease;
+        }
+
+        /* O EFEITO HOVER (A MÁGICA ACONTECE AQUI) */
+        .dept-card:hover {
+            opacity: 1;
+            filter: grayscale(0%);
+            transform: translateY(-8px) scale(1.03);
+            border-color: var(--card-color); /* Pega a cor específica do ministério */
+            box-shadow: 0 15px 30px rgba(0,0,0,0.8), 0 0 20px var(--card-glow);
+        }
+
+        .dept-card:hover .bg-image {
+            opacity: 1; /* Mostra a foto borrada */
+            transform: scale(1.1); /* Dá um zoom lento na foto */
+        }
+
+        .dept-card:hover i {
+            color: var(--card-color);
+            transform: scale(1.1);
+            text-shadow: 0 0 15px var(--card-glow);
+        }
+
+        .dept-card:hover h3 {
+            color: #fff; /* Fica branco pra destacar */
+            text-shadow: 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        .dept-card.disabled {
+            display: none; /* Esconde se o cara não tiver acesso */
         }
 
         .btn-sair {
             margin-top: 50px;
-            background: none;
-            border: none;
+            background: transparent;
             color: #ef4444;
-            font-family: 'Urbanist', sans-serif;
-            font-size: 16px;
+            border: 1px dashed #ef4444;
+            padding: 12px 30px;
+            border-radius: 8px;
             cursor: pointer;
-            display: flex;
+            font-family: 'Urbanist', sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.3s;
+            display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+        }
+        .btn-sair:hover {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
         }
     </style>
 </head>
 <body>
 
-    <h1>Bem-vindo, <span id="nomeUser">Líder</span>!</h1>
+<div class="portal-wrapper">
+    <h1 id="tituloPortal">Bem-vindo, <span class="highlight">Visitante</span>!</h1>
     <p class="subtitle">Selecione o ministério que deseja acessar</p>
 
-    <div class="portal-grid" id="gridDepartamentos"></div>
+    <div class="dept-grid" id="gridDepartamentos">
+        
+        <div class="dept-card" id="card-LOUVOR" style="--card-color: #FF3300; --card-glow: rgba(255, 51, 0, 0.3);" onclick="entrarDept('LOUVOR', '#FF3300')">
+            <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="content">
+                <i class="fas fa-music"></i>
+                <h3>LOUVOR</h3>
+            </div>
+        </div>
 
-    <button class="btn-sair" onclick="sair()"><i class="fas fa-sign-out-alt"></i> Sair do Sistema</button>
+        <div class="dept-card" id="card-MIDIA" style="--card-color: #a855f7; --card-glow: rgba(168, 85, 247, 0.3);" onclick="entrarDept('MIDIA', '#a855f7')">
+            <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="content">
+                <i class="fas fa-camera"></i>
+                <h3>MÍDIA</h3>
+            </div>
+        </div>
+
+        <div class="dept-card" id="card-SALT" style="--card-color: #3b82f6; --card-glow: rgba(59, 130, 246, 0.3);" onclick="entrarDept('SALT', '#3b82f6')">
+            <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1529070538774-1843cb1665e8?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="content">
+                <i class="fas fa-users"></i>
+                <h3>SALT</h3>
+            </div>
+        </div>
+
+        <div class="dept-card" id="card-27+" style="--card-color: #10b981; --card-glow: rgba(16, 185, 129, 0.3);" onclick="entrarDept('27+', '#10b981')">
+            <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="content">
+                <i class="fas fa-plus-circle"></i>
+                <h3>27+</h3>
+            </div>
+        </div>
+
+        <div class="dept-card" id="card-JOIN" style="--card-color: #6366f1; --card-glow: rgba(99, 102, 241, 0.3);" onclick="entrarDept('JOIN', '#6366f1')">
+            <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1576383617300-84ccfd1cda8e?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="content">
+                <i class="fas fa-handshake"></i>
+                <h3>JOIN</h3>
+            </div>
+        </div>
+
+        <div class="dept-card" id="card-KIDS" style="--card-color: #facc15; --card-glow: rgba(250, 204, 21, 0.3);" onclick="entrarDept('KIDS', '#facc15')">
+            <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="content">
+                <i class="fas fa-child"></i>
+                <h3>KIDS</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <button class="btn-sair" onclick="deslogarSistema()"><i class="fas fa-sign-out-alt"></i> Sair do Sistema</button>
+</div>
 
 <script>
-    const DEPARTAMENTOS_CONFIG = {
-        "LOUVOR": { cor: "#FF3300", icone: "fa-music" },
-        "MIDIA": { cor: "#190B28", icone: "fa-camera" },
-        "SALT": { cor: "#121831", icone: "fa-users" },
-        "27+": { cor: "#10251A", icone: "fa-plus-circle" },
-        "JOIN": { cor: "#2F3C64", icone: "fa-handshake" },
-        "KIDS": { cor: "#FDD835", icone: "fa-child" }
-    };
-
-    const userLogado = JSON.parse(localStorage.getItem('usuario')) || {};
-    const cargoUser = String(userLogado.cargo || 'MEMBRO').toUpperCase().trim();
-    
-    document.getElementById('nomeUser').innerText = userLogado.nome ? userLogado.nome.split(' ')[0] : 'Visitante';
-
-    function renderizarPortal() {
-        const grid = document.getElementById('gridDepartamentos');
-        let deptsParaMostrar = [];
-        
-        // Se for Pastor, Dev ou Admin, abre as portas de tudo
-        if (['PASTOR', 'DEV', 'ADMIN'].includes(cargoUser)) {
-            deptsParaMostrar = Object.keys(DEPARTAMENTOS_CONFIG);
-        } else {
-            // Se for líder ou membro multi-área, renderiza apenas o que ele gerencia
-            deptsParaMostrar = (userLogado.departamentos && userLogado.departamentos.length > 0) ? userLogado.departamentos : ["LOUVOR"];
-        }
-
-        grid.innerHTML = deptsParaMostrar.map(dept => {
-            const config = DEPARTAMENTOS_CONFIG[dept] || { cor: "#3b82f6", icone: "fa-star" };
-            
-            return `
-                <div class="dept-card" style="border-color: ${config.cor}40;" onmouseover="this.style.borderColor='${config.cor}'; this.style.background='${config.cor}15'" onmouseout="this.style.borderColor='${config.cor}40'; this.style.background='#111'" onclick="entrarDepartamento('${dept}', '${config.cor}')">
-                    <div class="dept-icon" style="color: ${config.cor}; border: 1px solid ${config.cor}50; background: ${config.cor}05;">
-                        <i class="fas ${config.icone}"></i>
-                    </div>
-                    <div class="dept-name" style="color: ${config.cor};">${dept}</div>
-                </div>
-            `;
-        }).join('');
+    // 1. CHECAGEM DE AUTENTICAÇÃO E NOME
+    const userLogado = JSON.parse(localStorage.getItem('usuario'));
+    if (!userLogado) {
+        window.location.href = 'login.html';
     }
 
-    function entrarDepartamento(nomeDept, corDept) {
+    const primeiroNome = userLogado.nome.split(' ')[0];
+    document.getElementById('tituloPortal').innerHTML = `Bem-vindo, <span style="color: #10b981;">${primeiroNome}</span>!`;
+
+    // 2. FILTRO DE ACESSO AOS CARDS
+    const deptsDoUsuario = userLogado.departamentos || [];
+    const cargo = String(userLogado.cargo).toUpperCase().trim();
+
+    // Se o usuário não for DEV nem ADMIN, escondemos os cards que ele não tem acesso
+    if (cargo !== 'DEV' && cargo !== 'ADMIN') {
+        const todosOsCards = document.querySelectorAll('.dept-card');
+        todosOsCards.forEach(card => {
+            const nomeCard = card.id.replace('card-', '');
+            // Se o departamento do card não estiver na lista do cara, esconde!
+            if (!deptsDoUsuario.includes(nomeCard)) {
+                card.classList.add('disabled');
+            }
+        });
+    }
+
+    // 3. FUNÇÃO DE ENTRADA NO MINISTÉRIO
+    function entrarDept(nomeDept, corDept) {
+        // Salva as escolhas na memória para as outras telas saberem como se comportar
         localStorage.setItem('departamentoAtual', nomeDept);
         localStorage.setItem('corAtual', corDept);
-        window.location.href = 'inicio.html';
+
+        // Faz uma transição suave da página sumindo antes de ir pra inicio.html
+        document.body.style.opacity = '0';
+        document.body.style.transition = '0.3s ease';
+        
+        setTimeout(() => {
+            window.location.href = 'inicio.html';
+        }, 300);
     }
 
-    function sair() {
-        localStorage.removeItem('usuario');
-        localStorage.removeItem('token');
-        localStorage.removeItem('departamentoAtual');
-        localStorage.removeItem('corAtual');
-        window.location.href = 'login.html'; 
+    // 4. FUNÇÃO DE DESLOGAR (A VERDADEIRA)
+    function deslogarSistema() {
+        localStorage.clear(); // Limpa tudo!
+        window.location.href = 'login.html';
     }
-
-    renderizarPortal();
 </script>
+
 </body>
 </html>
