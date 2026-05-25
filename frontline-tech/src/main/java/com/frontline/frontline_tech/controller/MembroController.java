@@ -18,8 +18,7 @@ public class MembroController {
     @Autowired
     private MembroRepository membroRepository;
 
-    // 1. LISTAR: Devolve APENAS os membros do departamento atual selecionado!
-   // 1. LISTAR: Devolve os membros do departamento atual, protegendo os antigos!
+    // 1. LISTAR: Devolve os membros do departamento atual, protegendo os antigos!
     @GetMapping
     public List<Membro> listarMembros(@RequestParam(required = false) String departamento) {
         List<Membro> todosOsMembros = membroRepository.findAllByOrderByNomeAsc();
@@ -38,6 +37,7 @@ public class MembroController {
         // Se não passar departamento (Visão Geral do Pastor), traz a listagem completa
         return todosOsMembros;
     }
+
     // 2. SCANNER / BUSCA POR NOME: Usado pelo front-end para verificar duplicidade global
     @GetMapping("/buscar-por-nome")
     public ResponseEntity<Membro> buscarPorNome(@RequestParam String nome) {
@@ -50,7 +50,6 @@ public class MembroController {
                 .filter(m -> m.getNome() != null && m.getNome().trim().equalsIgnoreCase(nomeFormatado))
                 .findFirst();
                 
-        // CORRIGIDO: Agora usando o nome correto da variável mapeada acima
         return membroExistenteOpt.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -91,6 +90,11 @@ public class MembroController {
                 } else if (!membroExistente.getFuncao().contains(novaFuncao)) {
                     membroExistente.setFuncao(membroExistente.getFuncao().trim() + ", " + novaFuncao);
                 }
+            }
+
+            // Atualiza o escopo de liderança, se enviado
+            if (novoMembro.getLiderDe() != null) {
+                membroExistente.setLiderDe(novoMembro.getLiderDe());
             }
             
             Membro membroVinculado = membroRepository.save(membroExistente);
@@ -134,6 +138,9 @@ public class MembroController {
                     membro.setWhatsapp(membroAtualizado.getWhatsapp());
                     membro.setDepartamentos(membroAtualizado.getDepartamentos());
                     membro.setFotoPerfil(membroAtualizado.getFotoPerfil());
+
+                    // ---> NOVO: Preserva a mochila de liderança
+                    membro.setLiderDe(membroAtualizado.getLiderDe());
 
                     if (membroAtualizado.getSenha() != null && !membroAtualizado.getSenha().isEmpty()) {
                         membro.setSenha(membroAtualizado.getSenha());
