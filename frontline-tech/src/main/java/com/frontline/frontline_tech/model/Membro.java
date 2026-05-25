@@ -27,6 +27,9 @@ public class Membro {
     private String whatsapp; // Número do Zap
     private String senha;    // Campo para armazenar a senha de acesso
 
+    // ---> NOVO: MOCHILA DE LIDERANÇA (Diz de quais extensões ele é chefe)
+    private String liderDe = "";
+
     // =====================================
     // LISTA DE DEPARTAMENTOS DO MEMBRO
     // =====================================
@@ -76,4 +79,8 @@ public class Membro {
 
     public List<String> getDepartamentos() { return departamentos; }
     public void setDepartamentos(List<String> departamentos) { this.departamentos = departamentos; }
+
+    // --- Getters e Setters Liderança ---
+    public String getLiderDe() { return liderDe; }
+    public void setLiderDe(String liderDe) { this.liderDe = liderDe; }
 }
