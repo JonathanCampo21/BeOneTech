@@ -330,7 +330,6 @@
 
     async function carregarTudo() {
         try {
-            // ATUALIZADO: Filtra as escalas pelo departamento
             const [resEscalas, resLouvores] = await Promise.all([
                 fetch(`/api/escalas?departamento=${deptAtual}`), 
                 fetch('/api/louvores')
@@ -348,7 +347,6 @@
 
     async function carregarDadosServidor() {
         try {
-            // ATUALIZADO: Contadores exclusivos do departamento
             const [resMembros, resEscalas, resFaltas] = await Promise.all([
                 fetch(`/api/membros?departamento=${deptAtual}`), 
                 fetch(`/api/escalas?departamento=${deptAtual}`), 
@@ -357,7 +355,13 @@
             
             const dataAtual = new Date(); const mesAtual = dataAtual.getMonth(); const anoAtual = dataAtual.getFullYear();
 
-            if (resMembros.ok) { const membros = await resMembros.json(); animarNumero('countMembros', membros.length); }
+            let membrosDaExtensao = [];
+
+            if (resMembros.ok) { 
+                membrosDaExtensao = await resMembros.json(); 
+                animarNumero('countMembros', membrosDaExtensao.length); 
+            }
+
             if (resEscalas.ok) {
                 const escalas = await resEscalas.json();
                 const escalasDoMes = escalas.filter(e => {
@@ -366,10 +370,19 @@
                 });
                 animarNumero('countEscalas', escalasDoMes.length);
             }
+
             if (resFaltas.ok) {
                 const faltas = await resFaltas.json();
+                
+                // MÁGICA DO ISOLAMENTO: Pega só os nomes da galera que é DESSA extensão
+                const nomesDestaExtensao = membrosDaExtensao.map(m => m.nome.trim().toLowerCase());
+
                 const faltasDoMes = faltas.filter(f => {
                     if(!f.data) return false;
+                    
+                    // Se o nome do cara que faltou não estiver na lista de membros DESTA extensão, ignora!
+                    if(!nomesDestaExtensao.includes(f.nomeMembro.trim().toLowerCase())) return false;
+
                     const d = new Date(f.data); return d.getMonth() === mesAtual && d.getFullYear() === anoAtual;
                 });
                 animarNumero('countFaltas', faltasDoMes.length);
