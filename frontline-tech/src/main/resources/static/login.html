@@ -121,7 +121,9 @@
                 const departamentosUser = dados.departamentos || [];
                 const cargoUser = String(dados.cargo || 'MEMBRO').toUpperCase().trim();
 
-                // ---> NOVO: SALVANDO TUDO QUE IMPORTA PRO FRONT-END NÃO FICAR PERDIDO
+                // ---> RAIO-X PRA GENTE DESCOBRIR O QUE O JAVA ESTÁ MANDANDO <---
+                console.warn(`[RAIO-X] O usuário ${dados.nome} logou! Cargo: ${cargoUser}. Departamentos:`, departamentosUser);
+
                 localStorage.setItem('token', dados.token);
                 localStorage.setItem('usuario', JSON.stringify({
                     id: dados.id,
@@ -129,31 +131,25 @@
                     cargo: cargoUser,
                     fotoPerfil: dados.fotoPerfil,
                     departamentos: departamentosUser,
-                    liderDe: dados.liderDe || "",     // Mochila de Liderança
-                    funcao: dados.funcao || "",       // Funções gerais
-                    whatsapp: dados.whatsapp || ""    // Contato
+                    liderDe: dados.liderDe || "",
+                    funcao: dados.funcao || "",
+                    whatsapp: dados.whatsapp || ""
                 }));
 
                 document.body.style.opacity = '0';
                 document.body.style.transition = '0.3s';
 
                 setTimeout(() => {
-                    // ---> REGRA DE DIRECIONAMENTO INTELIGENTE <---
-                    
-                    // 1. Se for Pastor, vai pro painel executivo
                     if (cargoUser === 'PASTOR') {
                         window.location.href = 'painel_pastor.html';
                     } 
-                    // 2. Se for DEV/ADMIN ou tiver mais de 1 departamento, vai pro Portal escolher
                     else if (['DEV', 'ADMIN'].includes(cargoUser) || departamentosUser.length > 1) {
                         window.location.href = 'portal.html';
                     } 
-                    // 3. Se for membro normal/líder com apenas 1 departamento, vai direto pro início dele
                     else {
                         const deptUnico = departamentosUser.length === 1 ? departamentosUser[0] : "LOUVOR";
                         const configCor = DEPARTAMENTOS_CONFIG[deptUnico] ? DEPARTAMENTOS_CONFIG[deptUnico].cor : "#FF3300";
                         
-                        // Salva qual é a área e a cor pro sistema pintar sozinho
                         localStorage.setItem('departamentoAtual', deptUnico);
                         localStorage.setItem('corAtual', configCor);
                         
