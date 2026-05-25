@@ -19,15 +19,25 @@ public class MembroController {
     private MembroRepository membroRepository;
 
     // 1. LISTAR: Devolve APENAS os membros do departamento atual selecionado!
+   // 1. LISTAR: Devolve os membros do departamento atual, protegendo os antigos!
     @GetMapping
     public List<Membro> listarMembros(@RequestParam(required = false) String departamento) {
-        if (departamento != null && !departamento.trim().isEmpty()) {
-            return membroRepository.findByDepartamentosContainingOrderByNomeAsc(departamento);
-        }
-        // Se não passar departamento (Visão Geral do Pastor), traz a listagem completa
-        return membroRepository.findAllByOrderByNomeAsc();
-    }
+        List<Membro> todosOsMembros = membroRepository.findAllByOrderByNomeAsc();
 
+        if (departamento != null && !departamento.trim().isEmpty()) {
+            return todosOsMembros.stream().filter(m -> {
+                // Se a ficha for antiga e a gaveta de departamentos estiver vazia, ele é do Louvor por padrão!
+                if (m.getDepartamentos() == null || m.getDepartamentos().isEmpty()) {
+                    return departamento.equalsIgnoreCase("LOUVOR");
+                }
+                // Se for uma ficha nova, verifica normalmente se a extensão está na lista dele
+                return m.getDepartamentos().contains(departamento);
+            }).toList();
+        }
+        
+        // Se não passar departamento (Visão Geral do Pastor), traz a listagem completa
+        return todosOsMembros;
+    }
     // 2. SCANNER / BUSCA POR NOME: Usado pelo front-end para verificar duplicidade global
     @GetMapping("/buscar-por-nome")
     public ResponseEntity<Membro> buscarPorNome(@RequestParam String nome) {
