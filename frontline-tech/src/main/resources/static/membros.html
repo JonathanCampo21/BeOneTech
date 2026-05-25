@@ -131,10 +131,10 @@
     const cargoUser = String(user.cargo).toUpperCase().trim();
     const deptAtual = localStorage.getItem('departamentoAtual') || 'LOUVOR';
 
-    // Mapeamento de funções específicas por extensão para o líder não ver coisas de outras áreas
+    // ATUALIZADO: Funções da Mídia alteradas!
     const FUNCOES_POR_DEPARTAMENTO = {
         "LOUVOR": ["Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado", "Ministro", "Diretor Musical"],
-        "MIDIA": ["Câmera", "Corte/Transmissão", "Fotografia", "Iluminação", "Sonoplastia", "Projeção/Cura"],
+        "MIDIA": ["Fotografia", "Storymaker", "Transmissão", "Camera transmissão"],
         "SALT": ["Intercessão", "Conselheiro", "Apoio Logístico", "Líder de Célula"],
         "27+": ["Organização", "Apoio", "Conselheiro"],
         "JOIN": ["Recepção", "Estacionamento", "Boas-Vindas", "Consolação"],
@@ -144,7 +144,7 @@
     let funcoesSelecionadas = [];
     let membrosDB = [];
     let idMembroSendoEditado = null;
-    let membroEncontradoNoScanner = null; // Armazena a ficha clonada se ele já existir globalmente
+    let membroEncontradoNoScanner = null;
 
     function carregarSidebar() {
         let fotoFinal = user.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nome)}&background=222&color=10b981`;
@@ -167,7 +167,6 @@
     }
 
     function carregarOpcoesFuncoes() {
-        // Puxa estritamente apenas as funções daquele ministério logado
         const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || ["Membro Ativo", "Voluntário", "Apoio"];
         document.getElementById('listaFuncoes').innerHTML = listaFuncoesArea.map(f => `
             <div class="funcao-checkbox" data-funcao="${f}" onclick="toggleFuncao(this, '${f}')">${f}</div>
@@ -184,9 +183,8 @@
         }
     }
 
-    // SCANNERS DE DUPLICIDADE EM TEMPO REAL
     async function verificarMembroExistente(nomeDigitado) {
-        if(idMembroSendoEditado) return; // Desativa o scanner se estiver alterando um card existente
+        if(idMembroSendoEditado) return; 
         
         const alerta = document.getElementById('alertaMembroExiste');
         const inputWhats = document.getElementById('whatsappMembro');
@@ -205,16 +203,14 @@
         try {
             const res = await fetch(`/api/membros/buscar-por-nome?nome=${encodeURIComponent(nomeDigitado.trim())}`);
             if (res.ok) {
-                // LINK ENCONTRADO! Reaproveita dados existentes
                 membroEncontradoNoScanner = await res.json();
                 
                 alerta.style.display = 'flex';
                 inputWhats.value = membroEncontradoNoScanner.whatsapp || '';
-                inputWhats.disabled = true; // Impede o líder de estragar o cadastro do outro depto
-                boxCargo.style.display = 'none'; // O cargo global dele não muda por aqui
+                inputWhats.disabled = true; 
+                boxCargo.style.display = 'none'; 
                 btnSalvar.innerText = `Vincular ${membroEncontradoNoScanner.nome.split(' ')[0]} ao ${deptAtual}`;
             } else {
-                // Membro novo de verdade
                 alerta.style.display = 'none';
                 inputWhats.disabled = false;
                 boxCargo.style.display = 'block';
@@ -248,14 +244,12 @@
         container.innerHTML = filtrados.map(m => {
             const cargoStr = (m.cargo || 'MEMBRO').toUpperCase();
             
-            // Separa apenas as funções que batem com a lista deste departamento!
             const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || [];
             let funcoesDesteDepto = m.funcao ? m.funcao.split(',').map(f => f.trim()).filter(f => listaFuncoesArea.includes(f)) : [];
             
             let tagsHtml = funcoesDesteDepto.map(f => `<span class="tag-funcao">${f}</span>`).join('');
             if (tagsHtml === '') tagsHtml = '<span class="tag-funcao" style="color: gray; border-color:#222;">Voluntário Geral</span>';
 
-            // Mostra se ele serve em outros locais sem expor dados privados
             let deptsOutros = m.departamentos ? m.departamentos.filter(d => d !== deptAtual) : [];
             let tagOutros = deptsOutros.length > 0 ? `<span class="tag-outros-depts" title="Acessos globais"><i class="fas fa-layer-group"></i> Serve também em: ${deptsOutros.join(', ')}</span>` : '';
 
@@ -286,7 +280,7 @@
         
         idMembroSendoEditado = id;
         document.getElementById('nomeMembro').value = m.nome;
-        document.getElementById('nomeMembro').disabled = true; // Trava o nome na edição
+        document.getElementById('nomeMembro').disabled = true; 
         
         const inputWhats = document.getElementById('whatsappMembro');
         inputWhats.value = m.whatsapp || '';
@@ -295,7 +289,6 @@
         document.getElementById('cargoMembro').value = m.cargo || 'MEMBRO';
         document.getElementById('boxCargo').style.display = 'block';
 
-        // Marca apenas as funções dele que pertencem a esse departamento
         const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || [];
         funcoesSelecionadas = m.funcao ? m.funcao.split(',').map(f => f.trim()).filter(f => listaFuncoesArea.includes(f)) : [];
         
@@ -323,12 +316,10 @@
         let payload = {};
 
         if (idMembroSendoEditado) {
-            // ---> FLUXO EDITAR CARD EXISTENTE
             const original = membrosDB.find(item => item.id == idMembroSendoEditado);
             metodo = 'PUT';
             url = `/api/membros/${idMembroSendoEditado}`;
 
-            // Limpa as funções antigas deste departamento e adiciona as novas sem estragar as das outras extensões
             const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || [];
             let funcoesOutrosDepts = original.funcao ? original.funcao.split(',').map(f => f.trim()).filter(f => !listaFuncoesArea.includes(f)) : [];
             if(funcaoNovaDesteDepto) funcoesOutrosDepts.push(funcaoNovaDesteDepto);
@@ -341,12 +332,11 @@
             };
         } 
         else if (membroEncontradoNoScanner) {
-            // ---> FLUXO VINCULAR MEMBRO EXISTENTE DE OUTRA EXTENSÃO
             metodo = 'PUT';
             url = `/api/membros/${membroEncontradoNoScanner.id}`;
 
             let depts = membroEncontradoNoScanner.departamentos || [];
-            if(!depts.contains) depts = Array.from(depts); // Segurança de Cast
+            if(!depts.contains) depts = Array.from(depts); 
             if(!depts.includes(deptAtual)) depts.push(deptAtual);
 
             let funcoesGlobais = membroEncontradoNoScanner.funcao ? membroEncontradoNoScanner.funcao.split(',').map(f => f.trim()) : [];
@@ -359,7 +349,6 @@
             };
         } 
         else {
-            // ---> FLUXO MEMBRO COMPLETAMENTE NOVO
             payload = {
                 nome: nome,
                 whatsapp: whatsapp,
@@ -370,14 +359,12 @@
             };
         }
 
-        // Adiciona um parâmetro extra na URL só para garantir compatibilidade com o Java
         const finalUrl = metodo === 'POST' ? `${url}?departamentoAtual=${deptAtual}` : url;
 
         const res = await fetch(finalUrl, { method: metodo, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
         if(res.ok) { resetarFormulario(); carregarMembros(); }
     }
 
-    // FUNÇÃO QUE DETECTA SE REMOVE O MEMBRO DO DEPARTAMENTO OU DO SISTEMA INTEIRO
     async function excluirMembroDepto(id, nomeMembro) {
         const membro = membrosDB.find(m => m.id == id);
         if(!membro) return;
@@ -385,7 +372,6 @@
         let deptsRestantes = membro.departamentos ? membro.departamentos.filter(d => d !== deptAtual) : [];
 
         if (deptsRestantes.length > 0) {
-            // O membro faz parte de outras áreas. Vamos apenas desvincular ele DAQUI!
             if (confirm(`O irmão ${nomeMembro} atua em outros ministérios. Deseja apenas REMOVER o acesso dele ao ${deptAtual}?`)) {
                 
                 const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || [];
@@ -401,7 +387,6 @@
                 if(res.ok) carregarMembros();
             }
         } else {
-            // Ele só pertence a este departamento, exclusão total da base de dados
             if (confirm(`Deseja EXCLUIR permanentemente o cadastro de ${nomeMembro} do sistema?`)) {
                 await fetch(`/api/membros/${id}`, { method: 'DELETE' });
                 carregarMembros();
