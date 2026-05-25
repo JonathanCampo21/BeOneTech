@@ -121,14 +121,17 @@
                 const departamentosUser = dados.departamentos || [];
                 const cargoUser = String(dados.cargo || 'MEMBRO').toUpperCase().trim();
 
-                // Guarda o Token e os Dados do Usuário (COM OS DEPARTAMENTOS)
+                // ---> NOVO: SALVANDO TUDO QUE IMPORTA PRO FRONT-END NÃO FICAR PERDIDO
                 localStorage.setItem('token', dados.token);
                 localStorage.setItem('usuario', JSON.stringify({
                     id: dados.id,
                     nome: dados.nome,
                     cargo: cargoUser,
                     fotoPerfil: dados.fotoPerfil,
-                    departamentos: departamentosUser
+                    departamentos: departamentosUser,
+                    liderDe: dados.liderDe || "",     // Mochila de Liderança
+                    funcao: dados.funcao || "",       // Funções gerais
+                    whatsapp: dados.whatsapp || ""    // Contato
                 }));
 
                 document.body.style.opacity = '0';
