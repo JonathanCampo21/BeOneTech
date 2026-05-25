@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="auth.js"></script>
     <style>
-        .funcoes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin: 15px 0; }
+        .funcoes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin: 15px 0; }
         .funcao-checkbox { background: #1a1a1a; border: 1px solid #333; padding: 10px; border-radius: 6px; cursor: pointer; text-align: center; font-size: 13px; transition: 0.3s; color: #a1a1aa; }
         .funcao-checkbox.active { background: var(--primary); color: black; border-color: var(--primary); font-weight: bold; }
         
@@ -17,39 +17,19 @@
         .membro-card:hover { border-color: var(--primary); transform: translateY(-2px); }
         .membro-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); background: #222; flex-shrink: 0; }
         
-        /* AJUSTE PARA AS TAGS QUEBRAREM DE LINHA SEM EMPURRAR OS BOTÕES */
-        .membro-info-text { 
-            flex: 1; 
-            min-width: 0; /* Permite que o bloco de texto encolha e as tags quebrem linha */
-        }
+        .membro-info-text { flex: 1; min-width: 0; }
+        .membro-info-text > div { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+
+        .tag-funcao { background: #222; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 11px; border: 1px solid #333; font-weight: bold; white-space: nowrap; margin: 0 !important; }
+        .tag-outros-depts { background: #1a1a1a; color: #888; padding: 3px 6px; border-radius: 4px; font-size: 10px; border: 1px dashed #444; }
+
+        .membro-card > div:last-child { flex-shrink: 0; }
+
+        input, select { padding:12px; background:#1a1a1a; border:1px solid #333; color:white; border-radius:6px; outline: none; font-family: 'Urbanist', sans-serif; width: 100%; transition: 0.3s;}
+        input:focus, select:focus { border-color: var(--primary); }
+        input:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        .membro-info-text > div {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 8px;
-        }
-
-        .tag-funcao { 
-            background: #222; 
-            color: var(--primary); 
-            padding: 4px 8px; 
-            border-radius: 4px; 
-            font-size: 11px; 
-            border: 1px solid #333; 
-            font-weight: bold;
-            white-space: nowrap; /* Impede que a palavra quebre no meio */
-            margin: 0 !important;
-        }
-
-        /* Trava a caixa de botões (WhatsApp, Edit, Lixeira) para nunca ser esmagada */
-        .membro-card > div:last-child {
-            flex-shrink: 0; 
-        }
-
-        input, select { padding:12px; background:#1a1a1a; border:1px solid #333; color:white; border-radius:6px; outline: none; font-family: 'Urbanist', sans-serif; width: 100%;}
         .admin-only, .boss-only { display: none !important; }
-        
         .search-container { display: flex; margin-bottom: 20px; width: 100%; }
         .search-input { width: 100%; background: #1a1a1a; border: 1px solid #333; padding: 12px 20px; border-radius: 8px; color: white; font-family: 'Urbanist', sans-serif; transition: 0.3s; }
         .search-input:focus { border-color: var(--primary); outline: none; }
@@ -60,6 +40,8 @@
         .sidebar-user-info { display: flex; flex-direction: column; }
         .sidebar-user-info strong { color: white; font-size: 14px; }
         .sidebar-user-info span { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
+
+        .aviso-vinculo { background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; color: #3b82f6; padding: 12px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-top: 15px; display: none; align-items: center; gap: 8px; }
     </style>
 </head>
 <body>
@@ -94,28 +76,42 @@
 <main class="main-content">
     <div style="margin-bottom: 30px;">
         <h1 style="display: flex; align-items: center; gap: 10px;">Equipe do Ministério <span id="nomeDeptBadge" class="highlight" style="font-size: 14px; border: 1px solid var(--primary); padding: 3px 8px; border-radius: 12px;"></span></h1>
-        <p style="color: var(--text-dim);">Visualize os membros e suas funções.</p>
+        <p style="color: var(--text-dim);">Gerencie exclusivamente os membros ativos desta extensão.</p>
     </div>
 
-    <div class="card boss-only" id="cardCadastro" style="background:#111; border:1px solid #333; padding:20px; border-radius:12px; margin-bottom:30px; overflow-x: auto; border-left: 5px solid var(--primary);">
-        <h3 id="tituloFormMembro"><i class="fas fa-user-plus highlight"></i> Novo Membro</h3>
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; margin-top:15px;">
-            <input type="text" id="nomeMembro" placeholder="Nome Completo">
-            <input type="text" id="whatsappMembro" placeholder="WhatsApp">
-            <select id="cargoMembro">
-                <option value="MEMBRO">Membro</option>
-                <option value="LIDER">Líder</option>
-                <option value="PASTOR">Pastor</option>
-                <option value="ADMIN">Admin</option>
-                <option value="DEV">Dev</option>
-            </select>
+    <div class="card boss-only" id="cardCadastro" style="background:#111; border:1px solid #333; padding:20px; border-radius:12px; margin-bottom:30px; border-left: 5px solid var(--primary);">
+        <h3 id="tituloFormMembro"><i class="fas fa-user-plus highlight"></i> Novo Cadastro / Vínculo</h3>
+        
+        <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:15px; margin-top:15px;">
+            <div>
+                <input type="text" id="nomeMembro" placeholder="Nome Completo do Irmão" oninput="verificarMembroExistente(this.value)">
+                <div id="alertaMembroExiste" class="aviso-vinculo">
+                    <i class="fas fa-satellite-dish"></i> <span>Membro encontrado em outro ministério! Vinculando dados...</span>
+                </div>
+            </div>
+            <div>
+                <input type="text" id="whatsappMembro" placeholder="WhatsApp (DDD + Número)">
+            </div>
         </div>
+
+        <div id="secaoPrivilegios" style="display:grid; grid-template-columns: 1fr; margin-top: 15px;">
+            <div id="boxCargo">
+                <label style="font-size: 11px; color: gray; font-weight: bold; text-transform: uppercase;">Nível hierárquico no sistema:</label>
+                <select id="cargoMembro" style="margin-top: 5px;">
+                    <option value="MEMBRO">Membro Comum</option>
+                    <option value="LIDER">Líder de Ministério</option>
+                </select>
+            </div>
+        </div>
+
+        <p style="font-size: 12px; color: gray; font-weight: bold; text-transform: uppercase; margin: 20px 0 5px 0;"><i class="fas fa-tags"></i> Selecione a(s) função(ões) dele NESTE ministério:</p>
         <div class="funcoes-grid" id="listaFuncoes"></div>
-        <button id="btnSalvarMembro" onclick="salvarMembro()" style="width:100%; padding:15px; background:var(--primary); color:#000; border:none; border-radius:6px; font-weight:900; font-size:16px; cursor:pointer; font-family: 'Urbanist', sans-serif;">Cadastrar Membro</button>
+        
+        <button id="btnSalvarMembro" onclick="salvarMembro()" style="width:100%; padding:15px; background:var(--primary); color:#000; border:none; border-radius:6px; font-weight:900; font-size:16px; cursor:pointer; font-family: 'Urbanist', sans-serif; text-transform: uppercase; letter-spacing: 1px;">Cadastrar Membro</button>
     </div>
 
     <div class="search-container">
-        <input type="text" id="buscaMembro" class="search-input" placeholder="Pesquisar por nome ou função..." onkeyup="renderizarListaMembros()">
+        <input type="text" id="buscaMembro" class="search-input" placeholder="Pesquisar nesta extensão..." onkeyup="renderizarListaMembros()">
     </div>
 
     <div id="containerMembros">
@@ -133,57 +129,31 @@
     if (!user) { window.location.href = 'index.html'; }
 
     const cargoUser = String(user.cargo).toUpperCase().trim();
-    // Pega o departamento salvo
     const deptAtual = localStorage.getItem('departamentoAtual') || 'LOUVOR';
 
-    const funcoesDisponiveis = ["Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado", "Ministro", "Diretor Musical", "Foto", "Vídeo", "Transmissão", "Projeção", "Som", "Recepção", "Professor(a)", "Apoio"];
+    // Mapeamento de funções específicas por extensão para o líder não ver coisas de outras áreas
+    const FUNCOES_POR_DEPARTAMENTO = {
+        "LOUVOR": ["Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado", "Ministro", "Diretor Musical"],
+        "MIDIA": ["Câmera", "Corte/Transmissão", "Fotografia", "Iluminação", "Sonoplastia", "Projeção/Cura"],
+        "SALT": ["Intercessão", "Conselheiro", "Apoio Logístico", "Líder de Célula"],
+        "27+": ["Organização", "Apoio", "Conselheiro"],
+        "JOIN": ["Recepção", "Estacionamento", "Boas-Vindas", "Consolação"],
+        "KIDS": ["Professor(a)", "Teatrinho", "Apoio Kids", "Louvor Kids"]
+    };
+
     let funcoesSelecionadas = [];
     let membrosDB = [];
     let idMembroSendoEditado = null;
+    let membroEncontradoNoScanner = null; // Armazena a ficha clonada se ele já existir globalmente
 
-    async function carregarSidebar() {
-        try {
-            const userLogado = JSON.parse(localStorage.getItem('usuario'));
-            if (!userLogado) return;
-
-            let fotoFinal = userLogado.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userLogado.nome || 'User')}&background=222&color=10b981`;
-            const avatarElem = document.getElementById('sidebarAvatar');
-            const nameElem = document.getElementById('sidebarUserName');
-            const roleElem = document.getElementById('sidebarUserRole');
-
-            if (avatarElem) avatarElem.src = fotoFinal;
-            
-            if (nameElem) {
-                let primeiroNome = userLogado.nome ? userLogado.nome.split(' ')[0] : 'Visitante';
-                if (String(userLogado.cargo).toUpperCase().trim() === 'PASTOR') { 
-                    primeiroNome = "Pr. " + primeiroNome; 
-                }
-                nameElem.innerText = primeiroNome;
-            }
-            
-            if (roleElem) roleElem.innerText = userLogado.cargo || 'Membro';
-
-            const res = await fetch(`/api/membros?departamento=${deptAtual}`);
-            if (res.ok) {
-                const membros = await res.json();
-                let userAtualizado = null;
-                
-                if (userLogado.id) {
-                    userAtualizado = membros.find(m => m.id === userLogado.id);
-                } else if (userLogado.nome) {
-                    userAtualizado = membros.find(m => m.nome.trim().toLowerCase() === userLogado.nome.trim().toLowerCase());
-                }
-
-                if (userAtualizado) {
-                    if (userAtualizado.fotoPerfil && avatarElem) {
-                        avatarElem.src = userAtualizado.fotoPerfil;
-                    }
-                    localStorage.setItem('usuario', JSON.stringify(userAtualizado));
-                }
-            }
-        } catch(e) { 
-            console.log("Servidor ocupado. Mantendo os dados do cache."); 
-        }
+    function carregarSidebar() {
+        let fotoFinal = user.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nome)}&background=222&color=10b981`;
+        document.getElementById('sidebarAvatar').src = fotoFinal;
+        
+        let primeiroNome = user.nome ? user.nome.split(' ')[0] : 'Visitante';
+        if (String(user.cargo).toUpperCase().trim() === 'PASTOR') { primeiroNome = "Pr. " + primeiroNome; }
+        document.getElementById('sidebarUserName').innerText = primeiroNome;
+        document.getElementById('sidebarUserRole').innerText = user.cargo;
     }
 
     function ajustarAcessos() {
@@ -197,8 +167,10 @@
     }
 
     function carregarOpcoesFuncoes() {
-        document.getElementById('listaFuncoes').innerHTML = funcoesDisponiveis.map(f => `
-            <div class="funcao-checkbox" onclick="toggleFuncao(this, '${f}')">${f}</div>
+        // Puxa estritamente apenas as funções daquele ministério logado
+        const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || ["Membro Ativo", "Voluntário", "Apoio"];
+        document.getElementById('listaFuncoes').innerHTML = listaFuncoesArea.map(f => `
+            <div class="funcao-checkbox" data-funcao="${f}" onclick="toggleFuncao(this, '${f}')">${f}</div>
         `).join('');
     }
 
@@ -212,13 +184,52 @@
         }
     }
 
+    // SCANNERS DE DUPLICIDADE EM TEMPO REAL
+    async function verificarMembroExistente(nomeDigitado) {
+        if(idMembroSendoEditado) return; // Desativa o scanner se estiver alterando um card existente
+        
+        const alerta = document.getElementById('alertaMembroExiste');
+        const inputWhats = document.getElementById('whatsappMembro');
+        const boxCargo = document.getElementById('boxCargo');
+        const btnSalvar = document.getElementById('btnSalvarMembro');
+
+        if (nomeDigitado.trim().length < 4) {
+            alerta.style.display = 'none';
+            inputWhats.disabled = false;
+            boxCargo.style.display = 'block';
+            btnSalvar.innerText = "Cadastrar Membro";
+            membroEncontradoNoScanner = null;
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/membros/buscar-por-nome?nome=${encodeURIComponent(nomeDigitado.trim())}`);
+            if (res.ok) {
+                // LINK ENCONTRADO! Reaproveita dados existentes
+                membroEncontradoNoScanner = await res.json();
+                
+                alerta.style.display = 'flex';
+                inputWhats.value = membroEncontradoNoScanner.whatsapp || '';
+                inputWhats.disabled = true; // Impede o líder de estragar o cadastro do outro depto
+                boxCargo.style.display = 'none'; // O cargo global dele não muda por aqui
+                btnSalvar.innerText = `Vincular ${membroEncontradoNoScanner.nome.split(' ')[0]} ao ${deptAtual}`;
+            } else {
+                // Membro novo de verdade
+                alerta.style.display = 'none';
+                inputWhats.disabled = false;
+                boxCargo.style.display = 'block';
+                btnSalvar.innerText = "Cadastrar Membro";
+                membroEncontradoNoScanner = null;
+            }
+        } catch (e) { console.log("Scanner em espera..."); }
+    }
+
     async function carregarMembros() {
         try {
-            // ATUALIZADO: Busca só os membros deste departamento!
             const res = await fetch(`/api/membros?departamento=${deptAtual}`);
             membrosDB = await res.json();
             renderizarListaMembros(); 
-        } catch (e) { document.getElementById('containerMembros').innerHTML = '<p style="color:red; text-align:center;">Erro ao conectar.</p>'; }
+        } catch (e) { document.getElementById('containerMembros').innerHTML = '<p style="color:red; text-align:center;">Erro ao carregar equipe.</p>'; }
     }
 
     function renderizarListaMembros() {
@@ -232,18 +243,21 @@
 
         filtrados.sort((a, b) => a.nome.localeCompare(b.nome));
 
-        if (filtrados.length === 0) { container.innerHTML = '<p style="text-align: center; color: var(--text-dim);">Nenhum membro encontrado.</p>'; return; }
+        if (filtrados.length === 0) { container.innerHTML = '<p style="text-align: center; color: var(--text-dim); padding: 20px;">Nenhum membro ativo listado nesta extensão.</p>'; return; }
 
         container.innerHTML = filtrados.map(m => {
-            const cargoStr = (m.cargo && typeof m.cargo === 'string') ? m.cargo.toUpperCase() : 'MEMBRO';
-            const cargoFormatado = cargoStr.toLowerCase();
+            const cargoStr = (m.cargo || 'MEMBRO').toUpperCase();
+            
+            // Separa apenas as funções que batem com a lista deste departamento!
+            const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || [];
+            let funcoesDesteDepto = m.funcao ? m.funcao.split(',').map(f => f.trim()).filter(f => listaFuncoesArea.includes(f)) : [];
+            
+            let tagsHtml = funcoesDesteDepto.map(f => `<span class="tag-funcao">${f}</span>`).join('');
+            if (tagsHtml === '') tagsHtml = '<span class="tag-funcao" style="color: gray; border-color:#222;">Voluntário Geral</span>';
 
-            let tagsHtml = '';
-            if (cargoStr === 'PASTOR') tagsHtml += `<span class="tag-funcao">Gestor</span>`;
-            if (m.funcao && m.funcao.trim() !== '') {
-                tagsHtml += m.funcao.split(',').map(f => `<span class="tag-funcao">${f.trim()}</span>`).join('');
-            }
-            if (tagsHtml === '') tagsHtml = '<span style="font-size:11px; color:#444">Sem função</span>';
+            // Mostra se ele serve em outros locais sem expor dados privados
+            let deptsOutros = m.departamentos ? m.departamentos.filter(d => d !== deptAtual) : [];
+            let tagOutros = deptsOutros.length > 0 ? `<span class="tag-outros-depts" title="Acessos globais"><i class="fas fa-layer-group"></i> Serve também em: ${deptsOutros.join(', ')}</span>` : '';
 
             const fotoMembro = m.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.nome)}&background=222&color=10b981`;
 
@@ -252,14 +266,14 @@
                 <img src="${fotoMembro}" class="membro-avatar" alt="Foto">
                 <div class="membro-info-text">
                     <strong style="font-size:18px;">${m.nome}</strong>
-                    <small style="color:var(--text-dim); margin-left: 5px;">(${cargoFormatado})</small>
-                    <div>${tagsHtml}</div>
+                    <small style="color:var(--text-dim); margin-left: 5px;">(${cargoStr.toLowerCase()})</small>
+                    <div>${tagsHtml} ${tagOutros}</div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    ${m.whatsapp ? `<a href="https://wa.me/55${m.whatsapp.replace(/\D/g,'')}" target="_blank" style="color:#25d366; font-size:20px;"><i class="fab fa-whatsapp"></i></a>` : ''}
+                    ${m.whatsapp ? `<a href="https://wa.me/55${m.whatsapp.replace(/\D/g,'')}" target="_blank" style="color:#25d366; font-size:20px; padding: 10px;"><i class="fab fa-whatsapp"></i></a>` : ''}
                     ${isBoss ? `
                         <button onclick="prepararEdicaoMembro(${m.id})" style="background:none; border:1px solid #3b82f6; color:#3b82f6; padding:8px; border-radius:6px; cursor:pointer;"><i class="fas fa-edit"></i></button>
-                        <button onclick="excluirMembro(${m.id})" style="background:none; border:1px solid #ef4444; color:#ef4444; padding:8px; border-radius:6px; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                        <button onclick="excluirMembroDepto(${m.id}, '${m.nome}')" style="background:none; border:1px solid #ef4444; color:#ef4444; padding:8px; border-radius:6px; cursor:pointer;" title="Remover desta extensão"><i class="fas fa-user-minus"></i></button>
                     ` : ''}
                 </div>
             </div>`;
@@ -269,64 +283,146 @@
     function prepararEdicaoMembro(id) {
         const m = membrosDB.find(item => item.id == id);
         if(!m) return;
+        
         idMembroSendoEditado = id;
         document.getElementById('nomeMembro').value = m.nome;
-        document.getElementById('whatsappMembro').value = m.whatsapp || '';
+        document.getElementById('nomeMembro').disabled = true; // Trava o nome na edição
+        
+        const inputWhats = document.getElementById('whatsappMembro');
+        inputWhats.value = m.whatsapp || '';
+        inputWhats.disabled = false;
+        
         document.getElementById('cargoMembro').value = m.cargo || 'MEMBRO';
-        funcoesSelecionadas = m.funcao ? m.funcao.split(',').map(f => f.trim()) : [];
+        document.getElementById('boxCargo').style.display = 'block';
+
+        // Marca apenas as funções dele que pertencem a esse departamento
+        const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || [];
+        funcoesSelecionadas = m.funcao ? m.funcao.split(',').map(f => f.trim()).filter(f => listaFuncoesArea.includes(f)) : [];
+        
         document.querySelectorAll('.funcao-checkbox').forEach(el => {
-            el.classList.toggle('active', funcoesSelecionadas.includes(el.innerText));
+            const fName = el.getAttribute('data-funcao');
+            el.classList.toggle('active', funcoesSelecionadas.includes(fName));
         });
-        document.getElementById('tituloFormMembro').innerHTML = '<i class="fas fa-edit highlight"></i> Editando Membro';
-        document.getElementById('btnSalvarMembro').innerText = 'Atualizar Dados';
+
+        document.getElementById('tituloFormMembro').innerHTML = '<i class="fas fa-edit highlight"></i> Alterar Funções do Membro';
+        document.getElementById('btnSalvarMembro').innerText = 'Atualizar Ficha';
         document.querySelector('.main-content').scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function salvarMembro() {
-        const nome = document.getElementById('nomeMembro').value;
+        const nome = document.getElementById('nomeMembro').value.trim();
         const cargo = document.getElementById('cargoMembro').value;
-        const whatsapp = document.getElementById('whatsappMembro').value;
-        const funcao = funcoesSelecionadas.join(', ');
+        const whatsapp = document.getElementById('whatsappMembro').value.replace(/\D/g, '');
+        const funcaoNovaDesteDepto = funcoesSelecionadas.join(', ');
 
-        if(!nome) return alert("Nome é obrigatório");
+        if(!nome) return alert("Por favor, preencha o nome do membro.");
+        if(funcoesSelecionadas.length === 0) return alert("Selecione ao menos uma função para ele neste ministério.");
 
-        const metodo = idMembroSendoEditado ? 'PUT' : 'POST';
-        const url = idMembroSendoEditado ? `/api/membros/${idMembroSendoEditado}` : '/api/membros';
+        let url = '/api/membros';
+        let metodo = 'POST';
+        let payload = {};
 
-        let payload = { nome, cargo, whatsapp, funcao };
-        
-        if (!idMembroSendoEditado) { 
-            payload.senha = '123'; 
-            // ATUALIZADO: Salva o membro garantindo que ele vá para o departamento atual
-            payload.departamentos = [deptAtual]; 
+        if (idMembroSendoEditado) {
+            // ---> FLUXO EDITAR CARD EXISTENTE
+            const original = membrosDB.find(item => item.id == idMembroSendoEditado);
+            metodo = 'PUT';
+            url = `/api/membros/${idMembroSendoEditado}`;
+
+            // Limpa as funções antigas deste departamento e adiciona as novas sem estragar as das outras extensões
+            const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || [];
+            let funcoesOutrosDepts = original.funcao ? original.funcao.split(',').map(f => f.trim()).filter(f => !listaFuncoesArea.includes(f)) : [];
+            if(funcaoNovaDesteDepto) funcoesOutrosDepts.push(funcaoNovaDesteDepto);
+
+            payload = {
+                ...original,
+                whatsapp: whatsapp,
+                cargo: cargo,
+                funcao: funcoesOutrosDepts.join(', ')
+            };
+        } 
+        else if (membroEncontradoNoScanner) {
+            // ---> FLUXO VINCULAR MEMBRO EXISTENTE DE OUTRA EXTENSÃO
+            metodo = 'PUT';
+            url = `/api/membros/${membroEncontradoNoScanner.id}`;
+
+            let depts = membroEncontradoNoScanner.departamentos || [];
+            if(!depts.contains) depts = Array.from(depts); // Segurança de Cast
+            if(!depts.includes(deptAtual)) depts.push(deptAtual);
+
+            let funcoesGlobais = membroEncontradoNoScanner.funcao ? membroEncontradoNoScanner.funcao.split(',').map(f => f.trim()) : [];
+            funcoesSelecionadas.forEach(f => { if(!funcoesGlobais.includes(f)) funcoesGlobais.push(f); });
+
+            payload = {
+                ...membroEncontradoNoScanner,
+                departamentos: depts,
+                funcao: funcoesGlobais.join(', ')
+            };
         } 
         else {
-            const membroExistente = membrosDB.find(item => item.id == idMembroSendoEditado);
-            if (membroExistente) {
-                payload.fotoPerfil = membroExistente.fotoPerfil; 
-                payload.senha = membroExistente.senha; 
-                // Mantém os departamentos que ele já tinha
-                payload.departamentos = membroExistente.departamentos; 
-            }
+            // ---> FLUXO MEMBRO COMPLETAMENTE NOVO
+            payload = {
+                nome: nome,
+                whatsapp: whatsapp,
+                cargo: cargo,
+                funcao: funcaoNovaDesteDepto,
+                senha: '123',
+                departamentos: [deptAtual]
+            };
         }
 
-        const res = await fetch(url, { method: metodo, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-        if(res.ok) {
-            idMembroSendoEditado = null;
-            document.getElementById('nomeMembro').value = '';
-            document.getElementById('whatsappMembro').value = '';
-            funcoesSelecionadas = [];
-            carregarMembros();
-            document.getElementById('tituloFormMembro').innerHTML = '<i class="fas fa-user-plus highlight"></i> Novo Membro';
-            document.getElementById('btnSalvarMembro').innerText = 'Cadastrar Membro';
+        // Adiciona um parâmetro extra na URL só para garantir compatibilidade com o Java
+        const finalUrl = metodo === 'POST' ? `${url}?departamentoAtual=${deptAtual}` : url;
+
+        const res = await fetch(finalUrl, { method: metodo, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+        if(res.ok) { resetarFormulario(); carregarMembros(); }
+    }
+
+    // FUNÇÃO QUE DETECTA SE REMOVE O MEMBRO DO DEPARTAMENTO OU DO SISTEMA INTEIRO
+    async function excluirMembroDepto(id, nomeMembro) {
+        const membro = membrosDB.find(m => m.id == id);
+        if(!membro) return;
+
+        let deptsRestantes = membro.departamentos ? membro.departamentos.filter(d => d !== deptAtual) : [];
+
+        if (deptsRestantes.length > 0) {
+            // O membro faz parte de outras áreas. Vamos apenas desvincular ele DAQUI!
+            if (confirm(`O irmão ${nomeMembro} atua em outros ministérios. Deseja apenas REMOVER o acesso dele ao ${deptAtual}?`)) {
+                
+                const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || [];
+                let funcoesPreservadas = membro.funcao ? membro.funcao.split(',').map(f => f.trim()).filter(f => !listaFuncoesArea.includes(f)) : [];
+
+                const payloadAtualizado = {
+                    ...membro,
+                    departamentos: deptsRestantes,
+                    funcao: funcoesPreservadas.join(', ')
+                };
+
+                const res = await fetch(`/api/membros/${id}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payloadAtualizado) });
+                if(res.ok) carregarMembros();
+            }
+        } else {
+            // Ele só pertence a este departamento, exclusão total da base de dados
+            if (confirm(`Deseja EXCLUIR permanentemente o cadastro de ${nomeMembro} do sistema?`)) {
+                await fetch(`/api/membros/${id}`, { method: 'DELETE' });
+                carregarMembros();
+            }
         }
     }
 
-    async function excluirMembro(id) {
-        if(confirm("Deseja remover este membro?")) {
-            await fetch(`/api/membros/${id}`, { method: 'DELETE' });
-            carregarMembros();
-        }
+    function resetarFormulario() {
+        idMembroSendoEditado = null;
+        membroEncontradoNoScanner = null;
+        document.getElementById('nomeMembro').value = '';
+        document.getElementById('nomeMembro').disabled = false;
+        document.getElementById('whatsappMembro').value = '';
+        document.getElementById('whatsappMembro').disabled = false;
+        document.getElementById('cargoMembro').value = 'MEMBRO';
+        document.getElementById('boxCargo').style.display = 'block';
+        document.getElementById('alertaMembroExiste').style.display = 'none';
+        document.getElementById('tituloFormMembro').innerHTML = '<i class="fas fa-user-plus highlight"></i> Novo Cadastro / Vínculo';
+        document.getElementById('btnSalvarMembro').innerText = 'Cadastrar Membro';
+        funcoesSelecionadas = [];
+        document.querySelectorAll('.funcao-checkbox').forEach(el => el.classList.remove('active'));
     }
 
     carregarSidebar();
