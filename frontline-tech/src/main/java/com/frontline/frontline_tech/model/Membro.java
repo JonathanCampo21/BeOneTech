@@ -10,7 +10,7 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.FetchType;
-import java.time.LocalDateTime; 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -28,7 +28,7 @@ public class Membro {
     private String senha;    // Campo para armazenar a senha de acesso
 
     // =====================================
-    // NOVO: LISTA DE DEPARTAMENTOS DO MEMBRO
+    // LISTA DE DEPARTAMENTOS DO MEMBRO
     // =====================================
     // Usamos EAGER para o Java sempre carregar os departamentos junto com o membro no login
     @ElementCollection(fetch = FetchType.EAGER)
@@ -74,7 +74,6 @@ public class Membro {
     public LocalDateTime getUltimaAtividade() { return ultimaAtividade; }
     public void setUltimaAtividade(LocalDateTime ultimaAtividade) { this.ultimaAtividade = ultimaAtividade; }
 
-    // --- Novos Getters e Setters dos Departamentos ---
     public List<String> getDepartamentos() { return departamentos; }
     public void setDepartamentos(List<String> departamentos) { this.departamentos = departamentos; }
 }
