@@ -121,10 +121,14 @@
                 const dados = await res.json();
                 
                 // ========================================================
-                // 2. A SEGUNDA CHECAGEM: FORÇANDO A LEITURA DO BANCO DE DADOS
+                // 2. A SEGUNDA CHECAGEM: FORÇANDO A LEITURA DO BANCO DE DADOS COM O TOKEN!
                 // ========================================================
                 try {
-                    const resFresh = await fetch(`/api/membros/buscar-por-nome?nome=${encodeURIComponent(dados.nome)}`);
+                    const resFresh = await fetch(`/api/membros/buscar-por-nome?nome=${encodeURIComponent(dados.nome)}`, {
+                        // O Spring Security exige o token que acabamos de receber!
+                        headers: { 'Authorization': `Bearer ${dados.token}` }
+                    });
+                    
                     if (resFresh.ok) {
                         const fichaBanco = await resFresh.json();
                         // Substitui os dados capengas pelos dados reais e frescos do banco
