@@ -110,6 +110,7 @@
         btn.disabled = true;
 
         try {
+            // 1. FAZ O LOGIN OFICIAL PARA PEGAR O TOKEN DE ACESSO
             const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -118,12 +119,33 @@
 
             if (res.ok) {
                 const dados = await res.json();
+                
+                // ========================================================
+                // 2. A SEGUNDA CHECAGEM: FORÇANDO A LEITURA DO BANCO DE DADOS
+                // ========================================================
+                try {
+                    const resFresh = await fetch(`/api/membros/buscar-por-nome?nome=${encodeURIComponent(dados.nome)}`);
+                    if (resFresh.ok) {
+                        const fichaBanco = await resFresh.json();
+                        // Substitui os dados capengas pelos dados reais e frescos do banco
+                        dados.departamentos = fichaBanco.departamentos || [];
+                        dados.cargo = fichaBanco.cargo || dados.cargo;
+                        dados.liderDe = fichaBanco.liderDe || "";
+                        dados.fotoPerfil = fichaBanco.fotoPerfil || dados.fotoPerfil;
+                        dados.funcao = fichaBanco.funcao || "";
+                        dados.whatsapp = fichaBanco.whatsapp || "";
+                    }
+                } catch (err) {
+                    console.log("Servidor ocupado. Usando dados básicos da sessão.");
+                }
+
+                // Agora sim pegamos os dados garantidos!
                 const departamentosUser = dados.departamentos || [];
                 const cargoUser = String(dados.cargo || 'MEMBRO').toUpperCase().trim();
 
-                // ---> RAIO-X PRA GENTE DESCOBRIR O QUE O JAVA ESTÁ MANDANDO <---
-                console.warn(`[RAIO-X] O usuário ${dados.nome} logou! Cargo: ${cargoUser}. Departamentos:`, departamentosUser);
+                console.warn(`[RAIO-X 2.0] Usuário: ${dados.nome} | Cargo: ${cargoUser} | Acessos:`, departamentosUser);
 
+                // 3. SALVA TUDO NA MEMÓRIA DO NAVEGADOR (CACHE)
                 localStorage.setItem('token', dados.token);
                 localStorage.setItem('usuario', JSON.stringify({
                     id: dados.id,
@@ -131,20 +153,21 @@
                     cargo: cargoUser,
                     fotoPerfil: dados.fotoPerfil,
                     departamentos: departamentosUser,
-                    liderDe: dados.liderDe || "",
-                    funcao: dados.funcao || "",
-                    whatsapp: dados.whatsapp || ""
+                    liderDe: dados.liderDe,
+                    funcao: dados.funcao,
+                    whatsapp: dados.whatsapp
                 }));
 
                 document.body.style.opacity = '0';
                 document.body.style.transition = '0.3s';
 
                 setTimeout(() => {
+                    // 4. DIRETO PRO ALVO CERTO
                     if (cargoUser === 'PASTOR') {
                         window.location.href = 'painel_pastor.html';
                     } 
                     else if (['DEV', 'ADMIN'].includes(cargoUser) || departamentosUser.length > 1) {
-                        window.location.href = 'portal.html';
+                        window.location.href = 'portal.html'; // TELA DE SELEÇÃO!
                     } 
                     else {
                         const deptUnico = departamentosUser.length === 1 ? departamentosUser[0] : "LOUVOR";
