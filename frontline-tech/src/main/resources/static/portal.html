@@ -25,15 +25,11 @@
             color: var(--text-main);
             font-family: 'Urbanist', sans-serif;
             margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            /* Uso do DVH resolve o bug da barra de endereços no celular */
+            /* Removemos o travamento de tela (flex/hidden) para o Chrome respirar */
+            display: block; 
             min-height: 100vh;
-            min-height: 100dvh; 
             overflow-x: hidden;
-            overflow-y: auto; /* Libera a rolagem para celulares pequenos */
+            overflow-y: auto; 
         }
 
         @keyframes portalEntrada {
@@ -45,8 +41,14 @@
             text-align: center;
             width: 100%;
             max-width: 1200px;
-            padding: 20px 20px 40px 20px; /* Mais espaço em baixo */
+            /* Margem fantasma gigante em baixo (100px) para fugir da barra do navegador */
+            padding: 40px 20px 100px 20px; 
+            margin: 0 auto;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100vh;
             animation: portalEntrada 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
@@ -172,9 +174,8 @@
         @media (max-width: 800px) {
             .dept-grid {
                 flex-direction: column; 
-                /* Diminuído para dar espaço ao botão e adaptar à barra do navegador */
-                height: 65vh; 
-                min-height: 400px;
+                height: 70vh; 
+                min-height: 450px;
             }
             .vertical-title {
                 writing-mode: horizontal-tb; 
@@ -200,8 +201,13 @@
             .text-wrapper h3 { font-size: 24px; }
         }
 
-        .btn-sair {
+        .btn-sair-container {
             margin-top: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-sair {
             background: transparent;
             color: #ef4444;
             border: 1px dashed #ef4444;
@@ -305,7 +311,9 @@
 
     </div>
 
-    <button class="btn-sair" onclick="deslogarSistema()"><i class="fas fa-sign-out-alt"></i> Sair do Sistema</button>
+    <div class="btn-sair-container">
+        <button class="btn-sair" onclick="deslogarSistema()"><i class="fas fa-sign-out-alt"></i> Sair do Sistema</button>
+    </div>
 </div>
 
 <script>
@@ -332,15 +340,38 @@
         });
     }
 
+    // LÓGICA DE PROTEÇÃO DE TOQUE ACIDENTAL (TOUCH TRACKING)
+    let isDragging = false;
+    let startY = 0;
+
+    // Quando o usuário encosta o dedo
+    document.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+        isDragging = false;
+    }, { passive: true });
+
+    // Se o dedo se mover mais de 10 pixels na tela, marcamos como "Rolagem" (Arrasto)
+    document.addEventListener('touchmove', (e) => {
+        let moveY = e.touches[0].clientY;
+        if (Math.abs(moveY - startY) > 10) {
+            isDragging = true;
+        }
+    }, { passive: true });
+
     function entrarDept(nomeDept, corDept, elementoCard) {
+        // Se a inteligência detectou que foi um arrasto de tela, aborta o clique!
+        if (isDragging) return;
+
+        // Regra de "Dois Toques" para celulares
         if (window.innerWidth <= 800) {
             if (!elementoCard.classList.contains('active')) {
                 document.querySelectorAll('.dept-card').forEach(c => c.classList.remove('active'));
                 elementoCard.classList.add('active');
-                return; 
+                return; // Para aqui no primeiro toque
             }
         }
 
+        // Navegação de fato (Segundo toque ou clique no PC)
         localStorage.setItem('departamentoAtual', nomeDept);
         localStorage.setItem('corAtual', corDept);
 
