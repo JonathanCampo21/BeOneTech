@@ -25,7 +25,7 @@
         .container { max-width: 1400px; margin: 0 auto; padding: 25px; animation: fadeIn 0.6s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* HEADER LIMPO (SEM SIDEBAR) */
+        /* HEADER LIMPO */
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 30px; }
         .header h1 { margin: 0; font-size: 26px; display: flex; align-items: center; gap: 10px; font-weight: 900;}
         .header h1 i { color: var(--primary); }
@@ -69,8 +69,6 @@
         .cal-nav button { background: transparent; border: none; color: var(--text-dim); font-size: 18px; cursor: pointer; transition: 0.2s; }
         .cal-nav button:hover { color: var(--primary); transform: scale(1.2); }
         .calendar-header h2 { margin: 0; font-size: 20px; color: #fff; width: 140px; text-align: center; }
-        
-        /* Botão Agendar Corrigido */
         .btn-add-event { background: var(--primary); color: #000; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Urbanist'; transition: 0.3s; display: flex; align-items: center; gap: 8px; font-size: 13px;}
         .btn-add-event:hover { transform: scale(1.05); filter: brightness(1.1); }
 
@@ -83,7 +81,7 @@
         .event-dot-container { display: flex; gap: 3px; position: absolute; bottom: 6px; }
         .event-dot { width: 5px; height: 5px; border-radius: 50%; }
 
-        /* PILHAS DE EVENTOS (STACKS) */
+        /* PILHAS DE EVENTOS (STACKS) COM DESIGN CLICKABLE */
         .stack-group { margin-top: 25px; }
         
         .stack-header { 
@@ -231,7 +229,7 @@
             </div>
             
             <div class="form-group">
-                <label>Ministérios Envolvidos</label>
+                <label>Ministérios Envolvidos (Selecione quantos quiser)</label>
                 <div class="dept-pills" id="deptPillsContainer">
                     <div class="dept-pill active" onclick="toggleDeptPill(this)" data-dept="TODOS">TODOS</div>
                     <div class="dept-pill" onclick="toggleDeptPill(this)" data-dept="LOUVOR">LOUVOR</div>
@@ -262,13 +260,16 @@
     </div>
 
 <script>
+    // BLOQUEIO DE SEGURANÇA E AUTH
     const userLogado = JSON.parse(localStorage.getItem('usuario')) || {};
-    if(userLogado.cargo !== 'PASTOR' && userLogado.cargo !== 'DEV') { window.location.href = 'login.html'; }
-    document.getElementById('nomePastor').innerText = "| Pr. " + (userLogado.nome ? userLogado.nome.split(' ')[0] : 'Admin');
+    if(userLogado.cargo !== 'PASTOR' && userLogado.cargo !== 'DEV' && userLogado.cargo !== 'ADMIN') { 
+        window.location.href = 'portal.html'; 
+    }
+    
+    document.getElementById('nomePastor').innerText = "| " + (userLogado.nome ? userLogado.nome.split(' ')[0] : 'Admin');
 
     const tokenLocal = localStorage.getItem('token');
-    const authHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
-    const getHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}` } : {};
+    const getHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
 
     const DEPARTAMENTOS_CONFIG = {
         "LOUVOR": { cor: "#FF3300", icone: "fa-music" }, "MIDIA": { cor: "#a855f7", icone: "fa-camera" },
@@ -285,20 +286,33 @@
     let anoExibicao = new Date().getFullYear();
 
     async function inicializarDashboard() {
-        renderizarMinisteriosVazios(); // Desenha a estrutura antes pra não piscar
+        renderizarMinisteriosVazios(); 
         
         try {
-            // Busca de Membros INJETANDO O TOKEN de autorização
-            const promessasMembros = Object.keys(DEPARTAMENTOS_CONFIG).map(d => 
-                fetch(`/api/membros?departamento=${d}`, { headers: getHeaders }).then(r => r.ok ? r.json() : [])
-            );
-            const arraysMembros = await Promise.all(promessasMembros);
+            // BLINDAGEM MÁXIMA DE BUSCA DE DADOS
+            let arraysMembros = [];
+            try {
+                // Tenta puxar tudo de uma vez
+                const resM = await fetch('/api/membros', { headers: getHeaders });
+                if (resM.ok) arraysMembros = await resM.json();
+            } catch(e) { }
+
+            // Se falhou ou veio vazio, tenta puxar por departamento passando o URL Encode
+            if (!arraysMembros || arraysMembros.length === 0) {
+                const promessasMembros = Object.keys(DEPARTAMENTOS_CONFIG).map(d => 
+                    fetch(`/api/membros?departamento=${encodeURIComponent(d)}`, { headers: getHeaders })
+                    .then(r => r.ok ? r.json() : [])
+                );
+                const results = await Promise.all(promessasMembros);
+                arraysMembros = results.flat();
+            }
             
-            const todos = arraysMembros.flat();
+            // Remove duplicados pelo ID (se a pessoa estiver em 2 ministérios)
             const mapaUnicos = {};
-            todos.forEach(m => { if (m.nome) mapaUnicos[m.nome.trim().toLowerCase()] = m; });
+            arraysMembros.forEach(m => { if (m.id) mapaUnicos[m.id] = m; else if(m.nome) mapaUnicos[m.nome] = m; });
             membrosGlobais = Object.values(mapaUnicos);
 
+            // Busca escalas e faltas
             const [resE, resF] = await Promise.all([
                 fetch('/api/escalas', { headers: getHeaders }), 
                 fetch('/api/indisponibilidade', { headers: getHeaders })
@@ -336,7 +350,10 @@
 
         const elLideres = document.getElementById('kpiLideres');
         if(elLideres) {
-            elLideres.innerText = membrosGlobais.filter(m => String(m.cargo).toUpperCase() === 'LIDER' || String(m.cargo).toUpperCase() === 'PASTOR').length;
+            elLideres.innerText = membrosGlobais.filter(m => {
+                const cargo = String(m.cargo).toUpperCase();
+                return cargo === 'LIDER' || cargo === 'PASTOR' || cargo === 'DEV' || cargo === 'ADMIN';
+            }).length;
         }
 
         const contagemDept = { "LOUVOR":0, "MIDIA":0, "SALT":0, "27+":0, "JOIN":0, "KIDS":0 };
@@ -344,6 +361,7 @@
             let depts = [];
             if (Array.isArray(m.departamentos) && m.departamentos.length > 0) depts = m.departamentos;
             else if (m.departamento) depts = [m.departamento];
+            
             depts.forEach(d => { if(contagemDept[d] !== undefined) contagemDept[d]++; });
         });
 
@@ -357,7 +375,8 @@
         const hoje = new Date();
         const elLista = document.getElementById('listaFaltantes');
         
-        const passadas = escalasGlobais.filter(e => e.data && new Date(e.data) <= hoje).sort((a,b) => new Date(b.data) - new Date(a.data));
+        // Pega as datas passadas ignorando reuniões de liderança pra essa checagem
+        const passadas = escalasGlobais.filter(e => e.data && new Date(e.data) <= hoje && !(e.titulo || '').includes('[LIDERANÇA]')).sort((a,b) => new Date(b.data) - new Date(a.data));
         
         if (passadas.length === 0) {
             elLista.innerHTML = '<p style="color: #888; font-size: 12px; margin: 0;">Ainda não houve nenhum evento no sistema.</p>';
@@ -477,7 +496,7 @@
                 <div class="escala-date"><div class="day">${dia}</div><div class="month">${mes}</div></div>
                 <div class="escala-info">
                     <h4>${ev.titulo}</h4>
-                    <p>Visualizar engajamento da equipe</p>
+                    <p>Visualizar engajamento e presença</p>
                 </div>
             </div>`;
         }).join('');
@@ -535,7 +554,12 @@
         else {
             const confGerais = {};
             evento.escalas.forEach(esc => { if(esc.confirmacoes) { try { Object.assign(confGerais, JSON.parse(esc.confirmacoes)); } catch(e){} } });
-            const lideres = membrosGlobais.filter(m => String(m.cargo).toUpperCase() === 'LIDER' || String(m.cargo).toUpperCase() === 'PASTOR');
+            
+            // Filtra os líderes para as reuniões
+            const lideres = membrosGlobais.filter(m => {
+                const c = String(m.cargo).toUpperCase();
+                return c === 'LIDER' || c === 'PASTOR' || c === 'DEV' || c === 'ADMIN';
+            });
             
             if(lideres.length === 0) { html = '<p style="color:gray; text-align:center;">Nenhum líder encontrado.</p>'; }
             else {
@@ -547,7 +571,22 @@
                     else if(resposta === 'RECUSADO') { corRow = 'pending'; badgeHtml = '<span class="status-badge badge-pending"><i class="fas fa-times"></i> Ausente</span>'; }
                     else { corRow = ''; badgeHtml = '<span class="status-badge" style="background:#222; color:#888;"><i class="fas fa-clock"></i> Pendente</span>'; }
 
-                    html += `<div class="status-row ${corRow}"><div><div class="status-dept" style="color: #ccc;">${lider.nome}</div><div style="font-size: 10px; color: var(--text-dim); text-transform: uppercase;">${lider.liderDe || 'Líder'}</div></div>${badgeHtml}</div>`;
+                    // Lógica inteligente de Nomenclatura para Cargos
+                    let subtitulo = 'Líder';
+                    const c = String(lider.cargo).toUpperCase();
+                    if (c === 'PASTOR') {
+                        subtitulo = 'Pastor / Líder do Ministério';
+                    } else if (c === 'DEV' || c === 'ADMIN') {
+                        subtitulo = lider.liderDe ? `Líder - ${lider.liderDe} (Admin)` : 'Gestão do Sistema';
+                    } else if (lider.liderDe) {
+                        subtitulo = `Líder - ${lider.liderDe}`;
+                    } else if (lider.departamentos && lider.departamentos.length > 0) {
+                        subtitulo = `Líder - ${lider.departamentos.join(', ')}`;
+                    } else if (lider.departamento) {
+                        subtitulo = `Líder - ${lider.departamento}`;
+                    }
+
+                    html += `<div class="status-row ${corRow}"><div><div class="status-dept" style="color: #ccc;">${lider.nome}</div><div style="font-size: 10px; color: var(--text-dim); text-transform: uppercase;">${subtitulo}</div></div>${badgeHtml}</div>`;
                 });
             }
         }
@@ -596,7 +635,7 @@
 
             const chamadasAPI = deptsParaCriar.map(d => fetch('/api/escalas', { 
                 method: 'POST', 
-                headers: authHeaders, 
+                headers: getHeaders, 
                 body: JSON.stringify({ titulo: tituloBase, data: dataStr, departamento: d, equipe: "", repertorio: "", confirmacoes: "{}" }) 
             }));
             
