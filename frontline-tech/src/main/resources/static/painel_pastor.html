@@ -81,11 +81,21 @@
         .event-dot-container { display: flex; gap: 3px; position: absolute; bottom: 6px; }
         .event-dot { width: 5px; height: 5px; border-radius: 50%; }
 
-        /* PILHAS DE EVENTOS (STACKS) */
+        /* PILHAS DE EVENTOS (STACKS) COM NOVO DESIGN CLICKABLE */
         .stack-group { margin-top: 25px; }
-        .stack-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; border-bottom: 1px solid #222; padding-bottom: 10px;}
+        
+        /* Agora o header inteiro é o botão de clique! */
+        .stack-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 15px; padding: 10px; border-bottom: 1px solid #222; 
+            cursor: pointer; border-radius: 8px; transition: 0.3s;
+        }
+        .stack-header:hover { background: rgba(255,255,255,0.02); }
         .stack-header h3 { margin: 0; font-size: 16px; color: white; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
-        .btn-toggle-stack { background: #1a1a1a; border: 1px solid #333; color: white; padding: 6px 12px; border-radius: 15px; font-size: 11px; cursor: pointer; transition: 0.3s; font-weight: bold;}
+        
+        .stack-icon-toggle { transition: transform 0.4s ease; color: var(--text-dim); }
+        .stack-cards.collapsed ~ .stack-icon-toggle { transform: rotate(0deg); }
+        .stack-cards:not(.collapsed) ~ .stack-icon-toggle { transform: rotate(180deg); }
         
         .stack-cards { display: flex; flex-direction: column; gap: 10px; }
         .stack-cards.collapsed { gap: 0; padding-bottom: 20px; }
@@ -136,7 +146,7 @@
 
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-chess-king"></i> Painel Pastoral <span style="color: gray; font-size: 14px; margin-left: 10px;" id="nomePastor"></span></h1>
+            <h1><i class="fas fa-chart-pie"></i> Painel Pastoral <span style="color: gray; font-size: 14px; margin-left: 10px;" id="nomePastor"></span></h1>
             <button class="btn-sair" onclick="sair()"><i class="fas fa-sign-out-alt"></i> Sair do Sistema</button>
         </div>
 
@@ -153,11 +163,11 @@
                     <div class="kpi-grid">
                         <div class="kpi-item">
                             <div class="kpi-icon" style="color: #10b981;"><i class="fas fa-users"></i></div>
-                            <div class="kpi-text"><h4 id="kpiTotal">0</h4><p>Membros</p></div>
+                            <div class="kpi-text"><h4 id="kpiTotal">0</h4><p>Membros Gerais</p></div>
                         </div>
                         <div class="kpi-item">
                             <div class="kpi-icon" style="color: #3b82f6;"><i class="fas fa-crown"></i></div>
-                            <div class="kpi-text"><h4 id="kpiLideres">0</h4><p>Líderes</p></div>
+                            <div class="kpi-text"><h4 id="kpiLideres">0</h4><p>Líderes de Área</p></div>
                         </div>
                     </div>
 
@@ -168,7 +178,7 @@
                         </div>
                         
                         <div id="listaFaltantes">
-                            <p style="color: #888; font-size: 12px; margin: 0;">Analisando chamadas...</p>
+                            <p style="color: #888; font-size: 12px; margin: 0;">Analisando chamadas recentes...</p>
                         </div>
                     </div>
                 </div>
@@ -189,17 +199,17 @@
                         </div>
 
                     <div class="stack-group" id="blocoCultos" style="display: none;">
-                        <div class="stack-header">
+                        <div class="stack-header" onclick="togglePilha('stack-cultos')">
                             <h3 style="color: #a2ff00;"><i class="fas fa-church"></i> Próximos Cultos</h3>
-                            <button class="btn-toggle-stack" onclick="togglePilha(this, 'stack-cultos')">Ver Todos <i class="fas fa-chevron-down"></i></button>
+                            <i class="fas fa-chevron-down stack-icon-toggle" id="icon-stack-cultos"></i>
                         </div>
                         <div class="stack-cards collapsed" id="stack-cultos"></div>
                     </div>
 
                     <div class="stack-group" id="blocoReunioes" style="display: none;">
-                        <div class="stack-header">
-                            <h3 style="color: #3b82f6;"><i class="fas fa-user-tie"></i> Reuniões de Liderança</h3>
-                            <button class="btn-toggle-stack" onclick="togglePilha(this, 'stack-reunioes')">Ver Todas <i class="fas fa-chevron-down"></i></button>
+                        <div class="stack-header" onclick="togglePilha('stack-reunioes')">
+                            <h3 style="color: #3b82f6;"><i class="fas fa-user-tie"></i> Reuniões</h3>
+                            <i class="fas fa-chevron-down stack-icon-toggle" id="icon-stack-reunioes"></i>
                         </div>
                         <div class="stack-cards collapsed" id="stack-reunioes"></div>
                     </div>
@@ -266,9 +276,9 @@
     document.getElementById('nomePastor').innerText = "| Pr. " + (userLogado.nome ? userLogado.nome.split(' ')[0] : 'Admin');
 
     const DEPARTAMENTOS_CONFIG = {
-        "LOUVOR": { cor: "#FF3300", icone: "fa-music" }, "MIDIA": { cor: "#a855f7", icone: "fa-camera" },
-        "SALT": { cor: "#3b82f6", icone: "fa-users" }, "27+": { cor: "#10b981", icone: "fa-plus-circle" },
-        "JOIN": { cor: "#6366f1", icone: "fa-handshake" }, "KIDS": { cor: "#facc15", icone: "fa-child" }
+        "LOUVOR": { cor: "#FF3300", icone: "fa-music" }, "MIDIA": { cor: "#190B28", icone: "fa-camera" },
+        "SALT": { cor: "#121831", icone: "fa-users" }, "27+": { cor: "#10251A", icone: "fa-plus-circle" },
+        "JOIN": { cor: "#2F3C64", icone: "fa-handshake" }, "KIDS": { cor: "#FDD835", icone: "fa-child" }
     };
 
     let escalasGlobais = [];
@@ -283,9 +293,9 @@
     async function inicializarDashboard() {
         try {
             const [resM, resE, resF] = await Promise.all([ fetch('/api/membros'), fetch('/api/escalas'), fetch('/api/indisponibilidade') ]);
-            if(resM.ok) membrosGlobais = await resM.json();
-            if(resE.ok) escalasGlobais = await resE.json();
-            if(resF.ok) faltasGlobais = await resF.json();
+            if(resM.ok) membrosGlobais = await resM.json() || [];
+            if(resE.ok) escalasGlobais = await resE.json() || [];
+            if(resF.ok) faltasGlobais = await resF.json() || [];
 
             processarKpis();
             processarFaltasUltimoCulto();
@@ -294,48 +304,70 @@
         } catch (e) { console.error(e); }
     }
 
+    // AJUSTADO: CONTAGEM DE MEMBROS E LÍDERES
     function processarKpis() {
-        document.getElementById('kpiTotal').innerText = membrosGlobais.length;
-        document.getElementById('kpiLideres').innerText = membrosGlobais.filter(m => String(m.cargo).toUpperCase() === 'LIDER' || String(m.cargo).toUpperCase() === 'PASTOR').length;
+        // Blindagem: caso o banco devolva vazio
+        if (!membrosGlobais || membrosGlobais.length === 0) return;
 
+        // Atualiza os KPIs numéricos de forma segura
+        const elTotal = document.getElementById('kpiTotal');
+        if(elTotal) elTotal.innerText = membrosGlobais.length;
+
+        const elLideres = document.getElementById('kpiLideres');
+        if(elLideres) {
+            elLideres.innerText = membrosGlobais.filter(m => String(m.cargo).toUpperCase() === 'LIDER' || String(m.cargo).toUpperCase() === 'PASTOR').length;
+        }
+
+        // Conta quantos tem em cada departamento
         const contagemDept = { "LOUVOR":0, "MIDIA":0, "SALT":0, "27+":0, "JOIN":0, "KIDS":0 };
+        
         membrosGlobais.forEach(m => {
-            const depts = m.departamentos && m.departamentos.length > 0 ? m.departamentos : (m.departamento ? [m.departamento] : []);
+            // Tenta pegar a lista múltipla (departamentos) senão cai pro singular (departamento)
+            let depts = [];
+            if (Array.isArray(m.departamentos) && m.departamentos.length > 0) {
+                depts = m.departamentos;
+            } else if (m.departamento) {
+                depts = [m.departamento];
+            }
             depts.forEach(d => { if(contagemDept[d] !== undefined) contagemDept[d]++; });
         });
 
+        // Monta os cards do topo (Thermometer)
         const container = document.getElementById('linhaMinisterios');
-        container.innerHTML = '';
-        Object.keys(contagemDept).forEach(dept => {
-            const cfg = DEPARTAMENTOS_CONFIG[dept];
-            const div = document.createElement('div');
-            div.className = 'min-card';
-            div.style.setProperty('--min-color', cfg.cor);
-            div.onclick = () => { localStorage.setItem('departamentoAtual', dept); localStorage.setItem('corAtual', cfg.cor); window.location.href = 'inicio.html'; };
-            div.innerHTML = `<div class="min-header"><span>${dept}</span><i class="fas ${cfg.icone}"></i></div><h3 class="min-value">${contagemDept[dept]}</h3><p class="min-desc">voluntários totais</p>`;
-            container.appendChild(div);
-        });
+        if(container) {
+            container.innerHTML = '';
+            Object.keys(contagemDept).forEach(dept => {
+                const cfg = DEPARTAMENTOS_CONFIG[dept] || {cor: '#fff', icone: 'fa-users'};
+                const div = document.createElement('div');
+                div.className = 'min-card';
+                div.style.setProperty('--min-color', cfg.cor);
+                div.onclick = () => { localStorage.setItem('departamentoAtual', dept); localStorage.setItem('corAtual', cfg.cor); window.location.href = 'inicio.html'; };
+                div.innerHTML = `<div class="min-header"><span>${dept}</span><i class="fas ${cfg.icone}"></i></div><h3 class="min-value">${contagemDept[dept]}</h3><p class="min-desc">voluntários gerais</p>`;
+                container.appendChild(div);
+            });
+        }
     }
 
     function processarFaltasUltimoCulto() {
         const hoje = new Date();
-        
-        // Pega as escalas que já passaram, ordenadas da mais recente pra mais velha
+        const elLista = document.getElementById('listaFaltantes');
+        if(!elLista) return;
+
         const passadas = escalasGlobais.filter(e => e.data && new Date(e.data) <= hoje).sort((a,b) => new Date(b.data) - new Date(a.data));
         
         if (passadas.length === 0) {
-            document.getElementById('listaFaltantes').innerHTML = '<p style="color: #888; font-size: 12px; margin: 0;">Nenhum culto anterior registrado.</p>';
+            elLista.innerHTML = '<p style="color: #888; font-size: 12px; margin: 0;">Nenhum evento gravado no passado.</p>';
             return;
         }
 
-        const dataUltimo = passadas[0].data; // Data do evento mais recente no passado
-        document.getElementById('dataUltimoCultoBadge').innerText = dataUltimo.split('-').reverse().join('/');
+        const dataUltimo = passadas[0].data; 
+        const elBadge = document.getElementById('dataUltimoCultoBadge');
+        if(elBadge) elBadge.innerText = dataUltimo.split('-').reverse().join('/');
 
-        // Filtra as faltas só pra essa data
         const faltasDaqueleDia = faltasGlobais.filter(f => f.data === dataUltimo);
         
         if (faltasDaqueleDia.length === 0) {
-            document.getElementById('listaFaltantes').innerHTML = '<p style="color: #10b981; font-size: 13px; margin: 0; font-weight: bold;"><i class="fas fa-check-circle"></i> Equipe 100% presente!</p>';
+            elLista.innerHTML = '<p style="color: #10b981; font-size: 13px; margin: 0; font-weight: bold;"><i class="fas fa-check-circle"></i> Equipe 100% presente no último culto!</p>';
             return;
         }
 
@@ -343,7 +375,7 @@
         faltasDaqueleDia.forEach(f => {
             html += `<div class="alert-item"><span class="alert-name"><i class="fas fa-user-times" style="color:#ef4444;"></i> ${f.nomeMembro}</span><span class="alert-reason">Faltou</span></div>`;
         });
-        document.getElementById('listaFaltantes').innerHTML = html;
+        elLista.innerHTML = html;
     }
 
     function agruparEscalas() {
@@ -373,6 +405,8 @@
         document.getElementById('mesAnoTitulo').innerText = `${nomesMeses[mesExibicao]} ${anoExibicao}`;
 
         const grid = document.getElementById('calendarioGrid');
+        if(!grid) return;
+
         grid.innerHTML = `<div class="cal-day-name">Dom</div><div class="cal-day-name">Seg</div><div class="cal-day-name">Ter</div><div class="cal-day-name">Qua</div><div class="cal-day-name">Qui</div><div class="cal-day-name">Sex</div><div class="cal-day-name">Sáb</div>`;
 
         const primeiroDiaMes = new Date(anoExibicao, mesExibicao, 1).getDay();
@@ -380,7 +414,6 @@
 
         for(let i = 0; i < primeiroDiaMes; i++) { grid.innerHTML += `<div class="cal-day other-month"></div>`; }
 
-        // Extrai os eventos do mês de exibição
         const evsMes = Object.values(eventosAgrupados).filter(ev => {
             const [y, m, d] = ev.data.split('-');
             return parseInt(y) === anoExibicao && parseInt(m) - 1 === mesExibicao;
@@ -413,9 +446,7 @@
     }
 
     function desenharPilhas(eventosDoMes) {
-        // Ordena cronológico
         eventosDoMes.sort((a,b) => new Date(a.data) - new Date(b.data));
-        
         const cultos = eventosDoMes.filter(e => e.tipo === 'CULTO');
         const reunioes = eventosDoMes.filter(e => e.tipo === 'REUNIAO');
 
@@ -426,6 +457,9 @@
     function renderizarStack(tipo, lista, corBase) {
         const bloco = document.getElementById(`bloco${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
         const container = document.getElementById(`stack-${tipo}`);
+        const iconeGiro = document.getElementById(`icon-stack-${tipo}`);
+        
+        if(!bloco || !container) return;
         
         if(lista.length === 0) { bloco.style.display = 'none'; return; }
         bloco.style.display = 'block';
@@ -437,24 +471,31 @@
                 <div class="escala-date"><div class="day">${dia}</div><div class="month">${mes}</div></div>
                 <div class="escala-info">
                     <h4>${ev.titulo}</h4>
-                    <p>Ver status e engajamento da equipe</p>
+                    <p>Visualizar o painel do evento</p>
                 </div>
             </div>`;
         }).join('');
         
         container.innerHTML = html;
-        container.classList.add('collapsed'); // Sempre começa colapsado
+        container.classList.add('collapsed'); 
+        if(iconeGiro) iconeGiro.style.transform = 'rotate(0deg)';
     }
 
-    function togglePilha(btn, idStack) {
+    // AJUSTADO: CLIQUE NA BARRA INTEIRA DO HEADER PARA EXPANDIR
+    function togglePilha(idStack) {
         const stack = document.getElementById(idStack);
-        if (stack.classList.contains('collapsed')) { stack.classList.remove('collapsed'); btn.innerHTML = `Recolher <i class="fas fa-chevron-up"></i>`; } 
-        else { stack.classList.add('collapsed'); btn.innerHTML = `Ver Todos <i class="fas fa-chevron-down"></i>`; }
+        const icon = document.getElementById('icon-' + idStack);
+        if(!stack) return;
+        
+        if (stack.classList.contains('collapsed')) { 
+            stack.classList.remove('collapsed'); 
+            if(icon) icon.style.transform = 'rotate(180deg)';
+        } else { 
+            stack.classList.add('collapsed'); 
+            if(icon) icon.style.transform = 'rotate(0deg)';
+        }
     }
 
-    // ==========================================
-    // EFEITO GÊNIO: DETALHES DO EVENTO
-    // ==========================================
     function abrirDetalheEvento(chave) {
         const evento = eventosAgrupados[chave];
         if(!evento) return;
@@ -466,68 +507,45 @@
         let html = '';
 
         if (evento.tipo === 'CULTO') {
-            // MOSTRA O STATUS DE ESCALA DOS MINISTÉRIOS
             Object.keys(DEPARTAMENTOS_CONFIG).forEach(dept => {
                 const cfg = DEPARTAMENTOS_CONFIG[dept];
-                // Verifica se tem escala preenchida para esse depto
                 const escalaDoDepto = evento.escalas.find(e => e.departamento === dept);
                 const temGenteEscalada = escalaDoDepto && escalaDoDepto.equipe && escalaDoDepto.equipe.trim().length > 0;
 
                 const classeRow = temGenteEscalada ? 'status-row ready' : 'status-row pending';
-                const badge = temGenteEscalada ? '<span class="status-badge badge-ready"><i class="fas fa-check"></i> Escala Pronta</span>' : '<span class="status-badge badge-pending"><i class="fas fa-times"></i> Pendente</span>';
+                const badge = temGenteEscalada ? '<span class="status-badge badge-ready"><i class="fas fa-check"></i> Pronta</span>' : '<span class="status-badge badge-pending"><i class="fas fa-times"></i> Pendente</span>';
 
-                html += `
-                <div class="${classeRow}">
-                    <div class="status-dept"><i class="fas ${cfg.icone}" style="color: ${cfg.cor};"></i> ${dept}</div>
-                    ${badge}
-                </div>`;
+                html += `<div class="${classeRow}"><div class="status-dept"><i class="fas ${cfg.icone}" style="color: ${cfg.cor};"></i> ${dept}</div>${badge}</div>`;
             });
         } 
         else {
-            // É REUNIÃO: MOSTRA QUEM DOS LIDERES CONFIRMOU
-            // 1. Agrega todas as confirmações de todas as escalas dessa reunião
             const confGerais = {};
-            evento.escalas.forEach(esc => {
-                if(esc.confirmacoes) { try { Object.assign(confGerais, JSON.parse(esc.confirmacoes)); } catch(e){} }
-            });
+            evento.escalas.forEach(esc => { if(esc.confirmacoes) { try { Object.assign(confGerais, JSON.parse(esc.confirmacoes)); } catch(e){} } });
 
-            // 2. Pega todos os líderes da igreja
             const lideres = membrosGlobais.filter(m => String(m.cargo).toUpperCase() === 'LIDER' || String(m.cargo).toUpperCase() === 'PASTOR');
             
-            if(lideres.length === 0) { html = '<p style="color:gray; text-align:center;">Nenhum líder cadastrado no sistema.</p>'; }
+            if(lideres.length === 0) { html = '<p style="color:gray; text-align:center;">Nenhum líder encontrado no sistema.</p>'; }
             else {
                 lideres.forEach(lider => {
                     const resposta = confGerais[lider.nome] || 'PENDENTE';
                     let corRow = '', badgeHtml = '';
                     
                     if(resposta === 'CONFIRMADO') { corRow = 'ready'; badgeHtml = '<span class="status-badge badge-ready"><i class="fas fa-check"></i> Confirmado</span>'; }
-                    else if(resposta === 'RECUSADO') { corRow = 'pending'; badgeHtml = '<span class="status-badge badge-pending"><i class="fas fa-times"></i> Não Vai</span>'; }
+                    else if(resposta === 'RECUSADO') { corRow = 'pending'; badgeHtml = '<span class="status-badge badge-pending"><i class="fas fa-times"></i> Ausente</span>'; }
                     else { corRow = ''; badgeHtml = '<span class="status-badge" style="background:#222; color:#888;"><i class="fas fa-clock"></i> Pendente</span>'; }
 
-                    const areaQueLidera = lider.liderDe || 'Líder';
-
-                    html += `
-                    <div class="status-row ${corRow}">
-                        <div>
-                            <div class="status-dept" style="color: #ccc;">${lider.nome}</div>
-                            <div style="font-size: 10px; color: var(--text-dim); text-transform: uppercase;">${areaQueLidera}</div>
-                        </div>
-                        ${badgeHtml}
-                    </div>`;
+                    html += `<div class="status-row ${corRow}"><div><div class="status-dept" style="color: #ccc;">${lider.nome}</div><div style="font-size: 10px; color: var(--text-dim); text-transform: uppercase;">${lider.liderDe || 'Líder'}</div></div>${badgeHtml}</div>`;
                 });
             }
         }
-
         areaList.innerHTML = html;
 
         const overlay = document.getElementById('modalStatusEvento');
         const modal = document.getElementById('modalStatusCaixa');
         overlay.style.display = 'flex';
-        // Pequeno truque para ativar a animação CSS
         setTimeout(() => { overlay.classList.add('active'); modal.classList.add('active'); }, 10);
     }
 
-    // CONTROLE DOS MODAIS
     function abrirModalEvento() { 
         const overlay = document.getElementById('modalNovoEvento');
         const modal = document.getElementById('modalEventoCaixa');
@@ -542,9 +560,6 @@
         setTimeout(() => { overlay.style.display = 'none'; }, 300);
     }
 
-    // ==========================================
-    // A MÁGICA DE CADASTRAR O EVENTO PARA TODOS
-    // ==========================================
     async function salvarEvento() {
         const tipoEvento = document.getElementById('evTipo').value;
         let tituloBase = document.getElementById('evTitulo').value.trim();
@@ -556,28 +571,19 @@
         if (tipoEvento === 'REUNIAO') tituloBase = "[LIDERANÇA] " + tituloBase;
 
         const btn = document.querySelector('.btn-salvar');
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Disparando na nuvem...'; 
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Disparando...'; 
         btn.disabled = true;
 
         try {
-            // Se ele escolheu "TODOS", cria uma escala para cada ministério na mesma data!
             const deptsParaCriar = deptForm === 'TODOS' ? Object.keys(DEPARTAMENTOS_CONFIG) : [deptForm];
-
-            const chamadasAPI = deptsParaCriar.map(d => {
-                const novaEscala = { titulo: tituloBase, data: dataStr, departamento: d, equipe: "", repertorio: "", confirmacoes: "{}" };
-                return fetch('/api/escalas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(novaEscala) });
-            });
-
-            // Dispara todos ao mesmo tempo
+            const chamadasAPI = deptsParaCriar.map(d => fetch('/api/escalas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ titulo: tituloBase, data: dataStr, departamento: d, equipe: "", repertorio: "", confirmacoes: "{}" }) }));
+            
             await Promise.all(chamadasAPI);
 
-            alert('Evento cadastrado com sucesso!');
-            document.getElementById('evTitulo').value = '';
-            document.getElementById('evData').value = '';
+            document.getElementById('evTitulo').value = ''; document.getElementById('evData').value = '';
             fecharModal('modalNovoEvento');
-            inicializarDashboard(); // Recarrega para desenhar nas pilhas
-            
-        } catch (e) { alert('Erro de conexão ao salvar evento.'); } 
+            inicializarDashboard(); 
+        } catch (e) { alert('Erro ao salvar evento.'); } 
         finally { btn.innerHTML = "<i class='fas fa-check'></i> Agendar e Notificar"; btn.disabled = false; }
     }
 
