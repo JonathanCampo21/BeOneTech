@@ -18,18 +18,21 @@
 
         body { background-color: var(--bg-color); color: #fff; font-family: 'Urbanist', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
 
+        /* LUZES AMBIENTES */
         .ambient-glow { position: fixed; top: -10%; left: -10%; width: 60vw; height: 60vh; background: radial-gradient(circle, rgba(162, 255, 0, 0.05) 0%, transparent 60%); filter: blur(80px); z-index: -1; pointer-events: none; }
         .ambient-glow-2 { position: fixed; bottom: -10%; right: -10%; width: 50vw; height: 50vh; background: radial-gradient(circle, rgba(239, 68, 68, 0.03) 0%, transparent 60%); filter: blur(80px); z-index: -1; pointer-events: none; }
 
         .container { max-width: 1400px; margin: 0 auto; padding: 25px; animation: fadeIn 0.6s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 30px; }
         .header h1 { margin: 0; font-size: 26px; display: flex; align-items: center; gap: 10px; font-weight: 900;}
         .header h1 i { color: var(--primary); }
         .btn-sair { background: rgba(239, 68, 68, 0.05); border: 1px solid #ef4444; color: #ef4444; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold; font-family: 'Urbanist'; }
         .btn-sair:hover { background: #ef4444; color: white; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);}
 
+        /* LINHA DE MINISTÉRIOS TOP */
         .ministry-row { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 25px; scrollbar-width: none; }
         .ministry-row::-webkit-scrollbar { display: none; }
         .min-card { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 16px; min-width: 150px; padding: 15px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
@@ -39,12 +42,14 @@
         .min-value { font-size: 28px; font-weight: 900; margin: 0; color: #fff;}
         .min-desc { font-size: 11px; color: var(--text-dim); margin: 0; }
 
+        /* GRID ESQUERDA X DIREITA */
         .main-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         @media (max-width: 950px) { .main-layout { grid-template-columns: 1fr; } }
 
         .panel-box { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 20px; padding: 25px; margin-bottom: 25px;}
         .box-title { font-size: 15px; color: var(--text-dim); text-transform: uppercase; font-weight: bold; margin-top: 0; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
 
+        /* KPIs */
         .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;}
         .kpi-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: #151719; border: 1px solid #222; border-radius: 12px; transition: 0.3s;}
         .kpi-item.clickable { cursor: pointer; }
@@ -53,12 +58,14 @@
         .kpi-text h4 { margin: 0; font-size: 22px; color: #fff; font-weight: 900;}
         .kpi-text p { margin: 0; font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: bold;}
 
+        /* ALERTAS DO ÚLTIMO CULTO */
         .alert-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 15px; }
         .alert-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .alert-item:last-child { border-bottom: none; padding-bottom: 0;}
         .alert-name { font-size: 14px; color: #fff; font-weight: bold; display: flex; align-items: center; gap: 8px;}
         .alert-reason { font-size: 11px; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 3px 8px; border-radius: 8px; font-weight: bold;}
 
+        /* CALENDÁRIO OTIMIZADO */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .cal-nav { display: flex; align-items: center; gap: 15px; }
         .cal-nav button { background: transparent; border: none; color: var(--text-dim); font-size: 18px; cursor: pointer; transition: 0.2s; }
@@ -76,7 +83,8 @@
         .event-dot-container { display: flex; gap: 3px; position: absolute; bottom: 6px; }
         .event-dot { width: 5px; height: 5px; border-radius: 50%; }
 
-        .stack-group { margin-top: 20px; }
+        /* GAVETAS DE EVENTOS (À ESQUERDA) */
+        .stack-group { margin-top: 25px; }
         .stack-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 12px 15px; border: 1px solid #222; background: #151719; cursor: pointer; border-radius: 12px; transition: 0.3s; border-left: 4px solid var(--stack-color); }
         .stack-header:hover { background: #1c1e21; box-shadow: 0 5px 15px rgba(0,0,0,0.3);}
         .stack-header h3 { margin: 0; font-size: 15px; color: white; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: 900;}
@@ -96,25 +104,34 @@
         .escala-info h4 { margin: 0; font-size: 16px; color: white; font-weight: bold; }
         .escala-info p { margin: 3px 0 0 0; font-size: 12px; color: var(--text-dim); }
 
+        /* MODAIS GENIE EXECUTIVOS */
         .genie-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000;}
         .genie-modal { background: #111; border: 1px solid #333; border-radius: 20px; padding: 25px; width: 100%; max-width: 480px; height: auto; max-height: 85vh; overflow-y: auto; position: relative; animation: modalIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes modalIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
         .btn-close-genie { position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: #888; font-size: 20px; cursor: pointer; transition: 0.2s; z-index: 10;}
         .btn-close-genie:hover { color: #ef4444; }
 
-        .lider-card-row { display: flex; align-items: center; gap: 15px; padding: 12px; background: #151719; border-radius: 12px; margin-bottom: 10px; border: 1px solid #222; }
-        .lider-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); background: #222; }
-        .lider-meta h5 { margin: 0; font-size: 15px; color: #fff; font-weight: bold; }
-        .lider-meta p { margin: 3px 0 0 0; font-size: 11px; color: var(--primary); font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #151719; border-radius: 10px; margin-bottom: 10px; border-left: 3px solid #333;}
+        .status-row.ready { border-color: #10b981; }
+        .status-row.pending { border-color: #ef4444; }
+        .status-dept { font-weight: bold; font-size: 14px; color: #fff; display: flex; align-items: center; gap: 8px;}
+        .status-badge { font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; }
+        .badge-ready { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .badge-pending { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 
+        /* LISTA DE CARDS (MEMBROS E LÍDERES) */
+        .lider-card-row { display: flex; align-items: center; gap: 15px; padding: 12px; background: #151719; border-radius: 12px; margin-bottom: 10px; border: 1px solid #222; }
+        .lider-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid; background: #222; }
+        .lider-meta h5 { margin: 0; font-size: 15px; color: #fff; font-weight: bold; }
+        .lider-meta p { margin: 3px 0 0 0; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* FORMULÁRIOS DE AGENDAMENTO */
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase; font-weight: bold;}
         .form-group input, .form-group select { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #222; color: white; border-radius: 8px; font-family: 'Urbanist'; outline: none; box-sizing: border-box;}
         .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
         .btn-salvar { width: 100%; padding: 15px; background: var(--primary); color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Urbanist'; margin-top: 10px; transition: 0.2s;}
         .btn-salvar:hover { filter: brightness(1.1); }
-
         .dept-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
         .dept-pill { background: #151719; border: 1px solid #333; color: var(--text-dim); padding: 8px 14px; border-radius: 20px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; user-select: none; }
         .dept-pill:hover { border-color: #555; color: #fff; }
@@ -139,12 +156,12 @@
         <div class="main-layout">
             
             <div class="left-col">
-                <div class="panel-box" style="margin-bottom: 20px;">
+                <div class="panel-box">
                     <h3 class="box-title">Raio-X da Igreja <i class="fas fa-globe" style="color: #3b82f6;"></i></h3>
                     
                     <div class="kpi-grid">
-                        <div class="kpi-item">
-                            <div class="kpi-icon" style="color: #10b981;"><i class="fas fa-users"></i></div>
+                        <div class="kpi-item clickable" onclick="abrirGenieMembros()">
+                            <div class="kpi-icon" style="color: #10b981; background: rgba(16, 185, 129, 0.1);"><i class="fas fa-users"></i></div>
                             <div class="kpi-text"><h4 id="kpiTotal">0</h4><p>Membros Gerais</p></div>
                         </div>
                         <div class="kpi-item clickable" onclick="abrirGenieLideres()">
@@ -179,9 +196,7 @@
                         </div>
                         <button class="btn-add-event" onclick="abrirModalEvento()"><i class="fas fa-plus"></i> Agendar</button>
                     </div>
-
-                    <div class="calendar-grid" id="calendarioGrid">
-                        </div>
+                    <div class="calendar-grid" id="calendarioGrid"></div>
                 </div>
             </div>
 
@@ -192,7 +207,6 @@
         <div class="genie-modal">
             <button class="btn-close-genie" onclick="fecharModal('modalNovoEvento')"><i class="fas fa-times"></i></button>
             <h3 style="margin-top: 0; color: var(--primary); font-size: 20px; margin-bottom: 20px;"><i class="fas fa-calendar-plus"></i> Novo Evento</h3>
-            
             <div class="form-group">
                 <label>Tipo de Evento</label>
                 <select id="evTipo">
@@ -208,7 +222,6 @@
                 <label>Data Oficial</label>
                 <input type="date" id="evData">
             </div>
-            
             <div class="form-group">
                 <label>Ministérios Envolvidos (Selecione quantos quiser)</label>
                 <div class="dept-pills" id="deptPillsContainer">
@@ -247,13 +260,24 @@
         </div>
     </div>
 
+    <div class="genie-overlay" id="modalGenieMembros" onclick="if(event.target === this) fecharModal('modalGenieMembros')">
+        <div class="genie-modal">
+            <button class="btn-close-genie" onclick="fecharModal('modalGenieMembros')"><i class="fas fa-times"></i></button>
+            <div style="text-align: center; margin-bottom: 25px; border-bottom: 2px solid #10b981; padding-bottom: 15px;">
+                <h2 style="margin: 0; font-size: 22px; color: #fff;"><i class="fas fa-users" style="color:#10b981;"></i> Membros Gerais</h2>
+                <p style="color: var(--text-dim); margin: 5px 0 0 0; font-size: 13px;">Tropa completa de voluntários</p>
+            </div>
+            <div id="membrosListArea"></div>
+        </div>
+    </div>
+
 <script>
     const userLogado = JSON.parse(localStorage.getItem('usuario')) || {};
     if(userLogado.cargo !== 'PASTOR' && userLogado.cargo !== 'DEV' && userLogado.cargo !== 'ADMIN') { window.location.href = 'portal.html'; }
-    document.getElementById('nomePastor').innerText = "| " + (userLogado.nome ? userLogado.nome.split(' ')[0] : 'Admin');
+    document.getElementById('nomePastor').innerText = "| Pr. " + (userLogado.nome ? userLogado.nome.split(' ')[0] : 'Admin');
 
     const tokenLocal = localStorage.getItem('token');
-    const getHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+    const getHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}` } : {};
 
     const DEPARTAMENTOS_CONFIG = {
         "LOUVOR": { cor: "#FF3300", icone: "fa-music" }, "MIDIA": { cor: "#a855f7", icone: "fa-camera" },
@@ -301,10 +325,7 @@
             arraysMembros.forEach(m => { if (m && (m.id || m.nome)) mapaUnicos[m.id || m.nome.trim().toLowerCase()] = m; });
             membrosGlobais = Object.values(mapaUnicos);
 
-            const [resE, resF] = await Promise.all([
-                fetch('/api/escalas', { headers: getHeaders }), fetch('/api/indisponibilidade', { headers: getHeaders })
-            ]);
-            
+            const [resE, resF] = await Promise.all([ fetch('/api/escalas', { headers: getHeaders }), fetch('/api/indisponibilidade', { headers: getHeaders }) ]);
             if(resE.ok) escalasGlobais = await resE.json() || [];
             if(resF.ok) faltasGlobais = await resF.json() || [];
 
@@ -318,7 +339,7 @@
             const cfg = DEPARTAMENTOS_CONFIG[dept]; const div = document.createElement('div');
             div.className = 'min-card'; div.style.setProperty('--min-color', cfg.cor);
             div.onclick = () => { localStorage.setItem('departamentoAtual', dept); localStorage.setItem('corAtual', cfg.cor); window.location.href = 'inicio.html'; };
-            div.innerHTML = `<div class="min-header"><span>${dept}</span><i class="fas ${cfg.icone}"></i></div><h3 class="min-value" id="count-${dept}">0</h3><p class="min-desc">voluntários totais</p>`;
+            div.innerHTML = `<div class="min-header"><span>${dept}</span><i class="fas ${cfg.icone}"></i></div><h3 class="min-value" id="count-${dept}">0</h3><p class="min-desc">voluntários gerais</p>`;
             container.appendChild(div);
         });
     }
@@ -328,17 +349,32 @@
         if(document.getElementById('kpiTotal')) document.getElementById('kpiTotal').innerText = membrosGlobais.length;
         if(document.getElementById('kpiLideres')) document.getElementById('kpiLideres').innerText = membrosGlobais.filter(m => ['LIDER', 'PASTOR', 'DEV', 'ADMIN'].includes(String(m.cargo).toUpperCase())).length;
 
+        // CONTAGEM À PROVA DE BALAS (Vasculha todas as variáveis pra achar o nome do ministério)
         const contagemDept = { "LOUVOR":0, "MIDIA":0, "SALT":0, "27+":0, "JOIN":0, "KIDS":0 };
+        
         membrosGlobais.forEach(m => {
-            let depts = [];
-            if (Array.isArray(m.departamentos)) depts = m.departamentos;
+            let deptsEncontrados = new Set();
+            
+            if (Array.isArray(m.departamentos)) m.departamentos.forEach(d => deptsEncontrados.add(String(d).toUpperCase().trim()));
             else if (typeof m.departamentos === 'string') {
-                if(m.departamentos.startsWith('[')) { try { depts = JSON.parse(m.departamentos); } catch(e){} }
-                else { depts = m.departamentos.split(',').map(d => d.trim()); }
-            } else if (m.departamento) { depts = [m.departamento]; }
-            const setDepts = new Set(depts.map(d => String(d).toUpperCase().trim()));
-            setDepts.forEach(d => { if (contagemDept[d] !== undefined) contagemDept[d]++; });
+                if(m.departamentos.startsWith('[')) { try { JSON.parse(m.departamentos).forEach(d => deptsEncontrados.add(String(d).toUpperCase().trim())); } catch(e){} }
+                else deptsEncontrados.add(m.departamentos.toUpperCase().trim());
+            }
+            if (m.departamento) deptsEncontrados.add(String(m.departamento).toUpperCase().trim());
+            
+            // Se o depto não tiver exatamente o nome limpo, busca por aproximação
+            deptsEncontrados.forEach(d => {
+                const limpo = d.replace('Í','I').replace('+','');
+                if(limpo.includes('LOUVOR')) contagemDept['LOUVOR']++;
+                else if(limpo.includes('MIDIA') || limpo.includes('MÍDIA')) contagemDept['MIDIA']++;
+                else if(limpo.includes('SALT')) contagemDept['SALT']++;
+                else if(limpo.includes('27')) contagemDept['27+']++;
+                else if(limpo.includes('JOIN')) contagemDept['JOIN']++;
+                else if(limpo.includes('KIDS')) contagemDept['KIDS']++;
+                else if(contagemDept[d] !== undefined) contagemDept[d]++;
+            });
         });
+
         Object.keys(contagemDept).forEach(dept => { const el = document.getElementById(`count-${dept}`); if(el) el.innerText = contagemDept[dept]; });
     }
 
@@ -347,7 +383,7 @@
         const passadas = escalasGlobais.filter(e => e.data && new Date(e.data) <= hoje && !(e.titulo || '').includes('[LIDERANÇA]')).sort((a,b) => new Date(b.data) - new Date(a.data));
         
         if (passadas.length === 0) {
-            elLista.innerHTML = '<p style="color: #888; font-size: 12px; margin: 0;">Nenhum evento gravado.</p>';
+            elLista.innerHTML = '<p style="color: #888; font-size: 12px; margin: 0;">Nenhum evento gravado no passado.</p>';
             document.getElementById('dataUltimoCultoBadge').innerText = '--/--'; return;
         }
 
@@ -369,11 +405,25 @@
         if (lideres.length === 0) { areaList.innerHTML = '<p style="color:gray; text-align:center;">Nenhum líder encontrado.</p>'; } 
         else {
             areaList.innerHTML = lideres.map(lider => {
-                let foto = lider.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(lider.nome)}&background=222&color=a2ff00`;
-                return `<div class="lider-card-row"><img src="${foto}" class="lider-avatar"><div class="lider-meta"><h5>${lider.nome}</h5><p>${obterCargoFormatado(lider)}</p></div></div>`;
+                let foto = lider.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(lider.nome)}&background=222&color=3b82f6`;
+                return `<div class="lider-card-row"><img src="${foto}" class="lider-avatar" style="border-color:#3b82f6;"><div class="lider-meta"><h5>${lider.nome}</h5><p style="color:#3b82f6;">${obterCargoFormatado(lider)}</p></div></div>`;
             }).join('');
         }
         document.getElementById('modalGenieLideres').style.display = 'flex';
+    }
+
+    function abrirGenieMembros() {
+        const areaList = document.getElementById('membrosListArea');
+        
+        if (membrosGlobais.length === 0) { areaList.innerHTML = '<p style="color:gray; text-align:center;">Nenhum membro encontrado.</p>'; } 
+        else {
+            areaList.innerHTML = membrosGlobais.map(membro => {
+                let foto = membro.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(membro.nome)}&background=222&color=10b981`;
+                let cargoFormatado = obterCargoFormatado(membro);
+                return `<div class="lider-card-row"><img src="${foto}" class="lider-avatar" style="border-color:#10b981;"><div class="lider-meta"><h5>${membro.nome}</h5><p style="color:#10b981;">${cargoFormatado}</p></div></div>`;
+            }).join('');
+        }
+        document.getElementById('modalGenieMembros').style.display = 'flex';
     }
 
     function agruparEscalas() {
@@ -438,7 +488,7 @@
 
         let htmlFinal = '';
         if(cultos.length > 0) htmlFinal += gerarBlocoGaveta('Cultos Gerais', cultos, '#a2ff00', 'fa-church');
-        if(reunioes.length > 0) htmlFinal += gerarBlocoGaveta('Reuniões', reunioes, '#3b82f6', 'fa-user-tie');
+        if(reunioes.length > 0) htmlFinal += gerarBlocoGaveta('Reuniões de Liderança', reunioes, '#3b82f6', 'fa-user-tie');
         area.innerHTML = htmlFinal || '<p style="color: gray; font-style: italic; text-align: center; margin-top:15px;">Nenhum evento agendado neste mês.</p>';
     }
 
@@ -465,7 +515,6 @@
         else { gaveta.classList.add('collapsed'); if(icon) icon.style.transform = 'rotate(0deg)'; }
     }
 
-    // A MÁGICA: MOSTRAR AS PESSOAS ESCALADAS NO MODAL
     function abrirDetalheEvento(chave, event) {
         if(event) event.stopPropagation();
         const evento = eventosAgrupados[chave];
@@ -481,7 +530,7 @@
             Object.keys(DEPARTAMENTOS_CONFIG).forEach(dept => {
                 const cfg = DEPARTAMENTOS_CONFIG[dept];
                 const escalaDoDepto = evento.escalas.find(e => e.departamento === dept);
-                if(!escalaDoDepto) return; // Ministério não foi escalado para este dia
+                if(!escalaDoDepto) return; 
 
                 let equipeHtml = '';
                 if (escalaDoDepto.equipe && escalaDoDepto.equipe.trim().length > 0) {
@@ -506,22 +555,19 @@
                     <h5 style="margin:0 0 10px 0; color:${cfg.cor}; font-size:14px; display:flex; justify-content:space-between; align-items:center;">
                         <span><i class="fas ${cfg.icone}"></i> ${dept}</span>
                     </h5>
-                    <ul style="list-style:none; padding:0; margin:0; font-size:13px;">
-                        ${equipeHtml}
-                    </ul>
+                    <ul style="list-style:none; padding:0; margin:0; font-size:13px;">${equipeHtml}</ul>
                 </div>`;
             });
         } 
         else {
-            // Se for reunião, mostra a confirmação dos líderes
             const confGerais = {};
             evento.escalas.forEach(esc => { if(esc.confirmacoes) { try { Object.assign(confGerais, JSON.parse(esc.confirmacoes)); } catch(e){} } });
             
-            const lideres = membrosGlobais.filter(m => ['LIDER', 'PASTOR', 'DEV', 'ADMIN'].includes(String(m.cargo).toUpperCase()));
+            const lideresDaReuniao = membrosGlobais.filter(m => ['LIDER', 'PASTOR', 'DEV', 'ADMIN'].includes(String(m.cargo).toUpperCase()));
             
-            if(lideres.length === 0) { html = '<p style="color:gray; text-align:center;">Nenhum líder encontrado.</p>'; }
+            if(lideresDaReuniao.length === 0) { html = '<p style="color:gray; text-align:center;">Nenhum líder encontrado no sistema.</p>'; }
             else {
-                lideres.forEach(lider => {
+                lideresDaReuniao.forEach(lider => {
                     const resposta = confGerais[lider.nome] || 'PENDENTE';
                     let corRow = '', badgeHtml = '';
                     
@@ -534,7 +580,7 @@
             }
         }
         
-        areaList.innerHTML = html || '<p style="color:gray; text-align:center;">Nenhum detalhe disponível.</p>';
+        areaList.innerHTML = html || '<p style="color:gray; text-align:center;">Detalhes indisponíveis no momento.</p>';
         document.getElementById('modalStatusEvento').style.display = 'flex';
     }
 
