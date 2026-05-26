@@ -69,6 +69,8 @@
         .cal-nav button { background: transparent; border: none; color: var(--text-dim); font-size: 18px; cursor: pointer; transition: 0.2s; }
         .cal-nav button:hover { color: var(--primary); transform: scale(1.2); }
         .calendar-header h2 { margin: 0; font-size: 20px; color: #fff; width: 140px; text-align: center; }
+        
+        /* Botão Agendar Corrigido */
         .btn-add-event { background: var(--primary); color: #000; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Urbanist'; transition: 0.3s; display: flex; align-items: center; gap: 8px; font-size: 13px;}
         .btn-add-event:hover { transform: scale(1.05); filter: brightness(1.1); }
 
@@ -81,7 +83,7 @@
         .event-dot-container { display: flex; gap: 3px; position: absolute; bottom: 6px; }
         .event-dot { width: 5px; height: 5px; border-radius: 50%; }
 
-        /* PILHAS DE EVENTOS (STACKS) COM NOVO DESIGN CLICKABLE */
+        /* PILHAS DE EVENTOS (STACKS) */
         .stack-group { margin-top: 25px; }
         
         .stack-header { 
@@ -132,7 +134,7 @@
         .btn-salvar { width: 100%; padding: 15px; background: var(--primary); color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Urbanist'; margin-top: 10px; transition: 0.2s;}
         .btn-salvar:hover { filter: brightness(1.1); }
 
-        /* BOTÕES/TAGS DE MÚLTIPLA ESCOLHA DE DEPARTAMENTO */
+        /* TAGS DE SELEÇÃO MULTIPLA */
         .dept-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
         .dept-pill { background: #151719; border: 1px solid #333; color: var(--text-dim); padding: 8px 14px; border-radius: 20px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; user-select: none; }
         .dept-pill:hover { border-color: #555; color: #fff; }
@@ -185,7 +187,7 @@
 
             <div class="right-col">
                 <div class="panel-box">
-                    <div class="cal-header">
+                    <div class="calendar-header">
                         <div class="cal-nav">
                             <button onclick="mudarMes(-1)"><i class="fas fa-chevron-left"></i></button>
                             <h2 id="mesAnoTitulo">Mês 2024</h2>
@@ -229,7 +231,7 @@
             </div>
             
             <div class="form-group">
-                <label>Ministérios Envolvidos (Selecione quantos quiser)</label>
+                <label>Ministérios Envolvidos</label>
                 <div class="dept-pills" id="deptPillsContainer">
                     <div class="dept-pill active" onclick="toggleDeptPill(this)" data-dept="TODOS">TODOS</div>
                     <div class="dept-pill" onclick="toggleDeptPill(this)" data-dept="LOUVOR">LOUVOR</div>
@@ -264,6 +266,10 @@
     if(userLogado.cargo !== 'PASTOR' && userLogado.cargo !== 'DEV') { window.location.href = 'login.html'; }
     document.getElementById('nomePastor').innerText = "| Pr. " + (userLogado.nome ? userLogado.nome.split(' ')[0] : 'Admin');
 
+    const tokenLocal = localStorage.getItem('token');
+    const authHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+    const getHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}` } : {};
+
     const DEPARTAMENTOS_CONFIG = {
         "LOUVOR": { cor: "#FF3300", icone: "fa-music" }, "MIDIA": { cor: "#a855f7", icone: "fa-camera" },
         "SALT": { cor: "#3b82f6", icone: "fa-users" }, "27+": { cor: "#10b981", icone: "fa-plus-circle" },
@@ -279,10 +285,13 @@
     let anoExibicao = new Date().getFullYear();
 
     async function inicializarDashboard() {
-        renderizarMinisteriosVazios();
+        renderizarMinisteriosVazios(); // Desenha a estrutura antes pra não piscar
         
         try {
-            const promessasMembros = Object.keys(DEPARTAMENTOS_CONFIG).map(d => fetch(`/api/membros?departamento=${d}`).then(r => r.ok ? r.json() : []));
+            // Busca de Membros INJETANDO O TOKEN de autorização
+            const promessasMembros = Object.keys(DEPARTAMENTOS_CONFIG).map(d => 
+                fetch(`/api/membros?departamento=${d}`, { headers: getHeaders }).then(r => r.ok ? r.json() : [])
+            );
             const arraysMembros = await Promise.all(promessasMembros);
             
             const todos = arraysMembros.flat();
@@ -290,7 +299,11 @@
             todos.forEach(m => { if (m.nome) mapaUnicos[m.nome.trim().toLowerCase()] = m; });
             membrosGlobais = Object.values(mapaUnicos);
 
-            const [resE, resF] = await Promise.all([fetch('/api/escalas'), fetch('/api/indisponibilidade')]);
+            const [resE, resF] = await Promise.all([
+                fetch('/api/escalas', { headers: getHeaders }), 
+                fetch('/api/indisponibilidade', { headers: getHeaders })
+            ]);
+            
             if(resE.ok) escalasGlobais = await resE.json() || [];
             if(resF.ok) faltasGlobais = await resF.json() || [];
 
@@ -446,7 +459,7 @@
         let htmlFinal = '';
 
         if(cultos.length > 0) htmlFinal += gerarBlocoGaveta('Cultos Gerais', cultos, '#a2ff00', 'fa-church');
-        if(reunioes.length > 0) htmlFinal += gerarBlocoGaveta('Reuniões', reunioes, '#3b82f6', 'fa-user-tie');
+        if(reunioes.length > 0) htmlFinal += gerarBlocoGaveta('Reuniões de Liderança', reunioes, '#3b82f6', 'fa-user-tie');
 
         if(htmlFinal === '') {
             area.innerHTML = '<p style="color: gray; font-style: italic; text-align: center; margin-top:30px;">Nenhum evento agendado neste mês.</p>';
@@ -464,7 +477,7 @@
                 <div class="escala-date"><div class="day">${dia}</div><div class="month">${mes}</div></div>
                 <div class="escala-info">
                     <h4>${ev.titulo}</h4>
-                    <p>Visualizar engajamento e presença</p>
+                    <p>Visualizar engajamento da equipe</p>
                 </div>
             </div>`;
         }).join('');
@@ -510,8 +523,6 @@
             Object.keys(DEPARTAMENTOS_CONFIG).forEach(dept => {
                 const cfg = DEPARTAMENTOS_CONFIG[dept];
                 const escalaDoDepto = evento.escalas.find(e => e.departamento === dept);
-                
-                // Ignora os ministérios que não foram convidados pra esse evento específico!
                 if(!escalaDoDepto) return; 
 
                 const temGenteEscalada = escalaDoDepto.equipe && escalaDoDepto.equipe.trim().length > 0;
@@ -548,7 +559,6 @@
     function abrirModalEvento() { document.getElementById('modalNovoEvento').style.display = 'flex'; }
     function fecharModal(idModal) { document.getElementById(idModal).style.display = 'none'; }
 
-    // CONTROLE DOS BOTÕES MULTI-SELECT DE MINISTÉRIOS
     function toggleDeptPill(elemento) {
         const dept = elemento.dataset.dept;
         if (dept === 'TODOS') {
@@ -565,7 +575,6 @@
         let tituloBase = document.getElementById('evTitulo').value.trim();
         const dataStr = document.getElementById('evData').value;
         
-        // Pega os ministérios selecionados nas Tags
         const pillsAtivas = document.querySelectorAll('.dept-pill.active');
         const deptsSelecionados = Array.from(pillsAtivas).map(p => p.dataset.dept);
 
@@ -578,7 +587,6 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agendando...'; btn.disabled = true;
 
         try {
-            // Converte "TODOS" para a lista real
             let deptsParaCriar = [];
             if (deptsSelecionados.includes('TODOS')) {
                 deptsParaCriar = Object.keys(DEPARTAMENTOS_CONFIG);
@@ -586,7 +594,11 @@
                 deptsParaCriar = deptsSelecionados;
             }
 
-            const chamadasAPI = deptsParaCriar.map(d => fetch('/api/escalas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ titulo: tituloBase, data: dataStr, departamento: d, equipe: "", repertorio: "", confirmacoes: "{}" }) }));
+            const chamadasAPI = deptsParaCriar.map(d => fetch('/api/escalas', { 
+                method: 'POST', 
+                headers: authHeaders, 
+                body: JSON.stringify({ titulo: tituloBase, data: dataStr, departamento: d, equipe: "", repertorio: "", confirmacoes: "{}" }) 
+            }));
             
             await Promise.all(chamadasAPI);
 
