@@ -3,385 +3,542 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Be One Tech - Visão Geral</title>
+    <title>Be One Tech - Painel Pastoral</title>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="auth.js"></script>
+
     <style>
-        :root { --primary: #10b981; --text-dim: #a0a0a0; --bg-card: #0f1011; --border-color: #222; }
+        :root {
+            --bg-color: #050505;
+            --surface-color: #0f1011;
+            --border-color: #1a1c1e;
+            --text-dim: #8b9298;
+        }
+
+        body { background-color: var(--bg-color); color: #fff; overflow-x: hidden; }
+
+        /* LUZES AMBIENTES */
+        .ambient-glow { position: fixed; top: -10%; left: -10%; width: 70vw; height: 70vh; background: radial-gradient(circle, rgba(162, 255, 0, 0.08) 0%, transparent 60%); filter: blur(80px); z-index: -1; pointer-events: none; }
+        .ambient-glow-2 { position: fixed; bottom: -10%; right: -10%; width: 50vw; height: 50vh; background: radial-gradient(circle, rgba(239, 68, 68, 0.05) 0%, transparent 60%); filter: blur(80px); z-index: -1; pointer-events: none; }
+
+        .main-content { padding: 30px; margin-left: 250px; animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .header-top h1 { margin: 0; font-size: 28px; display: flex; align-items: center; gap: 10px; font-weight: 900;}
         
-        body { background-color: #050505; color: #fff; font-family: 'Urbanist', sans-serif; margin: 0; padding: 0; overflow-x: hidden;}
+        .ministry-row { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; scrollbar-width: none; }
+        .ministry-row::-webkit-scrollbar { display: none; }
+
+        .min-card { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 16px; min-width: 140px; padding: 15px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .min-card:hover { transform: translateY(-5px); border-color: var(--min-color); box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+        .min-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--min-color); opacity: 0.7; }
+        .min-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-dim); text-transform: uppercase; font-weight: bold;}
+        .min-value { font-size: 26px; font-weight: 900; margin: 0; color: #fff;}
+        .min-desc { font-size: 11px; color: var(--text-dim); margin: 0; }
+
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 2.2fr; gap: 20px; }
+
+        .panel-box { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 20px; padding: 25px; }
+        .box-title { font-size: 14px; color: var(--text-dim); text-transform: uppercase; font-weight: bold; margin-top: 0; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
+
+        /* KPIs */
+        .kpi-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px dashed var(--border-color); transition: 0.3s; }
+        .kpi-item:last-child { border-bottom: none; }
+        .kpi-item.clickable { cursor: pointer; border-radius: 12px; padding: 15px; }
+        .kpi-item.clickable:hover { background: rgba(255,255,255,0.05); transform: translateX(5px); }
+        .kpi-info { display: flex; align-items: center; gap: 15px; }
+        .kpi-icon { width: 40px; height: 40px; border-radius: 10px; background: #1a1c1e; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .kpi-text h4 { margin: 0; font-size: 15px; color: #fff; }
+        .kpi-text p { margin: 0; font-size: 12px; color: var(--text-dim); }
+        .kpi-value { font-size: 20px; font-weight: 900; }
+
+        .alert-list { margin-top: 20px; }
+        .alert-item { display: flex; align-items: center; gap: 15px; padding: 12px; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; margin-bottom: 10px; }
+        .alert-item i { color: #ef4444; }
+        .alert-item div h5 { margin: 0; font-size: 14px; color: #fff;}
+        .alert-item div p { margin: 0; font-size: 11px; color: #ef4444;}
+
+        /* CALENDÁRIO COM SETAS */
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .cal-nav { display: flex; align-items: center; gap: 15px; }
+        .cal-nav button { background: transparent; border: none; color: var(--text-dim); font-size: 18px; cursor: pointer; transition: 0.2s; }
+        .cal-nav button:hover { color: #a2ff00; transform: scale(1.2); }
+        .calendar-header h2 { margin: 0; font-size: 22px; color: #fff; width: 160px; text-align: center; }
         
-        /* O BRILHO CINEMATOGRÁFICO DO VÍDEO NO FUNDO DA TELA */
-        .ambient-glow { position: fixed; top: -10%; left: -10%; width: 60vw; height: 60vh; background: radial-gradient(circle, rgba(162, 255, 0, 0.05) 0%, transparent 60%); filter: blur(80px); z-index: -1; pointer-events: none; }
-        .ambient-glow-2 { position: fixed; bottom: -10%; right: -10%; width: 60vw; height: 60vh; background: radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 60%); filter: blur(80px); z-index: -1; pointer-events: none; }
+        .btn-add-event { background: #a2ff00; color: #000; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Urbanist', sans-serif; transition: 0.3s; display: flex; align-items: center; gap: 8px; font-size: 13px;}
+        .btn-add-event:hover { background: #8be600; transform: scale(1.05); }
 
-        .container { max-width: 1400px; margin: 0 auto; padding: 30px; animation: fadeIn 0.6s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 30px; }
-        .header h1 { margin: 0; font-size: 26px; display: flex; align-items: center; gap: 10px; font-weight: 900;}
-        .header h1 i { color: #a2ff00; }
-        .btn-sair { background: rgba(239, 68, 68, 0.05); border: 1px solid #ef4444; color: #ef4444; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold; font-family: 'Urbanist'; }
-        .btn-sair:hover { background: #ef4444; color: white; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);}
-        
-        /* GRID DE LAYOUT (ESQUERDA: MINISTÉRIOS | DIREITA: CALENDÁRIO) */
-        .main-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
-
-        /* KPIs SUPERIORES */
-        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
-        .kpi-card { background: var(--bg-card); border: 1px solid var(--border-color); padding: 20px; border-radius: 16px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .kpi-icon { width: 50px; height: 50px; border-radius: 12px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .kpi-text h4 { margin: 0; font-size: 24px; font-weight: 900; color: #fff; }
-        .kpi-text p { margin: 0; font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: bold; margin-top: 2px;}
-
-        .section-title { font-size: 18px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; color: #ccc; border-left: 3px solid #a2ff00; padding-left: 10px;}
-
-        /* A SUA ESSÊNCIA: OS CARDS DE MINISTÉRIOS */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-        .dept-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.2);}
-        .dept-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        .dept-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
-        .dept-icon { font-size: 24px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: rgba(255,255,255,0.05); }
-        .dept-title { font-weight: 900; font-size: 18px; text-transform: uppercase; }
-        .dept-action { font-size: 13px; color: var(--text-dim); display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 15px; font-weight: bold;}
-        .glow { position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; border-radius: 50%; filter: blur(40px); opacity: 0.2; transition: 0.3s;}
-        .dept-card:hover .glow { opacity: 0.4; transform: scale(1.2);}
-
-        /* PAINEL DA DIREITA (CALENDÁRIO) */
-        .side-panel { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 25px; height: fit-content;}
-        
-        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .cal-header h2 { margin: 0; font-size: 20px; color: #fff; }
-        .btn-add { background: #a2ff00; color: #000; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Urbanist'; font-size: 13px; transition: 0.2s;}
-        .btn-add:hover { background: #8be600; transform: scale(1.05); }
-
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px; }
-        .cal-day-name { text-align: center; font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: bold; padding-bottom: 10px;}
-        .cal-day { background: #151719; border: 1px solid transparent; border-radius: 10px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 15px; font-weight: bold; color: #fff; position: relative; cursor: pointer; transition: 0.2s;}
-        .cal-day:hover { border-color: #444; background: #1c1e21; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 20px; }
+        .day-name { text-align: center; font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: bold; padding-bottom: 10px;}
+        .cal-day { background: #151719; border: 1px solid transparent; border-radius: 10px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; color: #fff; position: relative; transition: 0.3s; cursor: pointer; }
+        .cal-day:hover { border-color: #555; background: #1a1c1e; }
         .cal-day.today { border-color: #a2ff00; color: #a2ff00; background: rgba(162, 255, 0, 0.05);}
-        .cal-day.other-month { opacity: 0.2; pointer-events: none;}
-        .event-dot { width: 5px; height: 5px; border-radius: 50%; position: absolute; bottom: 6px; }
+        .cal-day.other-month { opacity: 0.3; }
+        .event-dot { width: 6px; height: 6px; border-radius: 50%; position: absolute; bottom: 8px; }
 
-        /* ALERTAS PASTORAIS */
-        .alert-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 15px; margin-top: 20px;}
-        .alert-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0;}
-        .alert-item:last-child { border-bottom: none; padding-bottom: 0;}
-        .alert-name { font-size: 14px; color: #fff; font-weight: bold;}
-        .alert-reason { font-size: 11px; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 3px 8px; border-radius: 10px;}
+        .upcoming-events { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; border-top: 1px dashed var(--border-color); padding-top: 20px;}
+        .event-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: #151719; border-radius: 12px; border-left: 4px solid var(--event-color); }
+        .event-row .event-date { font-size: 16px; font-weight: 900; color: var(--event-color); width: 50px; text-align: center;}
+        .event-row .event-title { flex: 1; font-size: 15px; font-weight: bold; color: #fff; margin-left: 15px;}
+        .event-row .event-dept { font-size: 11px; text-transform: uppercase; color: var(--text-dim); font-weight: bold; padding: 4px 10px; background: #1f2225; border-radius: 20px;}
 
-        /* MODAL GLOBAL */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-box { background: var(--bg-card); border: 1px solid var(--border-color); padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; }
+        /* MODAIS E GENIE EFFECT */
+        .genie-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 1001;}
+        .genie-overlay.active { opacity: 1; pointer-events: all; }
+        .genie-modal { position: fixed; background: #111; border: 1px solid #333; border-radius: 20px; padding: 0; width: 90%; max-width: 500px; height: auto; max-height: 90vh; overflow-y: auto; transform: scale(0); opacity: 0; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease; z-index: 1002;}
+        .genie-modal.active { transform: scale(1); opacity: 1; }
+
+        .genie-header { background: #1a1a1a; padding: 25px; border-bottom: 2px solid var(--primary); border-radius: 20px 20px 0 0; text-align: center; }
+        .genie-title { font-size: 24px; font-weight: 900; margin-bottom: 5px; color: white; }
+        .genie-subtitle { color: var(--primary); font-size: 14px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
+        .btn-close-genie { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.1); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 16px; transition: 0.3s;}
+        .btn-close-genie:hover { background: #ef4444; }
+        .genie-content { padding: 25px; }
+
+        .dept-faltas-box { background: #151719; border: 1px solid #222; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .dept-faltas-box h5 { margin: 0 0 10px 0; font-size: 14px; color: var(--dept-cor); display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #222; padding-bottom: 8px;}
+        .dept-faltas-box ul { list-style: none; padding: 0; margin: 0; }
+        .dept-faltas-box li { color: #ccc; font-size: 13px; padding: 5px 0; display: flex; justify-content: space-between;}
+        .dept-faltas-box li span { color: #ef4444; font-weight: bold; font-size: 11px; background: rgba(239, 68, 68, 0.1); padding: 2px 6px; border-radius: 6px;}
+
+        /* INPUTS DO MODAL DE NOVO EVENTO */
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase; font-weight: bold;}
-        .form-group input, .form-group select { width: 100%; padding: 12px; background: #151719; border: 1px solid #333; color: white; border-radius: 8px; font-family: 'Urbanist'; outline: none; box-sizing: border-box;}
+        .form-group input, .form-group select { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #222; color: white; border-radius: 8px; font-family: 'Urbanist'; outline: none; box-sizing: border-box;}
         .form-group input:focus, .form-group select:focus { border-color: #a2ff00; }
-        .btn-salvar { width: 100%; padding: 15px; background: #a2ff00; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Urbanist'; margin-top: 10px; transition: 0.2s;}
-        .btn-salvar:hover { background: #8be600; }
+        .btn-salvar { width: 100%; padding: 15px; background: #a2ff00; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Urbanist'; margin-top: 10px;}
 
-        @media (max-width: 1000px) {
-            .main-layout { grid-template-columns: 1fr; }
-            .kpi-grid { grid-template-columns: 1fr; }
+        @media (max-width: 900px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .main-content { margin-left: 0; padding: 15px; margin-top: 60px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="ambient-glow"></div>
-    <div class="ambient-glow-2"></div>
+<div class="ambient-glow"></div>
+<div class="ambient-glow-2"></div>
 
-    <div class="container">
-        <div class="header">
-            <h1><i class="fas fa-chess-king"></i> Ministério Be One <span style="color: gray; font-size: 16px; margin-left: 10px;" id="nomePastor"></span></h1>
-            <button class="btn-sair" onclick="sair()"><i class="fas fa-sign-out-alt"></i> Sair do Sistema</button>
+<div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
+<header class="mobile-header">
+    <button class="hamburger-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+    <h2>Be One <span style="color: #a2ff00;">Tech</span></h2>
+</header>
+<aside class="sidebar" id="sidebar">
+    <h2>Be One <span style="color: #a2ff00;">Tech</span></h2>
+    <div class="sidebar-user" onclick="window.location.href='perfil.html'">
+        <img src="https://ui-avatars.com/api/?name=Pastor&background=222&color=a2ff00" id="sidebarAvatar" alt="Avatar">
+        <div class="sidebar-user-info">
+            <strong id="sidebarUserName">Pr. Carregando...</strong>
+            <span id="sidebarUserRole" style="color: #a2ff00;">Pastor</span>
         </div>
+    </div>
+    <a href="painel_pastor.html" class="active"><i class="fas fa-chart-pie"></i> Painel Executivo</a>
+    <a href="usuarios.html"><i class="fas fa-user-shield"></i> Gestão Completa</a>
+    <a href="#" onclick="sairSistema()" class="btn-sair" style="margin-top: 40px; color: #ef4444;"><i class="fas fa-sign-out-alt"></i> Sair do Sistema</a>
+</aside>
 
-        <div class="main-layout">
-            
-            <div class="left-col">
-                <h2 class="section-title">Resumo Operacional</h2>
+<main class="main-content">
+    
+    <div class="header-top">
+        <h1><i class="fas fa-chart-pie" style="color: #a2ff00; font-size: 22px;"></i> Visão Geral</h1>
+    </div>
+
+    <div class="ministry-row" id="linhaMinisterios">
+        <div style="color: var(--text-dim); padding: 15px;">Mapeando igreja...</div>
+    </div>
+
+    <div class="dashboard-grid">
+        
+        <div>
+            <div class="panel-box" style="margin-bottom: 20px;">
+                <h3 class="box-title">Números Globais <i class="fas fa-globe" style="color: #3b82f6;"></i></h3>
                 
-                <div class="kpi-grid">
-                    <div class="kpi-card">
+                <div class="kpi-item">
+                    <div class="kpi-info">
                         <div class="kpi-icon" style="color: #10b981;"><i class="fas fa-users"></i></div>
-                        <div class="kpi-text"><h4 id="kpiTotal">0</h4><p>Total de Membros</p></div>
+                        <div class="kpi-text"><h4>Total de Voluntários</h4><p>Ativos no sistema</p></div>
                     </div>
-                    <div class="kpi-card">
-                        <div class="kpi-icon" style="color: #3b82f6;"><i class="fas fa-crown"></i></div>
-                        <div class="kpi-text"><h4 id="kpiLideres">0</h4><p>Líderes de Área</p></div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-icon" style="color: #ef4444;"><i class="fas fa-user-injured"></i></div>
-                        <div class="kpi-text"><h4 id="kpiFaltas">0</h4><p>Ausências no Mês</p></div>
-                    </div>
+                    <div class="kpi-value" id="kpiTotal">0</div>
                 </div>
 
-                <h2 class="section-title" style="margin-top: 40px;">Gestão de Áreas</h2>
-                <p style="color: var(--text-dim); margin-bottom: 20px; font-size: 14px;">Selecione o ministério abaixo para visualizar as escalas e gerenciar a equipe daquela área.</p>
-
-                <div class="dashboard-grid" id="gridDepartamentos"></div>
-            </div>
-
-            <div class="right-col">
-                <div class="side-panel">
-                    <div class="cal-header">
-                        <h2 id="mesAnoTitulo">Mês 2024</h2>
-                        <button class="btn-add" onclick="abrirModalEvento()"><i class="fas fa-plus"></i> Evento</button>
+                <div class="kpi-item">
+                    <div class="kpi-info">
+                        <div class="kpi-icon" style="color: #a855f7;"><i class="fas fa-crown"></i></div>
+                        <div class="kpi-text"><h4>Líderes Formados</h4><p>Responsáveis de área</p></div>
                     </div>
+                    <div class="kpi-value" id="kpiLideres">0</div>
+                </div>
 
-                    <div class="cal-grid" id="calendarioGrid">
-                        </div>
-
-                    <div class="alert-box">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; color: #ef4444; font-weight: bold; font-size: 14px; text-transform: uppercase;">
-                            <i class="fas fa-exclamation-triangle"></i> Atenção Pastoral
-                        </div>
-                        <div id="listaAlertas">
-                            <p style="color: #888; font-size: 12px; margin: 0;">Buscando dados de assiduidade...</p>
-                        </div>
+                <div class="kpi-item clickable" onclick="abrirGenieFaltas()">
+                    <div class="kpi-info">
+                        <div class="kpi-icon" style="color: #ef4444; background: rgba(239, 68, 68, 0.1);"><i class="fas fa-user-injured"></i></div>
+                        <div class="kpi-text"><h4>Indisponibilidades</h4><p>Clique para ver detalhes</p></div>
                     </div>
+                    <div class="kpi-value" id="kpiFaltas" style="color: #ef4444;">0</div>
                 </div>
             </div>
 
+            <div class="panel-box">
+                <h3 class="box-title" style="color: #ef4444;">Atenção Pastoral <i class="fas fa-exclamation-triangle"></i></h3>
+                <p style="font-size: 12px; color: var(--text-dim); margin-top: -15px;">Membros com muitas indisponibilidades recentes.</p>
+                <div class="alert-list" id="listaAlertas">
+                    <div class="alert-item" style="background: transparent; border-color: #333;"><p style="color: #888;">Nenhum alerta crítico.</p></div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="modal-overlay" id="modalNovoEvento" onclick="if(event.target === this) fecharModal()">
-        <div class="modal-box">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="margin: 0; color: #a2ff00; font-size: 20px;"><i class="fas fa-calendar-plus"></i> Novo Evento</h3>
-                <i class="fas fa-times" style="cursor: pointer; color: #888;" onclick="fecharModal()"></i>
+        <div class="panel-box">
+            <div class="calendar-header">
+                <div class="cal-nav">
+                    <button onclick="mudarMes(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <h2 id="mesAnoTitulo">Mês 2024</h2>
+                    <button onclick="mudarMes(1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <button class="btn-add-event" onclick="abrirModalEvento()"><i class="fas fa-plus"></i> Agendar</button>
             </div>
-            
-            <div class="form-group">
-                <label>Título do Evento / Culto</label>
-                <input type="text" id="evTitulo" placeholder="Ex: Culto de Celebração">
+
+            <div class="calendar-grid">
+                <div class="day-name">Dom</div><div class="day-name">Seg</div><div class="day-name">Ter</div>
+                <div class="day-name">Qua</div><div class="day-name">Qui</div><div class="day-name">Sex</div><div class="day-name">Sáb</div>
+                </div>
+
+            <div class="upcoming-events" id="listaProximosEventos">
+                <p style="color: gray; font-style: italic; text-align: center;">Carregando agenda...</p>
             </div>
-            <div class="form-group">
-                <label>Data Oficial</label>
-                <input type="date" id="evData">
-            </div>
-            <div class="form-group">
-                <label>Vincular a qual Ministério?</label>
-                <select id="evDept">
-                    <option value="LOUVOR">LOUVOR</option>
-                    <option value="MIDIA">MÍDIA</option>
-                    <option value="SALT">SALT</option>
-                    <option value="27+">27+</option>
-                    <option value="JOIN">JOIN</option>
-                    <option value="KIDS">KIDS</option>
-                </select>
-            </div>
-            <button class="btn-salvar" onclick="salvarEventoPastor()"><i class="fas fa-check"></i> Criar Escala Base</button>
         </div>
+
     </div>
+</main>
+
+<div class="genie-overlay" id="modalNovoEvento" onclick="if(event.target === this) fecharModal()">
+    <div class="genie-modal active" style="transform: scale(1); position: relative; padding: 25px;">
+        <button class="btn-close-genie" onclick="fecharModal()"><i class="fas fa-times"></i></button>
+        <h3 style="margin-top: 0; color: #a2ff00; margin-bottom: 20px; font-size: 20px;"><i class="fas fa-calendar-plus"></i> Novo Agendamento</h3>
+        
+        <div class="form-group">
+            <label>Tipo de Agendamento</label>
+            <select id="evTipo">
+                <option value="CULTO">Culto / Evento Oficial (Visível a todos)</option>
+                <option value="REUNIAO">Reunião de Liderança (Exclusivo para Líderes)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Título do Evento</label>
+            <input type="text" id="evTitulo" placeholder="Ex: Ceia do Senhor">
+        </div>
+        <div class="form-group">
+            <label>Data</label>
+            <input type="date" id="evData">
+        </div>
+        <div class="form-group">
+            <label>Ministério Envolvido</label>
+            <select id="evDept">
+                <option value="LOUVOR">LOUVOR</option>
+                <option value="MIDIA">MÍDIA</option>
+                <option value="SALT">SALT</option>
+                <option value="27+">27+</option>
+                <option value="JOIN">JOIN</option>
+                <option value="KIDS">KIDS</option>
+            </select>
+        </div>
+        <button class="btn-salvar" onclick="salvarEventoPastor()"><i class="fas fa-check"></i> Salvar na Agenda</button>
+    </div>
+</div>
+
+<div class="genie-overlay" id="genieFaltasOverlay" onclick="fecharGenieFaltas()"></div>
+<div class="genie-modal" id="genieFaltasModal">
+    <button class="btn-close-genie" onclick="fecharGenieFaltas()"><i class="fas fa-times"></i></button>
+    <div class="genie-header" style="border-color: #ef4444;">
+        <h2 class="genie-title">Termômetro de Ausências</h2>
+        <div class="genie-subtitle" style="color: #ef4444;">Membros que registraram indisponibilidade neste mês</div>
+    </div>
+    <div class="genie-content" id="genieFaltasContent">
+        </div>
+</div>
 
 <script>
-    const userLogado = JSON.parse(localStorage.getItem('usuario')) || {};
-    if(userLogado.cargo !== 'PASTOR' && userLogado.cargo !== 'DEV') {
-        window.location.href = 'login.html'; 
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('overlay').classList.toggle('active');
     }
-    
-    document.getElementById('nomePastor').innerText = "| Pr. " + (userLogado.nome ? userLogado.nome.split(' ')[0] : 'Pastor');
+
+    const user = JSON.parse(localStorage.getItem('usuario')) || {nome: 'Visitante', cargo: 'MEMBRO'};
+    if (!['PASTOR', 'DEV', 'ADMIN'].includes(String(user.cargo).toUpperCase())) { window.location.href = 'portal.html'; }
 
     const DEPARTAMENTOS_CONFIG = {
-        "LOUVOR": { cor: "#FF3300", icone: "fa-music", desc: "Escalas, Repertórios e Sugestões" },
-        "MIDIA": { cor: "#a855f7", icone: "fa-camera", desc: "Escalas de Transmissão e Foto" },
-        "SALT": { cor: "#3b82f6", icone: "fa-users", desc: "Escalas e Gestão de Membros" },
-        "27+": { cor: "#10b981", icone: "fa-plus-circle", desc: "Escalas e Gestão de Membros" },
-        "JOIN": { cor: "#6366f1", icone: "fa-handshake", desc: "Escalas e Recepção" },
-        "KIDS": { cor: "#facc15", icone: "fa-child", desc: "Escalas do Ministério Infantil" }
+        "LOUVOR": { cor: "#FF3300", icone: "fa-music" },
+        "MIDIA": { cor: "#a855f7", icone: "fa-camera" },
+        "SALT": { cor: "#3b82f6", icone: "fa-users" },
+        "27+": { cor: "#10b981", icone: "fa-plus-circle" },
+        "JOIN": { cor: "#6366f1", icone: "fa-handshake" },
+        "KIDS": { cor: "#facc15", icone: "fa-child" }
     };
 
+    // Variáveis Globais de Memória
+    let membrosGlobais = [];
     let escalasGlobais = [];
-
-    async function inicializarDashboard() {
-        // 1. RENDERIZA OS CARDS ORIGINAIS DA SUA TELA
-        renderizarCardsMinisterio();
-
+    let faltasGlobais = [];
+    
+    // Variáveis de Navegação do Calendário
+    let mesExibicao = new Date().getMonth();
+    let anoExibicao = new Date().getFullYear();
+    
+    async function inicializar() {
+        document.getElementById('sidebarUserName').innerText = "Pr. " + (user.nome ? user.nome.split(' ')[0] : 'Admin');
+        fecharModal(); // Esconde modal de evento no boot
+        
         try {
-            // 2. BUSCA OS DADOS GLOBAIS NO BACKEND
             const [resMembros, resEscalas, resFaltas] = await Promise.all([
-                fetch('/api/membros'),
-                fetch('/api/escalas'),
-                fetch('/api/indisponibilidade')
+                fetch('/api/membros'), fetch('/api/escalas'), fetch('/api/indisponibilidade')
             ]);
 
-            let membros = []; let faltas = [];
-            if(resMembros.ok) membros = await resMembros.json();
+            if(resMembros.ok) membrosGlobais = await resMembros.json();
             if(resEscalas.ok) escalasGlobais = await resEscalas.json();
-            if(resFaltas.ok) faltas = await resFaltas.json();
+            if(resFaltas.ok) faltasGlobais = await resFaltas.json();
 
-            // 3. PREENCHE OS KPIs
-            document.getElementById('kpiTotal').innerText = membros.length;
-            document.getElementById('kpiLideres').innerText = membros.filter(m => String(m.cargo).toUpperCase() === 'LIDER' || String(m.cargo).toUpperCase() === 'PASTOR').length;
-            
-            const mesAtual = new Date().getMonth();
-            const anoAtual = new Date().getFullYear();
-            const faltasMes = faltas.filter(f => f.data && new Date(f.data).getMonth() === mesAtual && new Date(f.data).getFullYear() === anoAtual);
-            document.getElementById('kpiFaltas').innerText = faltasMes.length;
-
-            // 4. PREENCHE OS ALERTAS (Quem faltou >= 2 vezes no mês)
-            const contagemFaltas = {};
-            faltasMes.forEach(f => { contagemFaltas[f.nomeMembro.trim()] = (contagemFaltas[f.nomeMembro.trim()] || 0) + 1; });
-            
-            const listaAlertas = document.getElementById('listaAlertas');
-            let htmlAlertas = '';
-            Object.keys(contagemFaltas).forEach(nome => {
-                if(contagemFaltas[nome] >= 2) {
-                    htmlAlertas += `<div class="alert-item"><span class="alert-name">${nome}</span><span class="alert-reason">${contagemFaltas[nome]} Faltas</span></div>`;
-                }
-            });
-            listaAlertas.innerHTML = htmlAlertas || '<p style="color: #888; font-size: 12px; margin: 0;">Equipe assídua. Nenhum alerta.</p>';
-
-            // 5. DESENHA O CALENDÁRIO
+            processarMembros(membrosGlobais);
+            processarFaltas(faltasGlobais);
             gerarCalendario();
 
-        } catch (e) {
-            console.error("Erro na carga de dados", e);
-        }
+        } catch (e) { console.error("Erro ao puxar dados globais", e); }
     }
 
-    // A FUNÇÃO ORIGINAL DOS SEUS CARDS (Apenas ajustada para o novo HTML)
-    function renderizarCardsMinisterio() {
-        const grid = document.getElementById('gridDepartamentos');
-        const departamentos = Object.keys(DEPARTAMENTOS_CONFIG);
+    function processarMembros(membros) {
+        if(!membros || membros.length === 0) return;
+        document.getElementById('kpiTotal').innerText = membros.length;
+        document.getElementById('kpiLideres').innerText = membros.filter(m => String(m.cargo).toUpperCase() === 'LIDER' || String(m.cargo).toUpperCase() === 'PASTOR').length;
 
-        grid.innerHTML = departamentos.map(dept => {
-            const config = DEPARTAMENTOS_CONFIG[dept];
-            return `
-                <div class="dept-card" style="border-color: ${config.cor}40;" onmouseover="this.style.borderColor='${config.cor}'" onmouseout="this.style.borderColor='${config.cor}40'" onclick="acessarArea('${dept}', '${config.cor}')">
-                    <div class="glow" style="background: ${config.cor};"></div>
-                    <div class="dept-header">
-                        <div class="dept-icon" style="color: ${config.cor};"><i class="fas ${config.icone}"></i></div>
-                        <div class="dept-title" style="color: ${config.cor};">${dept}</div>
-                    </div>
-                    <p style="font-size: 13px; color: #888; margin: 0;">${config.desc}</p>
-                    <div class="dept-action">
-                        <span>Acessar Painel</span>
-                        <i class="fas fa-arrow-right" style="color: ${config.cor};"></i>
-                    </div>
+        const contagemDept = { "LOUVOR":0, "MIDIA":0, "SALT":0, "27+":0, "JOIN":0, "KIDS":0 };
+        membros.forEach(m => {
+            if (m.departamentos && m.departamentos.length > 0) {
+                m.departamentos.forEach(d => { if(contagemDept[d] !== undefined) contagemDept[d]++; });
+            } else if (m.departamento && contagemDept[m.departamento] !== undefined) {
+                contagemDept[m.departamento]++;
+            }
+        });
+
+        const container = document.getElementById('linhaMinisterios');
+        container.innerHTML = '';
+        Object.keys(contagemDept).forEach(dept => {
+            const cfg = DEPARTAMENTOS_CONFIG[dept];
+            const div = document.createElement('div');
+            div.className = 'min-card';
+            div.style.setProperty('--min-color', cfg.cor);
+            div.onclick = () => { localStorage.setItem('departamentoAtual', dept); localStorage.setItem('corAtual', cfg.cor); window.location.href = 'inicio.html'; };
+            div.innerHTML = `<div class="min-header"><span>${dept}</span><i class="fas ${cfg.icone}"></i></div><h3 class="min-value">${contagemDept[dept]}</h3><p class="min-desc">voluntários</p>`;
+            container.appendChild(div);
+        });
+    }
+
+    function processarFaltas(faltas) {
+        const mesAtual = new Date().getMonth(); const anoAtual = new Date().getFullYear();
+        const faltasMes = faltas.filter(f => f.data && new Date(f.data).getMonth() === mesAtual && new Date(f.data).getFullYear() === anoAtual);
+        document.getElementById('kpiFaltas').innerText = faltasMes.length;
+
+        const contagemNomes = {};
+        faltasMes.forEach(f => { const n = f.nomeMembro.trim(); contagemNomes[n] = (contagemNomes[n] || 0) + 1; });
+
+        let htmlAlertas = '';
+        Object.keys(contagemNomes).forEach(nome => {
+            if(contagemNomes[nome] >= 2) {
+                htmlAlertas += `<div class="alert-item"><i class="fas fa-exclamation-circle"></i><div><h5>${nome}</h5><p>${contagemNomes[nome]} indisponibilidades</p></div></div>`;
+            }
+        });
+        if(htmlAlertas !== '') document.getElementById('listaAlertas').innerHTML = htmlAlertas;
+    }
+
+    // ==========================================
+    // GENIE EFFECT - LISTA DE FALTAS SEPARADA
+    // ==========================================
+    function abrirGenieFaltas() {
+        const mesAtual = new Date().getMonth(); const anoAtual = new Date().getFullYear();
+        const faltasMes = faltasGlobais.filter(f => f.data && new Date(f.data).getMonth() === mesAtual && new Date(f.data).getFullYear() === anoAtual);
+        
+        // Agrupar faltas por ministério
+        const gruposFaltas = {};
+        faltasMes.forEach(falta => {
+            const nomeStr = falta.nomeMembro.trim().toLowerCase();
+            // Tenta achar em qual ministério essa pessoa serve
+            const membroBase = membrosGlobais.find(m => m.nome.trim().toLowerCase() === nomeStr);
+            let depts = ["GERAL"];
+            if (membroBase) { depts = membroBase.departamentos && membroBase.departamentos.length > 0 ? membroBase.departamentos : [membroBase.departamento || "GERAL"]; }
+            
+            depts.forEach(d => {
+                if(!gruposFaltas[d]) gruposFaltas[d] = [];
+                gruposFaltas[d].push(falta);
+            });
+        });
+
+        let htmlContent = '';
+        Object.keys(gruposFaltas).forEach(dept => {
+            const cor = DEPARTAMENTOS_CONFIG[dept] ? DEPARTAMENTOS_CONFIG[dept].cor : '#fff';
+            const icone = DEPARTAMENTOS_CONFIG[dept] ? DEPARTAMENTOS_CONFIG[dept].icone : 'fa-users';
+            
+            // Conta quantas faltas essa pessoa tem nesse ministério para não repetir o nome
+            const contadorPessoa = {};
+            gruposFaltas[dept].forEach(f => { contadorPessoa[f.nomeMembro] = (contadorPessoa[f.nomeMembro] || 0) + 1; });
+
+            let listaPessoas = '';
+            Object.keys(contadorPessoa).forEach(nome => {
+                listaPessoas += `<li>${nome} <span>${contadorPessoa[nome]}x</span></li>`;
+            });
+
+            htmlContent += `
+                <div class="dept-faltas-box" style="--dept-cor: ${cor};">
+                    <h5><i class="fas ${icone}"></i> ${dept}</h5>
+                    <ul>${listaPessoas}</ul>
                 </div>
             `;
-        }).join('');
-    }
-
-    function acessarArea(nomeDept, corDept) {
-        localStorage.setItem('departamentoAtual', nomeDept);
-        localStorage.setItem('corAtual', corDept);
-        window.location.href = 'inicio.html';
-    }
-
-    // LÓGICA DO CALENDÁRIO
-    function gerarCalendario() {
-        const dataHoje = new Date();
-        const ano = dataHoje.getFullYear();
-        const mes = dataHoje.getMonth();
-        
-        const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-        document.getElementById('mesAnoTitulo').innerText = `${nomesMeses[mes]} ${ano}`;
-
-        const grid = document.getElementById('calendarioGrid');
-        grid.innerHTML = `
-            <div class="cal-day-name">Dom</div><div class="cal-day-name">Seg</div><div class="cal-day-name">Ter</div>
-            <div class="cal-day-name">Qua</div><div class="cal-day-name">Qui</div><div class="cal-day-name">Sex</div><div class="cal-day-name">Sáb</div>
-        `;
-
-        const primeiroDiaMes = new Date(ano, mes, 1).getDay();
-        const totalDiasMes = new Date(ano, mes + 1, 0).getDate();
-
-        // Espaços em branco do início do mês
-        for(let i = 0; i < primeiroDiaMes; i++) { grid.innerHTML += `<div class="cal-day other-month"></div>`; }
-
-        // Mapeia eventos deste mês
-        const eventosMes = escalasGlobais.filter(e => {
-            if(!e.data) return false;
-            const [y, m, d] = e.data.split('-');
-            return parseInt(y) === ano && parseInt(m) - 1 === mes;
         });
+
+        if(htmlContent === '') htmlContent = '<p style="color: #888; text-align: center;">Ninguém marcou indisponibilidade neste mês.</p>';
+
+        document.getElementById('genieFaltasContent').innerHTML = htmlContent;
+
+        // Animação de entrada do modal
+        const modal = document.getElementById('genieFaltasModal');
+        modal.style.left = '50%'; modal.style.top = '50%'; modal.style.transform = 'translate(-50%, -50%) scale(0)';
+        document.getElementById('genieFaltasOverlay').classList.add('active');
+        setTimeout(() => { modal.style.transform = 'translate(-50%, -50%) scale(1)'; modal.style.opacity = '1'; }, 10);
+    }
+
+    function fecharGenieFaltas() {
+        document.getElementById('genieFaltasOverlay').classList.remove('active');
+        document.getElementById('genieFaltasModal').style.opacity = '0';
+        document.getElementById('genieFaltasModal').style.transform = 'translate(-50%, -50%) scale(0)';
+    }
+
+    // ==========================================
+    // NAVEGAÇÃO DO CALENDÁRIO
+    // ==========================================
+    function mudarMes(delta) {
+        mesExibicao += delta;
+        if(mesExibicao < 0) { mesExibicao = 11; anoExibicao--; }
+        else if(mesExibicao > 11) { mesExibicao = 0; anoExibicao++; }
+        gerarCalendario();
+    }
+
+    function gerarCalendario() {
+        const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        document.getElementById('mesAnoTitulo').innerText = `${nomesMeses[mesExibicao]} ${anoExibicao}`;
+
+        const grid = document.querySelector('.calendar-grid');
+        const headers = Array.from(grid.querySelectorAll('.day-name'));
+        grid.innerHTML = '';
+        headers.forEach(h => grid.appendChild(h));
+
+        const primeiroDiaMes = new Date(anoExibicao, mesExibicao, 1).getDay();
+        const totalDiasMes = new Date(anoExibicao, mesExibicao + 1, 0).getDate();
+        
+        for(let i = 0; i < primeiroDiaMes; i++) {
+            const vazio = document.createElement('div');
+            vazio.className = 'cal-day other-month';
+            grid.appendChild(vazio);
+        }
+
+        const eventosDesteMesExibido = escalasGlobais.filter(e => {
+            if(!e.data) return false;
+            const [y, m, day] = e.data.split('-');
+            return parseInt(y) === anoExibicao && parseInt(m) - 1 === mesExibicao;
+        });
+
+        const dataHoje = new Date();
 
         for(let dia = 1; dia <= totalDiasMes; dia++) {
             const divDia = document.createElement('div');
             divDia.className = 'cal-day';
             divDia.innerText = dia;
-            if(dia === dataHoje.getDate()) divDia.classList.add('today');
+            
+            if(dia === dataHoje.getDate() && mesExibicao === dataHoje.getMonth() && anoExibicao === dataHoje.getFullYear()) {
+                divDia.classList.add('today');
+            }
 
-            // Coloca a bolinha se tiver evento
-            const evtsHoje = eventosMes.filter(e => parseInt(e.data.split('-')[2]) === dia);
-            if(evtsHoje.length > 0) {
-                const cor = DEPARTAMENTOS_CONFIG[evtsHoje[0].departamento || 'LOUVOR'].cor;
-                divDia.innerHTML += `<div class="event-dot" style="background: ${cor}; box-shadow: 0 0 5px ${cor};"></div>`;
+            const eventosDia = eventosDesteMesExibido.filter(e => parseInt(e.data.split('-')[2]) === dia);
+            if(eventosDia.length > 0) {
+                const deptEvento = eventosDia[0].departamento || 'LOUVOR';
+                const cor = DEPARTAMENTOS_CONFIG[deptEvento] ? DEPARTAMENTOS_CONFIG[deptEvento].cor : '#fff';
+                const dot = document.createElement('div');
+                dot.className = 'event-dot';
+                dot.style.background = cor;
+                dot.style.boxShadow = `0 0 5px ${cor}`;
+                divDia.appendChild(dot);
             }
             grid.appendChild(divDia);
         }
+
+        // Renderiza a lista de eventos baseada no mês exibido!
+        const listaEl = document.getElementById('listaProximosEventos');
+        eventosDesteMesExibido.sort((a, b) => new Date(a.data) - new Date(b.data)); 
+        
+        const proximos = eventosDesteMesExibido.slice(0, 5); // Pega 5 do mês exibido
+
+        if(proximos.length === 0) {
+            listaEl.innerHTML = '<p style="color: gray; font-style: italic; text-align: center;">Agenda livre neste mês.</p>';
+        } else {
+            listaEl.innerHTML = proximos.map(e => {
+                const diaEv = e.data.split('-')[2];
+                const deptEv = e.departamento || 'GERAL';
+                const corEv = DEPARTAMENTOS_CONFIG[deptEv] ? DEPARTAMENTOS_CONFIG[deptEv].cor : '#fff';
+                // Mostra um ícone de "secreto" se for reunião de liderança
+                const isReuniao = (e.titulo || '').includes('[LIDERANÇA]');
+                const tituloLimpo = (e.titulo || 'Reunião').replace('[LIDERANÇA]', '').trim();
+                const iconeSecreto = isReuniao ? '<i class="fas fa-user-tie" style="color: #f59e0b; margin-right: 5px;" title="Reunião de Liderança"></i>' : '';
+                
+                return `
+                <div class="event-row" style="--event-color: ${corEv};">
+                    <div class="event-date">${diaEv}</div>
+                    <div class="event-title">${iconeSecreto}${tituloLimpo}</div>
+                    <div class="event-dept">${deptEv}</div>
+                </div>`;
+            }).join('');
+        }
     }
 
-    // MODAL E CADASTRO DE EVENTO
-    function abrirModalEvento() {
-        document.getElementById('modalNovoEvento').style.display = 'flex';
-    }
-    function fecharModal() {
-        document.getElementById('modalNovoEvento').style.display = 'none';
-        document.getElementById('evTitulo').value = '';
-        document.getElementById('evData').value = '';
-    }
+    // MODAL DE ADICIONAR EVENTO
+    function abrirModalEvento() { document.getElementById('modalNovoEvento').style.display = 'flex'; }
+    function fecharModal() { document.getElementById('modalNovoEvento').style.display = 'none'; }
 
     async function salvarEventoPastor() {
-        const titulo = document.getElementById('evTitulo').value.trim();
+        const tipoEvento = document.getElementById('evTipo').value;
+        let tituloBase = document.getElementById('evTitulo').value.trim();
         const dataStr = document.getElementById('evData').value;
         const dept = document.getElementById('evDept').value;
 
-        if(!titulo || !dataStr) {
-            alert('Preencha título e data para agendar o evento!');
-            return;
+        if(!tituloBase || !dataStr) { alert('Preencha título e data!'); return; }
+
+        // MÁGICA DA REUNIÃO: Coloca uma TAG no nome pro inicio.html poder filtrar e esconder dos membros!
+        if (tipoEvento === 'REUNIAO') {
+            tituloBase = "[LIDERANÇA] " + tituloBase;
         }
 
         const novaEscala = {
-            titulo: titulo,
-            data: dataStr,
-            departamento: dept,
-            equipe: "",
-            repertorio: "",
-            confirmacoes: "{}"
+            titulo: tituloBase, data: dataStr, departamento: dept,
+            equipe: "", repertorio: "", confirmacoes: "{}"
         };
 
         const btn = document.querySelector('.btn-salvar');
         btn.innerText = "Criando..."; btn.disabled = true;
 
         try {
-            const res = await fetch('/api/escalas', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(novaEscala)
-            });
-
+            const res = await fetch('/api/escalas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(novaEscala) });
             if (res.ok) {
-                alert('Agenda criada! Os líderes já podem ver no painel.');
+                alert('Agenda criada! Se foi "Culto", todos verão. Se foi "Reunião", apenas os líderes da área vão enxergar.');
                 fecharModal();
-                inicializarDashboard(); // Recarrega para desenhar a bolinha no calendário
-            } else {
-                alert('Erro ao salvar no banco.');
-            }
-        } catch (e) {
-            alert('Erro de conexão!');
-        } finally {
-            btn.innerHTML = "<i class='fas fa-check'></i> Criar Escala Base";
-            btn.disabled = false;
-        }
+                inicializar(); // Recarrega os dados pra desenhar no calendário imediatamente
+            } else { alert('Erro ao salvar no banco.'); }
+        } catch (e) { alert('Erro de conexão!'); } 
+        finally { btn.innerHTML = "<i class='fas fa-check'></i> Salvar na Agenda"; btn.disabled = false; }
     }
 
-    function sair() {
-        localStorage.removeItem('usuario');
-        localStorage.removeItem('token');
-        localStorage.removeItem('departamentoAtual');
-        localStorage.removeItem('corAtual');
-        window.location.href = 'login.html'; 
+    function sairSistema() {
+        localStorage.clear(); window.location.href = 'login.html';
     }
 
-    // Start!
-    inicializarDashboard();
-
+    inicializar();
 </script>
 </body>
 </html>
