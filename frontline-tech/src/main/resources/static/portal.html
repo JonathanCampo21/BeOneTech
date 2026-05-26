@@ -29,8 +29,11 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            /* Uso do DVH resolve o bug da barra de endereços no celular */
             min-height: 100vh;
-            overflow: hidden; 
+            min-height: 100dvh; 
+            overflow-x: hidden;
+            overflow-y: auto; /* Libera a rolagem para celulares pequenos */
         }
 
         @keyframes portalEntrada {
@@ -42,7 +45,8 @@
             text-align: center;
             width: 100%;
             max-width: 1200px;
-            padding: 20px;
+            padding: 20px 20px 40px 20px; /* Mais espaço em baixo */
+            box-sizing: border-box;
             animation: portalEntrada 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
@@ -168,7 +172,9 @@
         @media (max-width: 800px) {
             .dept-grid {
                 flex-direction: column; 
-                height: 75vh;
+                /* Diminuído para dar espaço ao botão e adaptar à barra do navegador */
+                height: 65vh; 
+                min-height: 400px;
             }
             .vertical-title {
                 writing-mode: horizontal-tb; 
@@ -326,18 +332,15 @@
         });
     }
 
-    // NOVA FUNÇÃO INTELIGENTE DE "DOIS CLIQUES" NO CELULAR
     function entrarDept(nomeDept, corDept, elementoCard) {
-        // Verifica se a tela é de celular
         if (window.innerWidth <= 800) {
             if (!elementoCard.classList.contains('active')) {
                 document.querySelectorAll('.dept-card').forEach(c => c.classList.remove('active'));
                 elementoCard.classList.add('active');
-                return; // Impede a navegação no primeiro toque
+                return; 
             }
         }
 
-        // Navegação real
         localStorage.setItem('departamentoAtual', nomeDept);
         localStorage.setItem('corAtual', corDept);
 
