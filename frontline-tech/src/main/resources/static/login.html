@@ -43,6 +43,7 @@
             font-family: 'Urbanist', sans-serif;
             font-size: 15px;
             transition: 0.3s;
+            box-sizing: border-box; /* Garante que o input não vase a caixa */
         }
         .login-input:focus { border-color: var(--primary); }
 
@@ -120,12 +121,9 @@
             if (res.ok) {
                 const dados = await res.json();
                 
-                // ========================================================
                 // 2. A SEGUNDA CHECAGEM: FORÇANDO A LEITURA DO BANCO DE DADOS COM O TOKEN!
-                // ========================================================
                 try {
                     const resFresh = await fetch(`/api/membros/buscar-por-nome?nome=${encodeURIComponent(dados.nome)}`, {
-                        // O Spring Security exige o token que acabamos de receber!
                         headers: { 'Authorization': `Bearer ${dados.token}` }
                     });
                     
@@ -143,13 +141,13 @@
                     console.log("Servidor ocupado. Usando dados básicos da sessão.");
                 }
 
-                // Agora sim pegamos os dados garantidos!
+                // BLINDAGEM DE VARIÁVEIS
                 const departamentosUser = dados.departamentos || [];
                 const cargoUser = String(dados.cargo || 'MEMBRO').toUpperCase().trim();
 
                 console.warn(`[RAIO-X 2.0] Usuário: ${dados.nome} | Cargo: ${cargoUser} | Acessos:`, departamentosUser);
 
-                // 3. SALVA TUDO NA MEMÓRIA DO NAVEGADOR (CACHE)
+                // 3. SALVA TUDO NA MEMÓRIA DO NAVEGADOR
                 localStorage.setItem('token', dados.token);
                 localStorage.setItem('usuario', JSON.stringify({
                     id: dados.id,
@@ -162,18 +160,28 @@
                     whatsapp: dados.whatsapp
                 }));
 
+                // Faz a tela sumir suavemente
                 document.body.style.opacity = '0';
                 document.body.style.transition = '0.3s';
 
                 setTimeout(() => {
-                    // 4. DIRETO PRO ALVO CERTO
+                    // 4. LÓGICA DE REDIRECIONAMENTO INFALÍVEL
+                    
                     if (cargoUser === 'PASTOR') {
+                        // Pastor vai pra tela exclusiva dele
                         window.location.href = 'painel_pastor.html';
                     } 
-                    else if (['DEV', 'ADMIN'].includes(cargoUser) || departamentosUser.length > 1) {
-                        window.location.href = 'portal.html'; // TELA DE SELEÇÃO!
+                    else if (cargoUser === 'DEV' || cargoUser === 'ADMIN') {
+                        // Chefões de sistema (Dev/Admin) vão pro Portal ter a visão geral, 
+                        // mesmo se o array de departamentos deles vier vazio
+                        window.location.href = 'portal.html';
+                    }
+                    else if (departamentosUser.length > 1) {
+                        // Se for membro ou líder, mas tiver mais de 1 ministério, vai pro Portal escolher
+                        window.location.href = 'portal.html';
                     } 
                     else {
+                        // Se só tiver um ministério (ou nenhum), vai direto pra aba Início
                         const deptUnico = departamentosUser.length === 1 ? departamentosUser[0] : "LOUVOR";
                         const configCor = DEPARTAMENTOS_CONFIG[deptUnico] ? DEPARTAMENTOS_CONFIG[deptUnico].cor : "#FF3300";
                         
@@ -194,6 +202,7 @@
             msgErro.innerText = "Erro de conexão com o servidor.";
             msgErro.style.display = 'block';
         } finally {
+            const btn = document.querySelector('.btn-login');
             btn.innerText = "Entrar no Sistema";
             btn.disabled = false;
         }
