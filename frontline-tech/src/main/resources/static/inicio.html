@@ -32,7 +32,7 @@
 
         .stack-cards { display: flex; flex-direction: column; gap: 12px; }
         
-        .stack-cards.collapsed { gap: 0; padding-bottom: 30px; } /* Espaço para o "rabo" das cartas aparecer */
+        .stack-cards.collapsed { gap: 0; padding-bottom: 30px; } 
         
         .escala-mini-card { 
             background: #111; border: 1px solid #222; border-radius: 12px; padding: 15px 20px; 
@@ -42,21 +42,19 @@
             position: relative;
         }
 
-        /* COMPORTAMENTO EXPANDIDO */
         .stack-cards:not(.collapsed) .escala-mini-card:hover { 
             background: #1a1a1a; transform: translateX(5px); border-color: var(--stack-color, var(--primary)); box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
         }
 
-        /* COMPORTAMENTO RECOLHIDO (AS CARTAS FICAM EMPILHADAS ATRÁS) */
         .stack-cards.collapsed .escala-mini-card:nth-child(1) { z-index: 5; transform: scale(1); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .stack-cards.collapsed .escala-mini-card:nth-child(2) { z-index: 4; transform: scale(0.95); margin-top: -65px; opacity: 0.7; filter: brightness(0.7); }
         .stack-cards.collapsed .escala-mini-card:nth-child(3) { z-index: 3; transform: scale(0.90); margin-top: -65px; opacity: 0.4; filter: brightness(0.4); }
-        .stack-cards.collapsed .escala-mini-card:nth-child(n+4) { display: none; } /* Esconde a 4ª em diante na pilha */
+        .stack-cards.collapsed .escala-mini-card:nth-child(n+4) { display: none; } 
 
         .escala-date { text-align: center; line-height: 1.1; min-width: 60px; }
         .escala-date .day { font-size: 28px; font-weight: 900; color: var(--stack-color, var(--primary)); }
         .escala-date .month { font-size: 13px; color: var(--text-dim); text-transform: uppercase; font-weight: bold; }
-        .escala-info h4 { margin: 0; font-size: 18px; color: white; font-weight: bold; }
+        .escala-info h4 { margin: 0; font-size: 18px; color: white; font-weight: bold; display: flex; align-items: center; gap: 8px;}
         .escala-info p { margin: 5px 0 0 0; font-size: 13px; color: var(--text-dim); }
 
         /* ========================================== */
@@ -71,7 +69,7 @@
         .genie-subtitle { color: var(--primary); font-size: 16px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
 
         .genie-content { padding: 30px; }
-        .detalhe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;}
+        .detalhe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; transition: 0.3s ease;}
         .detalhe-box { background: #0a0a0a; border: 1px solid #222; border-radius: 12px; padding: 20px; }
         .detalhe-box h5 { color: var(--primary); font-size: 12px; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; border-bottom: 1px solid #222; padding-bottom: 5px;}
         .detalhe-box p { font-size: 14px; line-height: 1.6; color: #ddd; margin: 0; }
@@ -87,6 +85,19 @@
         .btn-rsvp.yes:hover { background: #059669; transform: translateY(-2px);}
         .btn-rsvp.no { background: transparent; border: 1px solid #ef4444; color: #ef4444; }
         .btn-rsvp.no:hover { background: #ef4444; color: #fff; transform: translateY(-2px);}
+
+        /* ÁREA DA CHAMADA DO LÍDER */
+        .area-chamada { background: #151719; border: 1px dashed #444; border-radius: 12px; padding: 20px; margin-top: 20px; }
+        .area-chamada h4 { margin: 0 0 15px 0; color: #a2ff00; font-size: 14px; text-transform: uppercase; display: flex; align-items: center; gap: 8px;}
+        .chamada-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #222; }
+        .chamada-row:last-child { border-bottom: none; }
+        .chamada-nome { color: #fff; font-size: 14px; font-weight: bold; }
+        .chamada-toggles { display: flex; background: #000; border-radius: 6px; overflow: hidden; border: 1px solid #333; }
+        .btn-tog { background: transparent; border: none; color: #888; padding: 6px 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
+        .btn-tog.active-pres { background: #10b981; color: #000; }
+        .btn-tog.active-falta { background: #ef4444; color: #fff; }
+        .btn-salvar-chamada { width: 100%; background: transparent; border: 1px solid #a2ff00; color: #a2ff00; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 15px; cursor: pointer; transition: 0.3s; font-family: 'Urbanist'; }
+        .btn-salvar-chamada:hover { background: #a2ff00; color: #000; }
 
         .escala-musica-item { display: flex; align-items: center; gap: 12px; padding: 10px; background: #1a1a1a; border: 1px solid #222; border-radius: 8px; margin-bottom: 8px; transition: 0.2s; }
         .escala-musica-item.clickable { cursor: pointer; }
@@ -144,8 +155,9 @@
     <a href="louvores.html"><i class="fas fa-music"></i> Repertório</a>
     <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
     <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
+    <a href="painel_pastor.html" id="linkPastor" class="admin-only" style="color: #a2ff00;"><i class="fas fa-chart-pie"></i> Painel Executivo</a>
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
-    <a href="#" onclick="sairSistema()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
+    <a href="#" onclick="sairSistema()" class="btn-sair" style="margin-top: 20px; color: #ef4444;"><i class="fas fa-sign-out-alt"></i> Sair</a>
 </aside>
 
 <main class="main-content">
@@ -176,9 +188,7 @@
     </div>
 
     <div style="margin-top: 40px;">
-        <h2 style="font-size: 22px; margin-bottom: 5px; color: white;">
-            Minhas Próximas Escalas
-        </h2>
+        <h2 style="font-size: 22px; margin-bottom: 5px; color: white;">Minhas Próximas Escalas</h2>
         <p style="color: var(--text-dim); margin-bottom: 25px; font-size: 14px;">Visão global de todos os seus compromissos.</p>
         
         <div id="listaMinhasEscalas">
@@ -190,15 +200,15 @@
         <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid #333; padding: 25px; border-radius: 12px;">
             <h3 style="color: var(--primary); margin-bottom: 15px;"><i class="fas fa-info-circle"></i> Primeiros Passos</h3>
             <ul style="list-style: none; color: var(--text-dim); line-height: 1.8;">
-                <li><i class="fas fa-check-circle highlight" style="margin-right: 10px;"></i> Consulte a aba <strong>Escalas</strong> para confirmar quando você tocará/cantará.</li>
-                <li><i class="fas fa-check-circle highlight" style="margin-right: 10px;"></i> Registre suas indisponibilidades no calendário da equipe.</li>
-                <li><i class="fas fa-check-circle highlight" style="margin-right: 10px;"></i> Estude os arranjos oficiais na aba de <strong>Repertório</strong> se estiver disponível.</li>
+                <li><i class="fas fa-check-circle highlight" style="margin-right: 10px;"></i> Consulte a aba <strong>Escalas</strong> para confirmar quando você foi escalado.</li>
+                <li><i class="fas fa-check-circle highlight" style="margin-right: 10px;"></i> Registre suas indisponibilidades com antecedência.</li>
+                <li><i class="fas fa-check-circle highlight" style="margin-right: 10px;"></i> Estude os arranjos oficiais na aba de <strong>Repertório</strong> se houver música.</li>
             </ul>
         </div>
     </div>
 </main>
 
-<div class="genie-overlay" id="escalaOverlay" onclick="fecharEscalaModal()"></div>
+<div class="genie-overlay" id="escalaOverlay" onclick="if(event.target === this) fecharEscalaModal()"></div>
 <div class="genie-modal" id="escalaModal">
     <button class="btn-close-genie" onclick="fecharEscalaModal()"><i class="fas fa-times"></i></button>
 
@@ -208,28 +218,38 @@
     </div>
 
     <div class="genie-content">
-        <div class="detalhe-grid">
+        <div class="detalhe-grid" id="gridDetalhesEscala">
             <div class="detalhe-box">
                 <h5><i class="fas fa-users"></i> Equipe Escalada</h5>
                 <div id="modalEscalaEquipe" style="font-size: 14px; line-height: 1.6; color: #ddd;">Carregando...</div>
             </div>
-            <div class="detalhe-box">
+            
+            <div class="detalhe-box" id="boxRepertorio">
                 <h5><i class="fas fa-music"></i> Repertório</h5>
                 <div id="modalEscalaRepertorio">Carregando...</div>
             </div>
         </div>
 
-        <div class="rsvp-area">
+        <div class="rsvp-area" id="rsvpAreaContainer">
             <div class="rsvp-status" id="statusPresenca">Seu status: <span style="color: #f59e0b;">PENDENTE</span></div>
             <div class="rsvp-buttons" id="rsvpBotoes">
                 <button class="btn-rsvp yes" onclick="responderEscala('CONFIRMADO')"><i class="fas fa-check"></i> Estarei Presente!</button>
                 <button class="btn-rsvp no" onclick="responderEscala('RECUSADO')"><i class="fas fa-times"></i> Não poderei ir</button>
             </div>
         </div>
+
+        <div class="area-chamada" id="areaChamadaLider" style="display: none;">
+            <h4><i class="fas fa-clipboard-check"></i> Controle de Presença Pós-Culto</h4>
+            <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 15px;">Atenção: Marcar 'Falta' aqui vai notificar diretamente o Painel do Pastor.</p>
+            <div id="listaNomesChamada">
+                <p style="font-size: 12px; color: gray;">Carregando chamada...</p>
+            </div>
+            <button class="btn-salvar-chamada" id="btnSalvarChamada" onclick="salvarChamadaLider()"><i class="fas fa-save"></i> Salvar Alterações</button>
+        </div>
     </div>
 </div>
 
-<div class="genie-overlay" id="louvorOverlay" onclick="fecharLouvorGenie()"></div>
+<div class="genie-overlay" id="louvorOverlay" onclick="if(event.target === this) fecharLouvorGenie()"></div>
 <div class="genie-modal" id="louvorModal">
     <button class="btn-close-genie" onclick="fecharLouvorGenie()"><i class="fas fa-times"></i></button>
     <img src="" id="louvorCapaModal" class="louvor-header-img" alt="Capa">
@@ -241,7 +261,7 @@
             <div class="info-item"><span>BPM</span><strong id="louvorBpmModal">120</strong></div>
             <div class="info-item"><span>Compasso</span><strong id="louvorCompassoModal">4/4</strong></div>
         </div>
-        <div class="link-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="link-grid">
             <a href="#" target="_blank" class="btn-link" id="btnCifra"><i class="fas fa-guitar"></i> Cifra</a>
             <a href="#" target="_blank" class="btn-link" id="btnLetra"><i class="fas fa-align-left"></i> Letra</a>
             <a href="#" target="_blank" class="btn-link" id="btnVs"><i class="fas fa-headphones"></i> Multitrack/VS</a>
@@ -261,28 +281,30 @@
     const user = JSON.parse(localStorage.getItem('usuario')) || {nome: 'Visitante', cargo: 'MEMBRO'};
     const cargoUser = String(user.cargo).toUpperCase().trim();
     const deptAtual = localStorage.getItem('departamentoAtual') || 'LOUVOR';
+    
+    // Header de segurança global
+    const tokenLocal = localStorage.getItem('token');
+    const getHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}` } : {};
 
     let todasEscalas = [];
     let escalaAtualAberta = null;
     let louvoresGlobais = [];
+    
+    // Variáveis da Chamada do Líder
+    let faltasDoBancoCache = [];
+    let estadoChamada = {};
 
     const DEPARTAMENTOS_CONFIG = {
-        "LOUVOR": { cor: "#FF3300", icone: "fa-music" },
-        "MIDIA": { cor: "#190B28", icone: "fa-camera" },
-        "SALT": { cor: "#121831", icone: "fa-users" },
-        "27+": { cor: "#10251A", icone: "fa-plus-circle" },
-        "JOIN": { cor: "#2F3C64", icone: "fa-handshake" },
-        "KIDS": { cor: "#FDD835", icone: "fa-child" }
+        "LOUVOR": { cor: "#FF3300", icone: "fa-music" }, "MIDIA": { cor: "#a855f7", icone: "fa-camera" },
+        "SALT": { cor: "#3b82f6", icone: "fa-users" }, "27+": { cor: "#10b981", icone: "fa-plus-circle" },
+        "JOIN": { cor: "#6366f1", icone: "fa-handshake" }, "KIDS": { cor: "#facc15", icone: "fa-child" }
     };
 
     const DEFAULT_IMG = "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80";
 
     async function carregarSidebar() {
         try {
-            const userLogado = JSON.parse(localStorage.getItem('usuario'));
-            if (!userLogado) return;
-
-            let fotoFinal = userLogado.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userLogado.nome || 'User')}&background=222&color=10b981`;
+            let fotoFinal = user.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nome || 'User')}&background=222&color=10b981`;
             const avatarElem = document.getElementById('sidebarAvatar');
             const nameElem = document.getElementById('sidebarUserName');
             const roleElem = document.getElementById('sidebarUserRole');
@@ -290,18 +312,15 @@
             if (avatarElem) avatarElem.src = fotoFinal;
             
             if (nameElem) {
-                let primeiroNome = userLogado.nome ? userLogado.nome.split(' ')[0] : 'Visitante';
-                if (String(userLogado.cargo).toUpperCase().trim() === 'PASTOR') { 
-                    primeiroNome = "Pr. " + primeiroNome; 
-                }
+                let primeiroNome = user.nome ? user.nome.split(' ')[0] : 'Visitante';
+                if (cargoUser === 'PASTOR') primeiroNome = "Pr. " + primeiroNome; 
                 nameElem.innerText = primeiroNome;
             }
             
             if (roleElem) {
-                let cargoLocal = userLogado.cargo;
-                if (cargoLocal === 'LIDER') {
-                    const mochila = userLogado.liderDe || "";
-                    if (!mochila.includes(deptAtual)) cargoLocal = 'MEMBRO';
+                let cargoLocal = user.cargo;
+                if (cargoLocal === 'LIDER' && !(user.liderDe || "").includes(deptAtual)) {
+                    cargoLocal = 'MEMBRO';
                 }
                 roleElem.innerText = cargoLocal || 'Membro';
             }
@@ -311,37 +330,34 @@
     function agruparEquipe(equipeStr) {
         if (!equipeStr) return [];
         const linhas = equipeStr.split('\n').filter(Boolean);
-        const mapa = {};
+        const nomesParaModal = [];
 
         linhas.forEach(linha => {
-            let nome = linha;
-            let funcao = '';
+            let nome = linha; let funcao = '';
             if (linha.includes('(') && linha.includes(')')) {
-                const openIdx = linha.lastIndexOf('(');
-                const closeIdx = linha.lastIndexOf(')');
-                nome = linha.substring(0, openIdx).trim();
-                funcao = linha.substring(openIdx + 1, closeIdx).trim();
+                const openIdx = linha.lastIndexOf('('); const closeIdx = linha.lastIndexOf(')');
+                nome = linha.substring(0, openIdx).trim(); funcao = linha.substring(openIdx + 1, closeIdx).trim();
             }
-            if (!mapa[nome]) mapa[nome] = [];
-            if (funcao) mapa[nome].push(funcao);
+            if(!nomesParaModal.find(n => n.nome === nome)) {
+                nomesParaModal.push({nome, funcao});
+            }
         });
-
-        return Object.entries(mapa).map(([n, f]) => f.length > 0 ? `${n} (${f.join(', ')})` : n);
+        return nomesParaModal;
     }
 
     function inicializarPainel() {
         const primeiroNome = user.nome.split(' ')[0];
-        
-        let saudacaoNome = primeiroNome;
-        if (cargoUser === 'PASTOR') {
-            saudacaoNome = "Pr. " + primeiroNome;
-        }
+        let saudacaoNome = cargoUser === 'PASTOR' ? "Pr. " + primeiroNome : primeiroNome;
 
         document.getElementById('txtBoasVindas').innerHTML = `Bem-vindo(a), <span class="highlight">${saudacaoNome}</span>`;
 
-        if (cargoUser === 'DEV') {
-            const linkAdmin = document.getElementById('linkAdmin');
-            if(linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
+        const cfg = DEPARTAMENTOS_CONFIG[deptAtual] || DEPARTAMENTOS_CONFIG['LOUVOR'];
+        const badge = document.getElementById('nomeDeptBadge');
+        badge.innerText = deptAtual; badge.style.color = cfg.cor; badge.style.borderColor = cfg.cor;
+        document.documentElement.style.setProperty('--primary', cfg.cor);
+
+        if (['DEV', 'ADMIN', 'PASTOR'].includes(cargoUser)) {
+            document.querySelectorAll('.admin-only').forEach(el => { el.classList.remove('admin-only'); el.style.display = 'flex'; });
         }
 
         let isChefiaLocal = false;
@@ -363,21 +379,34 @@
 
     async function carregarTudo() {
         try {
-            // MÁGICA: Agora busca TODAS as escalas de todos os ministérios
+            // Busca escalas blindada com Token
             const [resEscalas, resLouvores] = await Promise.all([
-                fetch('/api/escalas'), 
-                fetch('/api/louvores')
+                fetch('/api/escalas', { headers: getHeaders }), 
+                fetch('/api/louvores', { headers: getHeaders })
             ]);
             
             if(resLouvores.ok) louvoresGlobais = await resLouvores.json();
+            
             if(resEscalas.ok) {
                 todasEscalas = await resEscalas.json();
                 
-                // Filtra apenas as que o nome do usuário aparece
-                const minhas = todasEscalas.filter(e => e.equipe && e.equipe.toUpperCase().includes(user.nome.toUpperCase()));
-                minhas.sort((a, b) => new Date(a.data) - new Date(b.data));
-                
-                renderizarEscalasEmPilha(minhas);
+                const isAdminOuPastor = ['DEV', 'ADMIN', 'PASTOR'].includes(cargoUser);
+                const mochilaLider = user.liderDe || "";
+
+                // FILTRO INTELIGENTE: Quem pode ver o quê?
+                const escalasFiltradas = todasEscalas.filter(e => {
+                    const deptoDaEscala = e.departamento || 'LOUVOR';
+                    const ehLiderDestaEscala = isAdminOuPastor || (cargoUser === 'LIDER' && mochilaLider.includes(deptoDaEscala));
+                    const ehReuniaoFechada = (e.titulo || '').includes('[LIDERANÇA]');
+                    const meuNomeTaNaLista = e.equipe && e.equipe.toUpperCase().includes(user.nome.toUpperCase());
+
+                    if (ehLiderDestaEscala) return true; // Chefe vê tudo do seu setor
+                    if (ehReuniaoFechada) return false;  // Se não é chefe, não vê as reuniões secretas!
+                    return meuNomeTaNaLista; // Membro comum só vê onde foi escalado
+                });
+
+                escalasFiltradas.sort((a, b) => new Date(a.data) - new Date(b.data));
+                renderizarEscalasEmPilha(escalasFiltradas);
             }
         } catch (error) { console.error(error); }
     }
@@ -385,13 +414,12 @@
     async function carregarDadosServidor() {
         try {
             const [resMembros, resEscalas, resFaltas] = await Promise.all([
-                fetch(`/api/membros?departamento=${deptAtual}`), 
-                fetch(`/api/escalas?departamento=${deptAtual}`), 
-                fetch('/api/indisponibilidade')
+                fetch(`/api/membros?departamento=${encodeURIComponent(deptAtual)}`, { headers: getHeaders }), 
+                fetch(`/api/escalas?departamento=${encodeURIComponent(deptAtual)}`, { headers: getHeaders }), 
+                fetch('/api/indisponibilidade', { headers: getHeaders })
             ]);
             
             const dataAtual = new Date(); const mesAtual = dataAtual.getMonth(); const anoAtual = dataAtual.getFullYear();
-
             let membrosDaExtensao = [];
 
             if (resMembros.ok) { 
@@ -433,19 +461,15 @@
         }, 40);
     }
 
-    // =======================================================
-    // MOTOR DA PILHA EXPANSÍVEL (O ACORDEON APPLE WALLET)
-    // =======================================================
     function renderizarEscalasEmPilha(escalas) {
         const container = document.getElementById('listaMinhasEscalas');
         if (escalas.length === 0) {
             container.innerHTML = `<div style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 12px; text-align: center; border: 1px dashed #333;">
                 <i class="fas fa-mug-hot" style="font-size: 30px; color: var(--text-dim); margin-bottom: 15px;"></i>
-                <p style="color: var(--text-dim);">Você não está escalado para os próximos dias.<br>Aproveite o descanso!</p></div>`;
+                <p style="color: var(--text-dim);">Você não tem compromissos agendados na visão atual.<br>Aproveite o descanso!</p></div>`;
             return;
         }
 
-        // 1. Agrupa as escalas por Ministério (Se não tiver salvo, chuta pro deptAtual)
         const grupos = {};
         escalas.forEach(e => {
             const min = e.departamento || deptAtual; 
@@ -454,7 +478,6 @@
         });
 
         const mesesNomes = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-
         let htmlFinal = '';
 
         Object.keys(grupos).forEach(min => {
@@ -463,7 +486,6 @@
             const cor = configInfo.cor;
             const icone = configInfo.icone;
             
-            // Só começa colapsado se tiver mais de 1 escala nesse bloco
             const startClass = escalasDesteMin.length > 1 ? 'collapsed' : '';
             const txtBotao = startClass === 'collapsed' ? `Expandir (${escalasDesteMin.length}) <i class="fas fa-chevron-down"></i>` : 'Ocultar <i class="fas fa-chevron-up"></i>';
             const btnVisibility = escalasDesteMin.length > 1 ? `block` : `none`;
@@ -471,13 +493,17 @@
             let cardsHtml = escalasDesteMin.map(e => {
                 let dia = '--', mes = '---';
                 if (e.data) { const p = e.data.split('-'); dia = p[2]; mes = mesesNomes[parseInt(p[1]) - 1]; }
+                
+                const isReuniao = (e.titulo || '').includes('[LIDERANÇA]');
+                const tituloLimpo = (e.titulo || 'Sem Título').replace('[LIDERANÇA]', '').trim();
+                const iconeSecreto = isReuniao ? '<i class="fas fa-user-tie" style="color: #f59e0b;" title="Reunião Exclusiva"></i>' : '';
 
                 return `
                 <div class="escala-mini-card" style="--stack-color: ${cor};" onclick="abrirEscalaModal(${e.id}, event)">
                     <div class="escala-date"><div class="day">${dia}</div><div class="month">${mes}</div></div>
                     <div class="escala-info">
-                        <h4>${e.titulo || 'Evento sem Título'}</h4>
-                        <p>Clique para ver detalhes do repertório e equipe</p>
+                        <h4>${iconeSecreto} ${tituloLimpo}</h4>
+                        <p>Clique para ver detalhes e equipe</p>
                     </div>
                 </div>`;
             }).join('');
@@ -511,59 +537,97 @@
     }
 
     // =======================================================
-
+    // MODAL DE DETALHES (O GÊNIO DO LÍDER/MEMBRO)
+    // =======================================================
     function abrirEscalaModal(id, event) {
         escalaAtualAberta = todasEscalas.find(e => e.id == id);
         if(!escalaAtualAberta) return;
 
-        document.getElementById('modalEscalaTitulo').innerText = escalaAtualAberta.titulo || 'Sem Título';
+        const isReuniao = (escalaAtualAberta.titulo || '').includes('[LIDERANÇA]');
+        let tituloLimpo = (escalaAtualAberta.titulo || 'Sem Título').replace('[LIDERANÇA]', '').trim();
+        if(isReuniao) tituloLimpo = '<i class="fas fa-user-tie" style="color:#f59e0b;"></i> ' + tituloLimpo;
+
+        document.getElementById('modalEscalaTitulo').innerHTML = tituloLimpo;
         document.getElementById('modalEscalaData').innerText = escalaAtualAberta.data ? escalaAtualAberta.data.split('-').reverse().join('/') : 'Sem Data';
 
-        const equipeFormatada = agruparEquipe(escalaAtualAberta.equipe);
-        document.getElementById('modalEscalaEquipe').innerHTML = equipeFormatada.length > 0 ? equipeFormatada.join('<br>') : 'Ninguém escalado.';
+        // 1. MÁGICA DE ESCONDER O REPERTÓRIO PARA OUTRAS ÁREAS
+        const deptoDaEscala = escalaAtualAberta.departamento || 'LOUVOR';
+        const boxRepertorio = document.getElementById('boxRepertorio');
+        const gridDetalhes = document.getElementById('gridDetalhesEscala');
+        
+        if (deptoDaEscala.toUpperCase() !== 'LOUVOR') {
+            if(boxRepertorio) boxRepertorio.style.display = 'none';
+            if(gridDetalhes) gridDetalhes.style.gridTemplateColumns = '1fr'; // Estica a caixa da equipe pra ficar bonitão
+        } else {
+            if(boxRepertorio) boxRepertorio.style.display = 'block';
+            if(gridDetalhes) gridDetalhes.style.gridTemplateColumns = '1fr 1fr';
+            
+            let htmlRepertorio = '';
+            if (escalaAtualAberta.repertorio && escalaAtualAberta.repertorio.trim().length > 0) {
+                const linhasMusicas = escalaAtualAberta.repertorio.split('\n').filter(Boolean);
+                linhasMusicas.forEach(linha => {
+                    let tituloPuro = linha; let tomInfo = '';
+                    if (linha.includes('(') && linha.includes(')')) {
+                        const openIdx = linha.lastIndexOf('(');
+                        tituloPuro = linha.substring(0, openIdx).trim();
+                        tomInfo = linha.substring(openIdx);
+                    }
 
-        let htmlRepertorio = '';
-        if (escalaAtualAberta.repertorio) {
-            const linhasMusicas = escalaAtualAberta.repertorio.split('\n').filter(Boolean);
-            linhasMusicas.forEach(linha => {
-                let tituloPuro = linha;
-                let tomInfo = '';
-                if (linha.includes('(') && linha.includes(')')) {
-                    const openIdx = linha.lastIndexOf('(');
-                    tituloPuro = linha.substring(0, openIdx).trim();
-                    tomInfo = linha.substring(openIdx);
-                }
+                    const louvorOficial = louvoresGlobais.find(l => l.titulo.toLowerCase().trim() === tituloPuro.toLowerCase().trim());
+                    const img = louvorOficial && louvorOficial.imagemUrl ? louvorOficial.imagemUrl : DEFAULT_IMG;
+                    const artista = louvorOficial && louvorOficial.artista ? louvorOficial.artista : 'Música';
+                    const isClickable = louvorOficial ? `class="escala-musica-item clickable" onclick="abrirLouvorGenie(${louvorOficial.id}, event)"` : `class="escala-musica-item"`;
 
-                const louvorOficial = louvoresGlobais.find(l => l.titulo.toLowerCase().trim() === tituloPuro.toLowerCase().trim());
-                const img = louvorOficial && louvorOficial.imagemUrl ? louvorOficial.imagemUrl : DEFAULT_IMG;
-                const artista = louvorOficial && louvorOficial.artista ? louvorOficial.artista : 'Música';
-                const isClickable = louvorOficial ? `class="escala-musica-item clickable" onclick="abrirLouvorGenie(${louvorOficial.id}, event)"` : `class="escala-musica-item"`;
-
-                htmlRepertorio += `
-                    <div ${isClickable}>
-                        <img src="${img}" class="escala-musica-img">
-                        <div class="escala-musica-info">
-                            <h6>${tituloPuro} <span style="color: var(--primary); font-size: 11px;">${tomInfo}</span></h6>
-                            <p>${artista}</p>
-                        </div>
-                    </div>
-                `;
-            });
-        } else { htmlRepertorio = 'Nenhuma música definida.'; }
-        document.getElementById('modalEscalaRepertorio').innerHTML = htmlRepertorio;
-
-        let status = 'PENDENTE', cor = '#f59e0b';
-        if (escalaAtualAberta.confirmacoes) {
-            try {
-                const confJSON = JSON.parse(escalaAtualAberta.confirmacoes);
-                if (confJSON[user.nome] === 'CONFIRMADO') { status = 'CONFIRMADO'; cor = '#10b981'; }
-                else if (confJSON[user.nome] === 'RECUSADO') { status = 'NÃO VOU'; cor = '#ef4444'; }
-            } catch(e) {}
+                    htmlRepertorio += `
+                        <div ${isClickable}>
+                            <img src="${img}" class="escala-musica-img">
+                            <div class="escala-musica-info">
+                                <h6>${tituloPuro} <span style="color: var(--primary); font-size: 11px;">${tomInfo}</span></h6>
+                                <p>${artista}</p>
+                            </div>
+                        </div>`;
+                });
+            } else { htmlRepertorio = '<p style="font-size:12px; color:gray; font-style:italic;">Não definido pelo líder ainda.</p>'; }
+            document.getElementById('modalEscalaRepertorio').innerHTML = htmlRepertorio;
         }
 
-        document.getElementById('statusPresenca').innerHTML = `Seu status: <span style="color: ${cor};">${status}</span>`;
-        if (status !== 'PENDENTE') { document.getElementById('rsvpBotoes').style.display = 'none'; }
-        else { document.getElementById('rsvpBotoes').style.display = 'flex'; }
+        // Renderiza nomes da equipe
+        const equipeFormatada = agruparEquipe(escalaAtualAberta.equipe);
+        let htmlEquipe = '';
+        equipeFormatada.forEach(obj => {
+            htmlEquipe += `<div style="margin-bottom:5px; border-bottom:1px dashed #333; padding-bottom:5px;">${obj.nome} ${obj.funcao ? `<span style="color:var(--text-dim);font-size:11px; float:right;">${obj.funcao}</span>` : ''}</div>`;
+        });
+        document.getElementById('modalEscalaEquipe').innerHTML = htmlEquipe || '<p style="font-size:12px; color:gray;">Ninguém escalado.</p>';
+
+        // 2. LÓGICA DE CONFIRMAÇÃO DE PRESENÇA (RSVP)
+        const meuNomeNaLista = equipeFormatada.find(n => n.nome.toUpperCase() === user.nome.toUpperCase());
+        
+        if (meuNomeNaLista) {
+            document.getElementById('rsvpAreaContainer').style.display = 'block';
+            let status = 'PENDENTE', cor = '#f59e0b';
+            if (escalaAtualAberta.confirmacoes) {
+                try {
+                    const confJSON = JSON.parse(escalaAtualAberta.confirmacoes);
+                    if (confJSON[user.nome] === 'CONFIRMADO') { status = 'CONFIRMADO'; cor = '#10b981'; }
+                    else if (confJSON[user.nome] === 'RECUSADO') { status = 'NÃO VOU'; cor = '#ef4444'; }
+                } catch(e) {}
+            }
+            document.getElementById('statusPresenca').innerHTML = `Seu status: <span style="color: ${cor};">${status}</span>`;
+            document.getElementById('rsvpBotoes').style.display = status !== 'PENDENTE' ? 'none' : 'flex';
+        } else {
+            document.getElementById('rsvpAreaContainer').style.display = 'none'; // Se não for da escala de hoje, esconde.
+        }
+
+        // 3. MÁGICA 3: HABILITAR CHAMADA SE ELE FOR O CHEFE
+        const mochilaLider = user.liderDe || "";
+        const ehChefe = ['DEV', 'ADMIN', 'PASTOR'].includes(cargoUser) || (cargoUser === 'LIDER' && mochilaLider.includes(deptoDaEscala));
+        
+        if (ehChefe && equipeFormatada.length > 0) {
+            document.getElementById('areaChamadaLider').style.display = 'block';
+            carregarTabelaDeChamada(equipeFormatada.map(e => e.nome), escalaAtualAberta.data);
+        } else {
+            document.getElementById('areaChamadaLider').style.display = 'none';
+        }
 
         const modal = document.getElementById('escalaModal');
         modal.style.transformOrigin = `${event.clientX}px ${event.clientY}px`;
@@ -589,18 +653,97 @@
 
         const escalaAtualizada = { ...escalaAtualAberta, confirmacoes: JSON.stringify(confJSON) };
 
+        // Usa o Token na requisição pra não barrar
+        const putHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+
         const res = await fetch(`/api/escalas/${escalaAtualAberta.id}`, {
-            method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(escalaAtualizada)
+            method: 'PUT', headers: putHeaders, body: JSON.stringify(escalaAtualizada)
         });
 
         if (res.ok) {
-            escalaAtualAberta.confirmacoes = JSON.stringify(confJSON);
-            let cor = resposta === 'CONFIRMADO' ? '#10b981' : '#ef4444';
-            let texto = resposta === 'CONFIRMADO' ? 'CONFIRMADO' : 'NÃO VOU';
-            document.getElementById('statusPresenca').innerHTML = `Seu status: <span style="color: ${cor};">${texto}</span>`;
-            document.getElementById('rsvpBotoes').style.display = 'none';
+            fecharEscalaModal();
             carregarTudo();
         } else { alert('Erro ao confirmar presença!'); }
+    }
+
+    // ===============================================
+    // LÓGICA DA PRANCHETA DE CHAMADA DO LÍDER
+    // ===============================================
+    async function carregarTabelaDeChamada(nomesNaEscala, dataDoEvento) {
+        const containerNomes = document.getElementById('listaNomesChamada');
+        containerNomes.innerHTML = '<p style="color:gray; font-size:12px;"><i class="fas fa-spinner fa-spin"></i> Puxando livro de presenças...</p>';
+        estadoChamada = {};
+
+        try {
+            const resFaltas = await fetch('/api/indisponibilidade', { headers: getHeaders });
+            if (resFaltas.ok) {
+                const todasFaltas = await resFaltas.json();
+                faltasDoBancoCache = todasFaltas.filter(f => f.data === dataDoEvento);
+            }
+        } catch(e) { console.log(e); }
+
+        let html = '';
+        nomesNaEscala.forEach(nome => {
+            const faltaExistente = faltasDoBancoCache.find(f => f.nomeMembro.trim().toLowerCase() === nome.trim().toLowerCase());
+            estadoChamada[nome] = faltaExistente ? 'FALTA' : 'PRESENTE';
+
+            const classeBtnPres = estadoChamada[nome] === 'PRESENTE' ? 'btn-tog active-pres' : 'btn-tog';
+            const classeBtnFalta = estadoChamada[nome] === 'FALTA' ? 'btn-tog active-falta' : 'btn-tog';
+
+            html += `
+                <div class="chamada-row">
+                    <span class="chamada-nome">${nome}</span>
+                    <div class="chamada-toggles">
+                        <button class="${classeBtnPres}" onclick="alternarPresenca('${nome}', 'PRESENTE', this)">Presente</button>
+                        <button class="${classeBtnFalta}" onclick="alternarPresenca('${nome}', 'FALTA', this)">Faltou</button>
+                    </div>
+                </div>
+            `;
+        });
+        containerNomes.innerHTML = html;
+    }
+
+    function alternarPresenca(nome, novoEstado, elementoClicado) {
+        estadoChamada[nome] = novoEstado;
+        const divPai = elementoClicado.parentElement;
+        divPai.querySelectorAll('.btn-tog').forEach(b => b.classList.remove('active-pres', 'active-falta'));
+        
+        if(novoEstado === 'PRESENTE') divPai.children[0].classList.add('active-pres');
+        else divPai.children[1].classList.add('active-falta');
+    }
+
+    async function salvarChamadaLider() {
+        const btn = document.getElementById('btnSalvarChamada');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando com Pastor...';
+        btn.disabled = true;
+
+        const dataEvento = escalaAtualAberta.data;
+        const nomesParaProcessar = Object.keys(estadoChamada);
+        const postHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+
+        try {
+            for (let i = 0; i < nomesParaProcessar.length; i++) {
+                const nomeMembro = nomesParaProcessar[i];
+                const estadoTela = estadoChamada[nomeMembro];
+                const faltaExistente = faltasDoBancoCache.find(f => f.nomeMembro.trim().toLowerCase() === nomeMembro.trim().toLowerCase());
+
+                if (estadoTela === 'FALTA' && !faltaExistente) {
+                    await fetch('/api/indisponibilidade', {
+                        method: 'POST', headers: postHeaders,
+                        body: JSON.stringify({ nomeMembro: nomeMembro, data: dataEvento, motivo: 'Falta no Culto/Evento' })
+                    });
+                }
+                else if (estadoTela === 'PRESENTE' && faltaExistente) {
+                    await fetch(`/api/indisponibilidade/${faltaExistente.id}`, { method: 'DELETE', headers: getHeaders });
+                }
+            }
+            alert('Ata de presença enviada com sucesso ao Painel Pastoral!');
+            fecharEscalaModal(); 
+        } catch (e) {
+            alert('Erro de conexão ao salvar chamada.');
+        } finally {
+            btn.innerHTML = '<i class="fas fa-save"></i> Salvar Alterações'; btn.disabled = false;
+        }
     }
 
     function abrirLouvorGenie(idLouvor, event) {
@@ -640,6 +783,10 @@
         const btn = document.getElementById(btnId);
         if(url && url.trim() !== "") { btn.href = url; btn.classList.remove('disabled'); }
         else { btn.removeAttribute('href'); btn.classList.add('disabled'); }
+    }
+
+    function sairSistema() {
+        localStorage.clear(); window.location.href = 'login.html';
     }
 
     inicializarPainel();
