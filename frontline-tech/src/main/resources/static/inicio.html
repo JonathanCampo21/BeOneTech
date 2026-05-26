@@ -19,13 +19,47 @@
 
         .welcome-box { background: linear-gradient(135deg, #111 0%, #0a0a0a 100%); border: 1px solid #333; padding: 40px; border-radius: 15px; margin-bottom: 30px; border-left: 5px solid var(--primary); }
 
-        .escala-mini-card { background: #111; border: 1px solid #222; border-radius: 12px; padding: 15px 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: 0.3s; margin-bottom: 15px; border-left: 4px solid var(--primary); }
-        .escala-mini-card:hover { background: #1a1a1a; transform: translateX(5px); border-color: var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        /* ========================================== */
+        /* MÁGICA DA PILHA DE ESCALAS (STACK) */
+        /* ========================================== */
+        .stack-group { margin-bottom: 35px; }
+        
+        .stack-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; border-bottom: 1px solid #222; padding-bottom: 10px;}
+        .stack-header h3 { margin: 0; font-size: 18px; color: white; display: flex; align-items: center; gap: 10px; }
+        
+        .btn-toggle-stack { background: #1a1a1a; border: 1px solid #333; color: white; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.3s; font-weight: bold; font-family: 'Urbanist', sans-serif;}
+        .btn-toggle-stack:hover { background: #222; border-color: var(--primary); }
+
+        .stack-cards { display: flex; flex-direction: column; gap: 12px; }
+        
+        .stack-cards.collapsed { gap: 0; padding-bottom: 30px; } /* Espaço para o "rabo" das cartas aparecer */
+        
+        .escala-mini-card { 
+            background: #111; border: 1px solid #222; border-radius: 12px; padding: 15px 20px; 
+            display: flex; align-items: center; gap: 20px; cursor: pointer; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            border-left: 4px solid var(--stack-color, var(--primary)); 
+            position: relative;
+        }
+
+        /* COMPORTAMENTO EXPANDIDO */
+        .stack-cards:not(.collapsed) .escala-mini-card:hover { 
+            background: #1a1a1a; transform: translateX(5px); border-color: var(--stack-color, var(--primary)); box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+        }
+
+        /* COMPORTAMENTO RECOLHIDO (AS CARTAS FICAM EMPILHADAS ATRÁS) */
+        .stack-cards.collapsed .escala-mini-card:nth-child(1) { z-index: 5; transform: scale(1); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .stack-cards.collapsed .escala-mini-card:nth-child(2) { z-index: 4; transform: scale(0.95); margin-top: -65px; opacity: 0.7; filter: brightness(0.7); }
+        .stack-cards.collapsed .escala-mini-card:nth-child(3) { z-index: 3; transform: scale(0.90); margin-top: -65px; opacity: 0.4; filter: brightness(0.4); }
+        .stack-cards.collapsed .escala-mini-card:nth-child(n+4) { display: none; } /* Esconde a 4ª em diante na pilha */
+
         .escala-date { text-align: center; line-height: 1.1; min-width: 60px; }
-        .escala-date .day { font-size: 28px; font-weight: 900; color: var(--primary); }
+        .escala-date .day { font-size: 28px; font-weight: 900; color: var(--stack-color, var(--primary)); }
         .escala-date .month { font-size: 13px; color: var(--text-dim); text-transform: uppercase; font-weight: bold; }
         .escala-info h4 { margin: 0; font-size: 18px; color: white; font-weight: bold; }
         .escala-info p { margin: 5px 0 0 0; font-size: 13px; color: var(--text-dim); }
+
+        /* ========================================== */
 
         .genie-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 1001;}
         .genie-overlay.active { opacity: 1; pointer-events: all; }
@@ -142,11 +176,13 @@
     </div>
 
     <div style="margin-top: 40px;">
-        <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: white;">
-            <i class="fas fa-calendar-check highlight"></i> Minhas Próximas Escalas
-        </h3>
+        <h2 style="font-size: 22px; margin-bottom: 5px; color: white;">
+            Minhas Próximas Escalas
+        </h2>
+        <p style="color: var(--text-dim); margin-bottom: 25px; font-size: 14px;">Visão global de todos os seus compromissos.</p>
+        
         <div id="listaMinhasEscalas">
-            <p style="color: gray; font-style: italic;">Buscando suas escalas...</p>
+            <p style="color: gray; font-style: italic;">Buscando escalas na rede...</p>
         </div>
     </div>
 
@@ -224,13 +260,20 @@
 
     const user = JSON.parse(localStorage.getItem('usuario')) || {nome: 'Visitante', cargo: 'MEMBRO'};
     const cargoUser = String(user.cargo).toUpperCase().trim();
-    
-    // VARIÁVEL CHAVE DO DEPARTAMENTO
     const deptAtual = localStorage.getItem('departamentoAtual') || 'LOUVOR';
 
     let todasEscalas = [];
     let escalaAtualAberta = null;
     let louvoresGlobais = [];
+
+    const DEPARTAMENTOS_CONFIG = {
+        "LOUVOR": { cor: "#FF3300", icone: "fa-music" },
+        "MIDIA": { cor: "#190B28", icone: "fa-camera" },
+        "SALT": { cor: "#121831", icone: "fa-users" },
+        "27+": { cor: "#10251A", icone: "fa-plus-circle" },
+        "JOIN": { cor: "#2F3C64", icone: "fa-handshake" },
+        "KIDS": { cor: "#FDD835", icone: "fa-child" }
+    };
 
     const DEFAULT_IMG = "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80";
 
@@ -254,29 +297,15 @@
                 nameElem.innerText = primeiroNome;
             }
             
-            if (roleElem) roleElem.innerText = userLogado.cargo || 'Membro';
-
-            const res = await fetch(`/api/membros?departamento=${deptAtual}`);
-            if (res.ok) {
-                const membros = await res.json();
-                let userAtualizado = null;
-                
-                if (userLogado.id) {
-                    userAtualizado = membros.find(m => m.id === userLogado.id);
-                } else if (userLogado.nome) {
-                    userAtualizado = membros.find(m => m.nome.trim().toLowerCase() === userLogado.nome.trim().toLowerCase());
+            if (roleElem) {
+                let cargoLocal = userLogado.cargo;
+                if (cargoLocal === 'LIDER') {
+                    const mochila = userLogado.liderDe || "";
+                    if (!mochila.includes(deptAtual)) cargoLocal = 'MEMBRO';
                 }
-
-                if (userAtualizado) {
-                    if (userAtualizado.fotoPerfil && avatarElem) {
-                        avatarElem.src = userAtualizado.fotoPerfil;
-                    }
-                    localStorage.setItem('usuario', JSON.stringify(userAtualizado));
-                }
+                roleElem.innerText = cargoLocal || 'Membro';
             }
-        } catch(e) { 
-            console.log("Servidor ocupado. Mantendo os dados do cache."); 
-        }
+        } catch(e) { console.log("Erro ao processar sidebar"); }
     }
 
     function agruparEquipe(equipeStr) {
@@ -315,7 +344,11 @@
             if(linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
         }
 
-        if (['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser)) {
+        let isChefiaLocal = false;
+        if (['ADMIN', 'DEV', 'PASTOR'].includes(cargoUser)) isChefiaLocal = true;
+        else if (cargoUser === 'LIDER' && (user.liderDe || "").includes(deptAtual)) isChefiaLocal = true;
+
+        if (isChefiaLocal) {
             document.getElementById('subtxtBoasVindas').innerText = "Aqui está o resumo operacional do ministério neste mês.";
             document.querySelectorAll('.boss-only').forEach(el => { el.classList.remove('boss-only'); el.style.display = 'block'; });
             carregarDadosServidor();
@@ -330,17 +363,21 @@
 
     async function carregarTudo() {
         try {
+            // MÁGICA: Agora busca TODAS as escalas de todos os ministérios
             const [resEscalas, resLouvores] = await Promise.all([
-                fetch(`/api/escalas?departamento=${deptAtual}`), 
+                fetch('/api/escalas'), 
                 fetch('/api/louvores')
             ]);
             
             if(resLouvores.ok) louvoresGlobais = await resLouvores.json();
             if(resEscalas.ok) {
                 todasEscalas = await resEscalas.json();
+                
+                // Filtra apenas as que o nome do usuário aparece
                 const minhas = todasEscalas.filter(e => e.equipe && e.equipe.toUpperCase().includes(user.nome.toUpperCase()));
                 minhas.sort((a, b) => new Date(a.data) - new Date(b.data));
-                renderizarEscalas(minhas);
+                
+                renderizarEscalasEmPilha(minhas);
             }
         } catch (error) { console.error(error); }
     }
@@ -373,16 +410,11 @@
 
             if (resFaltas.ok) {
                 const faltas = await resFaltas.json();
-                
-                // MÁGICA DO ISOLAMENTO: Pega só os nomes da galera que é DESSA extensão
                 const nomesDestaExtensao = membrosDaExtensao.map(m => m.nome.trim().toLowerCase());
 
                 const faltasDoMes = faltas.filter(f => {
                     if(!f.data) return false;
-                    
-                    // Se o nome do cara que faltou não estiver na lista de membros DESTA extensão, ignora!
                     if(!nomesDestaExtensao.includes(f.nomeMembro.trim().toLowerCase())) return false;
-
                     const d = new Date(f.data); return d.getMonth() === mesAtual && d.getFullYear() === anoAtual;
                 });
                 animarNumero('countFaltas', faltasDoMes.length);
@@ -401,7 +433,10 @@
         }, 40);
     }
 
-    function renderizarEscalas(escalas) {
+    // =======================================================
+    // MOTOR DA PILHA EXPANSÍVEL (O ACORDEON APPLE WALLET)
+    // =======================================================
+    function renderizarEscalasEmPilha(escalas) {
         const container = document.getElementById('listaMinhasEscalas');
         if (escalas.length === 0) {
             container.innerHTML = `<div style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 12px; text-align: center; border: 1px dashed #333;">
@@ -410,21 +445,72 @@
             return;
         }
 
-        const mesesNomes = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-        container.innerHTML = escalas.map(e => {
-            let dia = '--', mes = '---';
-            if (e.data) { const p = e.data.split('-'); dia = p[2]; mes = mesesNomes[parseInt(p[1]) - 1]; }
+        // 1. Agrupa as escalas por Ministério (Se não tiver salvo, chuta pro deptAtual)
+        const grupos = {};
+        escalas.forEach(e => {
+            const min = e.departamento || deptAtual; 
+            if(!grupos[min]) grupos[min] = [];
+            grupos[min].push(e);
+        });
 
-            return `
-            <div class="escala-mini-card" onclick="abrirEscalaModal(${e.id}, event)">
-                <div class="escala-date"><div class="day">${dia}</div><div class="month">${mes}</div></div>
-                <div class="escala-info">
-                    <h4>${e.titulo || 'Evento sem Título'}</h4>
-                    <p>Clique para ver detalhes do repertório e equipe</p>
+        const mesesNomes = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+        let htmlFinal = '';
+
+        Object.keys(grupos).forEach(min => {
+            const escalasDesteMin = grupos[min];
+            const configInfo = DEPARTAMENTOS_CONFIG[min] || DEPARTAMENTOS_CONFIG["LOUVOR"];
+            const cor = configInfo.cor;
+            const icone = configInfo.icone;
+            
+            // Só começa colapsado se tiver mais de 1 escala nesse bloco
+            const startClass = escalasDesteMin.length > 1 ? 'collapsed' : '';
+            const txtBotao = startClass === 'collapsed' ? `Expandir (${escalasDesteMin.length}) <i class="fas fa-chevron-down"></i>` : 'Ocultar <i class="fas fa-chevron-up"></i>';
+            const btnVisibility = escalasDesteMin.length > 1 ? `block` : `none`;
+
+            let cardsHtml = escalasDesteMin.map(e => {
+                let dia = '--', mes = '---';
+                if (e.data) { const p = e.data.split('-'); dia = p[2]; mes = mesesNomes[parseInt(p[1]) - 1]; }
+
+                return `
+                <div class="escala-mini-card" style="--stack-color: ${cor};" onclick="abrirEscalaModal(${e.id}, event)">
+                    <div class="escala-date"><div class="day">${dia}</div><div class="month">${mes}</div></div>
+                    <div class="escala-info">
+                        <h4>${e.titulo || 'Evento sem Título'}</h4>
+                        <p>Clique para ver detalhes do repertório e equipe</p>
+                    </div>
+                </div>`;
+            }).join('');
+
+            htmlFinal += `
+            <div class="stack-group">
+                <div class="stack-header">
+                    <h3 style="color: ${cor};"><i class="fas ${icone}"></i> ${min}</h3>
+                    <button class="btn-toggle-stack" style="display: ${btnVisibility};" onclick="togglePilha(this, 'stack-${min}')">${txtBotao}</button>
+                </div>
+                <div class="stack-cards ${startClass}" id="stack-${min}">
+                    ${cardsHtml}
                 </div>
             </div>`;
-        }).join('');
+        });
+
+        container.innerHTML = htmlFinal;
     }
+
+    function togglePilha(btn, idStack) {
+        const stack = document.getElementById(idStack);
+        const qtdCards = stack.children.length;
+
+        if (stack.classList.contains('collapsed')) {
+            stack.classList.remove('collapsed');
+            btn.innerHTML = `Ocultar <i class="fas fa-chevron-up"></i>`;
+        } else {
+            stack.classList.add('collapsed');
+            btn.innerHTML = `Expandir (${qtdCards}) <i class="fas fa-chevron-down"></i>`;
+        }
+    }
+
+    // =======================================================
 
     function abrirEscalaModal(id, event) {
         escalaAtualAberta = todasEscalas.find(e => e.id == id);
