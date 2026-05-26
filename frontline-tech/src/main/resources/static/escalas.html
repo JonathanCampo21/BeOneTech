@@ -20,11 +20,13 @@
         .day-cell:hover { background: #222; border-color: var(--primary); }
         .day-cell.empty { background: transparent; border: none; cursor: default; }
         .day-cell.minha-falta { background: rgba(245, 158, 11, 0.2) !important; color: #f59e0b !important; border-color: #f59e0b; }
+        
         .switch-container { display: flex; align-items: center; gap: 10px; background: #1a1a1a; padding: 10px 15px; border-radius: 8px; border: 1px solid #333; cursor: pointer; transition: 0.3s; }
         .switch-container.active { border-color: var(--primary); background: rgba(16, 185, 129, 0.1); }
         .switch-container i { color: var(--text-dim); }
         .switch-container.active i { color: var(--primary); }
-        .builder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px; }
+        
+        .builder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px; transition: 0.3s ease; }
         .selector-box { background: #0a0a0a; border: 1px solid #333; border-radius: 8px; height: 250px; overflow-y: auto; padding: 10px; }
         .item-wrapper { border-bottom: 1px solid #222; transition: 0.3s; }
         .item-row { padding: 12px; cursor: pointer; font-size: 14px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
@@ -33,13 +35,16 @@
         .role-btn { display: inline-block; padding: 5px 10px; margin: 3px; border-radius: 4px; border: 1px solid #333; font-size: 12px; cursor: pointer; color: #aaa; transition: 0.2s; }
         .role-btn:hover { border-color: var(--primary); color: white; }
         .role-btn.active { background: var(--primary); color: black; border-color: var(--primary); font-weight: bold; }
+        
         .escala-card { background: #111; border: 1px solid #333; border-radius: 10px; padding: 20px; margin-bottom: 20px; border-left: 5px solid var(--primary); display: flex; flex-direction: column; gap: 15px; cursor: pointer; transition: 0.3s;}
         .escala-card:hover { background: #1a1a1a; border-color: var(--primary); transform: translateY(-3px);}
+        
         .btn { padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: 'Urbanist', sans-serif; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; }
         .btn-primary { background: var(--primary); color: #000; width: 100%; margin-top: 20px; }
         .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
         .btn-icon { background: none; border: 1px solid #333; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: 0.2s; color: white;}
         .btn-icon:hover { background: #333; }
+        
         .escala-musica-item { display: flex; align-items: center; gap: 12px; padding: 10px; background: #1a1a1a; border: 1px solid #222; border-radius: 8px; margin-bottom: 8px; transition: 0.2s; }
         .escala-musica-item.clickable { cursor: pointer; }
         .escala-musica-item.clickable:hover { border-color: var(--primary); transform: translateX(5px); }
@@ -55,12 +60,15 @@
         .genie-header { background: #1a1a1a; padding: 30px; border-bottom: 2px solid var(--primary); border-radius: 20px 20px 0 0; text-align: center; }
         .genie-title { font-size: 28px; font-weight: 900; margin-bottom: 5px; color: white; }
         .genie-subtitle { color: var(--primary); font-size: 16px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
+        
         .genie-content { padding: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .detalhe-box { background: #0a0a0a; border: 1px solid #222; border-radius: 12px; padding: 20px; }
         .detalhe-box h5 { color: var(--primary); font-size: 12px; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; border-bottom: 1px solid #222; padding-bottom: 5px;}
         .detalhe-box p { font-size: 14px; line-height: 1.6; color: #ddd; margin: 0; }
+        
         .btn-close-genie { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.1); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 16px; transition: 0.3s;}
         .btn-close-genie:hover { background: #ef4444; }
+        
         .louvor-header-img { width: 100%; height: 250px; object-fit: cover; border-radius: 20px 20px 0 0; border-bottom: 2px solid var(--primary); }
         .louvor-info-box { display: flex; gap: 20px; margin-bottom: 30px; }
         .info-item { background: #1a1a1a; padding: 15px 20px; border-radius: 12px; border: 1px solid #222; text-align: center; flex: 1; }
@@ -71,8 +79,8 @@
         .btn-link:hover { background: var(--primary); color: black; border-color: var(--primary); transform: translateY(-3px); }
         .btn-youtube:hover { background: #ef4444; color: white; border-color: #ef4444; }
         .btn-link.disabled { opacity: 0.3; pointer-events: none; }
+        
         .admin-only, .boss-only { display: none !important; }
-
         .search-micro { width: 100%; margin-bottom: 10px; padding: 10px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 6px; font-family: 'Urbanist', sans-serif; transition: 0.3s;}
         .search-micro:focus { border-color: var(--primary); outline: none; }
 
@@ -109,25 +117,26 @@
     <a href="louvores.html"><i class="fas fa-music"></i> Repertório</a>
     <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
     <a href="escalas.html" class="active"><i class="fas fa-calendar-alt"></i> Escalas</a>
+    <a href="painel_pastor.html" id="linkPastor" class="admin-only" style="color: #a2ff00;"><i class="fas fa-chart-pie"></i> Painel Executivo</a>
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
     <a href="#" onclick="sairSistema()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
 </aside>
 
 <main class="main-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
         <div>
             <h2 style="margin: 0;">Gestão de Escalas <span id="nomeDeptBadge" style="font-size: 12px; border: 1px solid var(--primary); padding: 3px 8px; border-radius: 12px; margin-left: 10px; vertical-align: middle;"></span></h2>
             <p style="color: var(--text-dim); margin-top: 5px; font-size: 14px;" class="boss-only">Organize a equipe e acompanhe as ausências.</p>
         </div>
 
-        <div style="display: flex; gap: 15px; align-items: center;">
+        <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
             <div id="toggleModoLider" class="switch-container boss-only" onclick="alternarModoClique()">
                 <i class="fas fa-calendar-plus" id="iconModo"></i>
                 <span id="labelModo" style="font-size: 12px; font-weight: bold; text-transform: uppercase;">Modo: Montar Escala</span>
             </div>
 
             <button onclick="baixarPdfMensal()" class="btn btn-outline boss-only">
-                <i class="fas fa-file-pdf" style="color: #ef4444;"></i> Imprimir Escala Mensal
+                <i class="fas fa-file-pdf" style="color: #ef4444;"></i> Imprimir Escala
             </button>
         </div>
     </div>
@@ -160,13 +169,14 @@
             <input type="date" id="dataEscala" onchange="dataAlteradaManualmente()" style="padding:12px; background:#1a1a1a; border:1px solid #333; color:white; color-scheme:dark; border-radius: 6px; font-family: 'Urbanist', sans-serif;">
         </div>
 
-        <div class="builder-grid">
+        <div class="builder-grid" id="gridConstrutor">
             <div>
                 <p style="font-size:13px; color:var(--text-dim); font-weight: bold; margin-bottom: 8px;"><i class="fas fa-users"></i> Escalar Equipe:</p>
                 <input type="text" id="buscaMembroEscala" class="search-micro" placeholder="Buscar membro..." onkeyup="dataAlteradaManualmente()">
                 <div id="listaMembros" class="selector-box"></div>
             </div>
-            <div>
+            
+            <div id="boxBuilderRepertorio">
                 <p style="font-size:13px; color:var(--text-dim); font-weight: bold; margin-bottom: 8px;"><i class="fas fa-music"></i> Definir Repertório:</p>
                 <input type="text" id="buscaLouvorEscala" class="search-micro" placeholder="Buscar louvor..." onkeyup="renderizarLouvores()">
                 <div id="listaLouvores" class="selector-box"></div>
@@ -184,37 +194,37 @@
     <div id="containerEscalas"></div>
 </main>
 
-<div class="genie-overlay" id="escalaOverlay" onclick="fecharGenie()"></div>
+<div class="genie-overlay" id="escalaOverlay" onclick="if(event.target === this) fecharGenie()"></div>
 <div class="genie-modal" id="escalaModal">
     <button class="btn-close-genie" onclick="fecharGenie()"><i class="fas fa-times"></i></button>
     <div class="genie-header">
         <h2 class="genie-title" id="modalEscalaTitulo">Título do Culto</h2>
         <div class="genie-subtitle" id="modalEscalaData">DD/MM/YYYY</div>
     </div>
-    <div class="genie-content">
-        <div class="detalhe-box" style="grid-column: span 2;">
+    <div class="genie-content" id="modalGridConteudo">
+        <div class="detalhe-box">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 10px;">
                 <h5 style="margin: 0; border: none; padding: 0;"><i class="fas fa-users"></i> Status da Equipe</h5>
                 <div style="font-size: 11px; color: gray;">
-                    <i class="fas fa-circle" style="color: #10b981;"></i> Confirmado &nbsp;
-                    <i class="fas fa-circle" style="color: #f59e0b;"></i> Pendente &nbsp;
-                    <i class="fas fa-circle" style="color: #ef4444;"></i> Recusado
+                    <i class="fas fa-circle" style="color: #10b981;"></i> Conf <span style="margin:0 5px;">|</span>
+                    <i class="fas fa-circle" style="color: #f59e0b;"></i> Pend <span style="margin:0 5px;">|</span>
+                    <i class="fas fa-circle" style="color: #ef4444;"></i> Rec
                 </div>
             </div>
             <div id="modalEscalaEquipeStatus" style="font-size: 15px; line-height: 1.8;">Carregando...</div>
         </div>
-        <div class="detalhe-box" style="grid-column: span 2;">
+        <div class="detalhe-box" id="modalBoxRepertorio">
             <h5><i class="fas fa-music"></i> Repertório</h5>
             <div id="modalEscalaRepertorio">Carregando...</div>
         </div>
     </div>
 </div>
 
-<div class="genie-overlay" id="louvorOverlay" onclick="fecharLouvorGenie()"></div>
+<div class="genie-overlay" id="louvorOverlay" onclick="if(event.target === this) fecharLouvorGenie()"></div>
 <div class="genie-modal" id="louvorModal">
     <button class="btn-close-genie" onclick="fecharLouvorGenie()"><i class="fas fa-times"></i></button>
     <img src="" id="louvorCapaModal" class="louvor-header-img" alt="Capa">
-    <div class="genie-content">
+    <div class="genie-content" style="display: block;">
         <h2 class="genie-title" id="louvorTituloModal">Título da Música</h2>
         <p class="genie-subtitle" id="louvorArtistaModal" style="color: var(--text-dim); font-size: 16px; margin-bottom: 20px;">Cantor</p>
         <div class="louvor-info-box">
@@ -222,7 +232,7 @@
             <div class="info-item"><span>BPM</span><strong id="louvorBpmModal">120</strong></div>
             <div class="info-item"><span>Compasso</span><strong id="louvorCompassoModal">4/4</strong></div>
         </div>
-        <div class="link-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="link-grid">
             <a href="#" target="_blank" class="btn-link" id="btnCifra"><i class="fas fa-guitar"></i> Cifra</a>
             <a href="#" target="_blank" class="btn-link" id="btnLetra"><i class="fas fa-align-left"></i> Letra</a>
             <a href="#" target="_blank" class="btn-link" id="btnVs"><i class="fas fa-headphones"></i> Multitrack/VS</a>
@@ -239,9 +249,11 @@
 
     const user = JSON.parse(localStorage.getItem('usuario')) || {nome: 'Visitante', cargo: 'MEMBRO'};
     const cargoUser = String(user.cargo).toUpperCase().trim();
-    
-    // VARIÁVEL CHAVE: Descobre qual departamento estamos gerenciando agora
     const deptAtual = localStorage.getItem('departamentoAtual') || 'LOUVOR';
+
+    const tokenLocal = localStorage.getItem('token');
+    const getHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}` } : {};
+    const postHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
 
     let dataFoco = new Date();
     let modoMarcarAusencia = false;
@@ -249,21 +261,20 @@
     let equipeSel = [], louvorSel = [], idEscalaSendoEditada = null;
 
     const DEFAULT_IMG = "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80";
+    const DEPARTAMENTOS_CONFIG = { "LOUVOR": { cor: "#FF3300" }, "MIDIA": { cor: "#a855f7" }, "SALT": { cor: "#3b82f6" }, "27+": { cor: "#10b981" }, "JOIN": { cor: "#6366f1" }, "KIDS": { cor: "#facc15" } };
 
-   async function carregarSidebar() {
-        const userLogado = JSON.parse(localStorage.getItem('usuario'));
-        if (!userLogado || !userLogado.id) return;
-
-        let fotoFinal = userLogado.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userLogado.nome)}&background=222&color=10b981`;
+    async function carregarSidebar() {
+        if (!user || !user.id) return;
+        let fotoFinal = user.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nome)}&background=222&color=10b981`;
         document.getElementById('sidebarAvatar').src = fotoFinal;
         
-        let primeiroNome = userLogado.nome ? userLogado.nome.split(' ')[0] : 'Visitante';
-        if (String(userLogado.cargo).toUpperCase().trim() === 'PASTOR') { 
-            primeiroNome = "Pr. " + primeiroNome; 
-        }
-
+        let primeiroNome = user.nome ? user.nome.split(' ')[0] : 'Visitante';
+        if (cargoUser === 'PASTOR') primeiroNome = "Pr. " + primeiroNome; 
         document.getElementById('sidebarUserName').innerText = primeiroNome;
-        document.getElementById('sidebarUserRole').innerText = userLogado.cargo;
+        
+        let cargoExibicao = cargoUser;
+        if (cargoUser === 'LIDER' && !(user.liderDe || "").includes(deptAtual)) cargoExibicao = 'MEMBRO';
+        document.getElementById('sidebarUserRole').innerText = cargoExibicao || 'Membro';
     }
 
     function agruparEquipe(equipeStr) {
@@ -271,13 +282,10 @@
         const linhas = equipeStr.split('\n').filter(Boolean);
         const mapa = {};
         linhas.forEach(linha => {
-            let nome = linha;
-            let funcao = '';
+            let nome = linha; let funcao = '';
             if (linha.includes('(') && linha.includes(')')) {
-                const openIdx = linha.lastIndexOf('(');
-                const closeIdx = linha.lastIndexOf(')');
-                nome = linha.substring(0, openIdx).trim();
-                funcao = linha.substring(openIdx + 1, closeIdx).trim();
+                const openIdx = linha.lastIndexOf('('); const closeIdx = linha.lastIndexOf(')');
+                nome = linha.substring(0, openIdx).trim(); funcao = linha.substring(openIdx + 1, closeIdx).trim();
             }
             if (!mapa[nome]) mapa[nome] = [];
             if (funcao) mapa[nome].push(funcao);
@@ -299,12 +307,31 @@
     }
 
     function ajustarAcessos() {
+        const cfg = DEPARTAMENTOS_CONFIG[deptAtual] || { cor: "#10b981" };
+        document.documentElement.style.setProperty('--primary', cfg.cor);
+        document.getElementById('nomeDeptBadge').innerText = deptAtual;
+        document.getElementById('nomeDeptBadge').style.color = cfg.cor;
+        document.getElementById('nomeDeptBadge').style.borderColor = cfg.cor;
+
         if (cargoUser === 'DEV') {
             const linkAdmin = document.getElementById('linkAdmin');
             if (linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
         }
         if (['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser)) {
             document.querySelectorAll('.boss-only').forEach(el => el.classList.remove('boss-only'));
+        }
+
+        // ESCONDE O REPERTÓRIO SE NÃO FOR LOUVOR
+        if (deptAtual.toUpperCase() !== 'LOUVOR') {
+            const boxBuilder = document.getElementById('boxBuilderRepertorio');
+            if(boxBuilder) boxBuilder.style.display = 'none';
+            const gridBuilder = document.getElementById('gridConstrutor');
+            if(gridBuilder) gridBuilder.style.gridTemplateColumns = '1fr';
+            
+            const modalRepertorio = document.getElementById('modalBoxRepertorio');
+            if(modalRepertorio) modalRepertorio.style.display = 'none';
+            const modalGrid = document.getElementById('modalGridConteudo');
+            if(modalGrid) modalGrid.style.gridTemplateColumns = '1fr';
         }
     }
 
@@ -318,21 +345,19 @@
 
     async function carregarDadosDoServidor() {
         try {
-            // ATUALIZADO: Agora busca apenas os membros e as escalas DAQUELE departamento!
-            const queryDept = `?departamento=${deptAtual}`;
-
+            const queryDept = `?departamento=${encodeURIComponent(deptAtual)}`;
             const [resF, resE, resM, resL] = await Promise.all([
-                fetch('/api/indisponibilidade'), 
-                fetch(`/api/escalas${queryDept}`), 
-                fetch(`/api/membros${queryDept}`), 
-                fetch('/api/louvores')
+                fetch('/api/indisponibilidade', { headers: getHeaders }), 
+                fetch(`/api/escalas${queryDept}`, { headers: getHeaders }), 
+                fetch(`/api/membros${queryDept}`, { headers: getHeaders }), 
+                fetch('/api/louvores', { headers: getHeaders })
             ]);
             
-            if(resF.ok) faltasDB = await resF.json();
-            if(resE.ok) escalasDB = await resE.json();
-            if(resM.ok) membrosDB = await resM.json();
+            if(resF.ok) faltasDB = await resF.json() || [];
+            if(resE.ok) escalasDB = await resE.json() || [];
+            if(resM.ok) membrosDB = await resM.json() || [];
             if(resL.ok) {
-                louvoresDB = await resL.json();
+                louvoresDB = await resL.json() || [];
                 renderizarLouvores();
             }
         } catch(e) { console.error("Erro na conexão", e); }
@@ -354,7 +379,7 @@
 
         for(let d=1; d<=ultimoDia; d++) {
             const dataStr = `${ano}-${String(mes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            const falta = faltasDB.find(f => f.data === dataStr && f.nomeMembro.trim() === user.nome.trim());
+            const falta = faltasDB.find(f => f.data === dataStr && f.nomeMembro.trim().toLowerCase() === user.nome.trim().toLowerCase());
             const isAdmin = ['ADMIN','DEV','LIDER','PASTOR'].includes(cargoUser);
 
             grid.innerHTML += `
@@ -367,9 +392,9 @@
     async function clicarNoDia(dataStr) {
         const isChefia = ['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser);
         if (cargoUser === 'MEMBRO' || modoMarcarAusencia) {
-            const falta = faltasDB.find(f => f.data === dataStr && f.nomeMembro.trim() === user.nome.trim());
-            if(falta) await fetch(`/api/indisponibilidade/${falta.id}`, {method:'DELETE'});
-            else await fetch('/api/indisponibilidade', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({nomeMembro: user.nome, data: dataStr})});
+            const falta = faltasDB.find(f => f.data === dataStr && f.nomeMembro.trim().toLowerCase() === user.nome.trim().toLowerCase());
+            if(falta) await fetch(`/api/indisponibilidade/${falta.id}`, {method:'DELETE', headers: getHeaders});
+            else await fetch('/api/indisponibilidade', {method:'POST', headers: postHeaders, body:JSON.stringify({nomeMembro: user.nome, data: dataStr})});
             await carregarDadosDoServidor(); desenharCalendario(); renderizarEscalas();
         } else if (isChefia) {
             abrirPrancheta(dataStr);
@@ -402,7 +427,7 @@
 
         document.getElementById('listaMembros').innerHTML = membrosFiltrados.map(d => {
             const funcoes = (d.funcao || 'Membro').split(',').map(f => f.trim());
-            const ausente = faltasDB.some(f => f.data === dataFiltro && f.nomeMembro.trim() === d.nome.trim());
+            const ausente = faltasDB.some(f => f.data === dataFiltro && f.nomeMembro.trim().toLowerCase() === d.nome.trim().toLowerCase());
             const estiloBlock = ausente ? 'opacity: 0.4; pointer-events: none;' : '';
             const tagAusente = ausente ? '<span style="color:#ef4444; font-size:10px; font-weight:bold; display:block; margin-top:2px;">INDISPONÍVEL</span>' : '';
 
@@ -495,134 +520,24 @@
             if(escalaAntiga && escalaAntiga.confirmacoes) confirmacoesAtuais = escalaAntiga.confirmacoes;
         }
 
-        // ATUALIZADO: Agora salva enviando o Departamento junto pro banco de dados!
         const dados = JSON.stringify({ 
-            titulo: t, 
-            data: d, 
-            equipe: equipeSel.join('\n'), 
-            repertorio: louvorSel.join('\n'), 
-            confirmacoes: confirmacoesAtuais,
-            departamento: deptAtual 
+            titulo: t, data: d, equipe: equipeSel.join('\n'), repertorio: louvorSel.join('\n'), 
+            confirmacoes: confirmacoesAtuais, departamento: deptAtual 
         });
 
         const url = idEscalaSendoEditada ? `/api/escalas/${idEscalaSendoEditada}` : '/api/escalas';
         const metodo = idEscalaSendoEditada ? 'PUT' : 'POST';
 
-        const res = await fetch(url, { method: metodo, headers: {'Content-Type':'application/json'}, body: dados });
+        const btn = document.getElementById('btnSalvarEscala'); btn.innerText = 'Salvando...'; btn.disabled = true;
+
+        const res = await fetch(url, { method: metodo, headers: postHeaders, body: dados });
         if (res.ok) {
             fecharPrancheta();
             const [ano, mes] = d.split('-'); dataFoco = new Date(parseInt(ano), parseInt(mes) - 1, 1);
             await carregarDadosDoServidor(); desenharCalendario(); renderizarEscalas();
         } else alert('Erro ao salvar no banco de dados.');
-    }
-
-    function abrirGenie(id, event) {
-        if(event.target.closest('.btn-icon')) return;
-
-        const escala = escalasDB.find(e => e.id == id);
-        if(!escala) return;
-
-        document.getElementById('modalEscalaTitulo').innerText = escala.titulo || 'Sem Título';
-        document.getElementById('modalEscalaData').innerText = escala.data ? escala.data.split('-').reverse().join('/') : 'Sem Data';
-
-        let htmlEquipe = '';
-        if (escala.equipe) {
-            let confJSON = {};
-            try { if (escala.confirmacoes) confJSON = JSON.parse(escala.confirmacoes); } catch(e) {}
-
-            const equipeAgrupada = agruparEquipe(escala.equipe);
-            equipeAgrupada.forEach(linha => {
-                const nomePuro = linha.split('(')[0].trim();
-                let statusCor = '#f59e0b';
-                if (confJSON[nomePuro] === 'CONFIRMADO') statusCor = '#10b981';
-                else if (confJSON[nomePuro] === 'RECUSADO') statusCor = '#ef4444';
-
-                htmlEquipe += `<div><i class="fas fa-circle" style="color: ${statusCor}; font-size: 12px; margin-right: 8px;"></i> ${linha}</div>`;
-            });
-        } else { htmlEquipe = 'Ninguém escalado.'; }
-        document.getElementById('modalEscalaEquipeStatus').innerHTML = htmlEquipe;
-
-        let htmlRepertorio = '';
-        if (escala.repertorio) {
-            const linhasMusicas = escala.repertorio.split('\n').filter(Boolean);
-            linhasMusicas.forEach(linha => {
-                let tituloPuro = linha; let tomInfo = '';
-                if (linha.includes('(') && linha.includes(')')) {
-                    const openIdx = linha.lastIndexOf('(');
-                    tituloPuro = linha.substring(0, openIdx).trim();
-                    tomInfo = linha.substring(openIdx);
-                }
-
-                const louvorOficial = louvoresDB.find(l => l.titulo.toLowerCase().trim() === tituloPuro.toLowerCase().trim());
-                const img = louvorOficial && louvorOficial.imagemUrl ? louvorOficial.imagemUrl : DEFAULT_IMG;
-                const artista = louvorOficial && louvorOficial.artista ? louvorOficial.artista : 'Música';
-                const isClickable = louvorOficial ? `class="escala-musica-item clickable" onclick="abrirLouvorGenie(${louvorOficial.id}, event)"` : `class="escala-musica-item"`;
-
-                htmlRepertorio += `
-                    <div ${isClickable}>
-                        <img src="${img}" class="escala-musica-img">
-                        <div class="escala-musica-info">
-                            <h6>${tituloPuro} <span style="color: var(--primary); font-size: 11px;">${tomInfo}</span></h6>
-                            <p>${artista}</p>
-                        </div>
-                    </div>
-                `;
-            });
-        } else { htmlRepertorio = 'Nenhuma música definida.'; }
-        document.getElementById('modalEscalaRepertorio').innerHTML = htmlRepertorio;
-
-        const modal = document.getElementById('escalaModal');
-        modal.style.transformOrigin = `${event.clientX}px ${event.clientY}px`;
-        modal.style.left = '50%'; modal.style.top = '50%';
-        modal.style.transform = 'translate(-50%, -50%) scale(0)';
-        document.getElementById('escalaOverlay').classList.add('active');
-
-        setTimeout(() => { modal.style.transform = 'translate(-50%, -50%) scale(1)'; modal.style.opacity = '1'; }, 10);
-    }
-
-    function fecharGenie() {
-        document.getElementById('escalaOverlay').classList.remove('active');
-        document.getElementById('escalaModal').style.transform = 'translate(-50%, -50%) scale(0)';
-        document.getElementById('escalaModal').style.opacity = '0';
-    }
-
-    function abrirLouvorGenie(idLouvor, event) {
-        event.stopPropagation();
-        const louvor = louvoresDB.find(l => l.id == idLouvor);
-        if(!louvor) return;
-
-        document.getElementById('louvorCapaModal').src = louvor.imagemUrl || DEFAULT_IMG;
-        document.getElementById('louvorTituloModal').innerText = louvor.titulo;
-        document.getElementById('louvorArtistaModal').innerText = louvor.artista || 'Sem Ministro';
-        document.getElementById('louvorTomModal').innerText = louvor.tom || '--';
-        document.getElementById('louvorBpmModal').innerText = louvor.bpm || '--';
-        document.getElementById('louvorCompassoModal').innerText = louvor.compasso || '--';
-
-        configurarLink('btnCifra', louvor.linkCifra);
-        configurarLink('btnLetra', louvor.linkLetra);
-        configurarLink('btnVs', louvor.linkVs);
-        configurarLink('btnYoutube', louvor.linkYoutube);
-
-        const modal = document.getElementById('louvorModal');
-        modal.style.transformOrigin = `${event.clientX}px ${event.clientY}px`;
-        modal.style.left = '50%'; modal.style.top = '50%';
-        modal.style.transform = 'translate(-50%, -50%) scale(0)';
-        document.getElementById('louvorOverlay').classList.add('active');
-
-        setTimeout(() => { modal.style.transform = 'translate(-50%, -50%) scale(1)'; modal.style.opacity = '1'; }, 10);
-    }
-
-    function fecharLouvorGenie() {
-        document.getElementById('louvorOverlay').classList.remove('active');
-        const modal = document.getElementById('louvorModal');
-        modal.style.transform = 'translate(-50%, -50%) scale(0)';
-        modal.style.opacity = '0';
-    }
-
-    function configurarLink(btnId, url) {
-        const btn = document.getElementById(btnId);
-        if(url && url.trim() !== "") { btn.href = url; btn.classList.remove('disabled'); }
-        else { btn.removeAttribute('href'); btn.classList.add('disabled'); }
+        
+        btn.innerHTML = '<i class="fas fa-save"></i> Publicar Escala'; btn.disabled = false;
     }
 
     function renderizarEscalas() {
@@ -631,110 +546,7 @@
 
         const escalasDoMes = escalasDB.filter(e => {
             if (!e.data) return false;
+            // FILTRA AS REUNIÕES DE LIDERANÇA! Nunca mostra na aba normal de escalas.
+            if ((e.titulo || '').includes('[LIDERANÇA]')) return false; 
             const [ano, mes] = e.data.split('-');
-            return parseInt(ano) === anoFoco && (parseInt(mes) - 1) === mesFoco;
-        });
-
-        if (escalasDoMes.length === 0) {
-            container.innerHTML = '<p style="color: var(--text-dim); text-align: center; padding: 20px;">Nenhuma escala agendada para este mês.</p>'; return;
-        }
-
-        container.innerHTML = escalasDoMes.map(e => {
-            const equipeExibir = e.equipe ? agruparEquipe(e.equipe).join('<br>') : 'Ninguém escalado';
-
-            return `
-            <div class="escala-card" onclick="abrirGenie(${e.id}, event)">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h4 style="color:white; margin:0; font-size: 20px;">${e.titulo || 'Sem Título'} <small style="color: #888;">(${e.data ? e.data.split('-').reverse().join('/') : 'Data Indefinida'})</small></h4>
-                    <div style="display:flex; gap:10px;" class="boss-only">
-                        <button onclick="prepararEdicao('${e.id}')" class="btn-icon" style="color: #3b82f6;"><i class="fas fa-edit"></i></button>
-                        <button onclick="baixarPdfIndividual('${e.id}')" class="btn-icon" style="color: #ef4444;"><i class="fas fa-file-pdf"></i></button>
-                        <button onclick="enviarZap('${e.id}')" class="btn-icon" style="color: #25D366;"><i class="fab fa-whatsapp"></i></button>
-                        <button onclick="excluirEscala('${e.id}')" class="btn-icon" style="color: #ef4444;"><i class="fas fa-trash"></i></button>
-                    </div>
-                </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:10px; font-size:14px; line-height: 1.6;">
-                    <div style="background:#0a0a0a; padding:15px; border-radius:8px; border: 1px solid #222;">
-                        <strong style="color:var(--primary); font-size: 12px; text-transform: uppercase;">Equipe</strong><br>
-                        ${equipeExibir}
-                    </div>
-                    <div style="background:#0a0a0a; padding:15px; border-radius:8px; border: 1px solid #222;">
-                        <strong style="color:var(--primary); font-size: 12px; text-transform: uppercase;">Repertório</strong><br>
-                        ${(e.repertorio || 'Sem músicas').replace(/\n/g, '<br>')}
-                    </div>
-                </div>
-                <p style="margin:0; font-size:12px; color:var(--text-dim);">Clique para ver status de confirmação da equipe.</p>
-            </div>`;
-        }).join('');
-        ajustarAcessos();
-    }
-
-    async function baixarPdfMensal() {
-        try {
-            const mesNum = dataFoco.getMonth() + 1;
-            const ano = dataFoco.getFullYear();
-            const mesFormatado = `${ano}-${String(mesNum).padStart(2, '0')}`;
-            
-            // ATUALIZADO: Passa o departamento para o PDF também!
-            const res = await fetch(`/api/escalas/pdf?mes=${mesFormatado}&departamento=${deptAtual}`);
-            
-            if (res.ok) {
-                const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `escala-${deptAtual}-mensal-${mesFormatado}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
-            } else {
-                alert("Nenhuma escala encontrada para este mês ou erro no servidor.");
-            }
-        } catch (e) {
-            alert("Erro de conexão ao gerar o PDF mensal.");
-        }
-    }
-
-    async function baixarPdfIndividual(id) {
-        try {
-            const res = await fetch(`/api/escalas/pdf?id=${id}&departamento=${deptAtual}`);
-            
-            if (res.ok) {
-                const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `escala-${deptAtual}-culto-${id}.pdf`; 
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
-            } else {
-                alert("O servidor recusou a emissão do PDF.");
-            }
-        } catch (e) {
-            alert("Erro de conexão ao tentar gerar o PDF.");
-        }
-    }
-
-    function enviarZap(id) {
-        const e = escalasDB.find(x => x.id == id);
-        const d = e.data ? e.data.split('-').reverse().join('/') : 'Data Indefinida';
-        const baseUrl = window.location.origin;
-        const linkWeb = `${baseUrl}/escala-wpp.html?id=${id}`;
-        const mensagem = `🎵 *ESCALA ${deptAtual}: ${e.titulo}*\n📅 *Data:* ${d}\n\nConfira a equipe escalada clicando abaixo:\n🔗 ${linkWeb}`;
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensagem)}`, '_blank');
-    }
-
-    async function excluirEscala(id) {
-        if(confirm("Tem certeza que deseja apagar essa escala?")) {
-            await fetch(`/api/escalas/${id}`, { method: 'DELETE' });
-            carregarPagina();
-        }
-    }
-
-    carregarPagina();
-</script>
-</body>
-</html>
+            return parseInt
