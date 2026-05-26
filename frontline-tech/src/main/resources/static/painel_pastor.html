@@ -51,7 +51,9 @@
 
         /* KPIs */
         .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;}
-        .kpi-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: #151719; border: 1px solid #222; border-radius: 12px; }
+        .kpi-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: #151719; border: 1px solid #222; border-radius: 12px; transition: 0.3s;}
+        .kpi-item.clickable { cursor: pointer; }
+        .kpi-item.clickable:hover { background: #1c1e21; border-color: #444; transform: scale(1.02); }
         .kpi-icon { width: 45px; height: 45px; border-radius: 10px; background: #1a1c1e; display: flex; align-items: center; justify-content: center; font-size: 18px; }
         .kpi-text h4 { margin: 0; font-size: 22px; color: #fff; font-weight: 900;}
         .kpi-text p { margin: 0; font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: bold;}
@@ -81,9 +83,8 @@
         .event-dot-container { display: flex; gap: 3px; position: absolute; bottom: 6px; }
         .event-dot { width: 5px; height: 5px; border-radius: 50%; }
 
-        /* PILHAS DE EVENTOS (STACKS) COM DESIGN CLICKABLE */
+        /* GAVETAS DE EVENTOS */
         .stack-group { margin-top: 25px; }
-        
         .stack-header { 
             display: flex; justify-content: space-between; align-items: center; 
             margin-bottom: 15px; padding: 12px 15px; border: 1px solid #222; background: #151719;
@@ -93,9 +94,6 @@
         .stack-header h3 { margin: 0; font-size: 15px; color: white; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: 900;}
         
         .stack-icon-toggle { transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); color: #fff; font-size: 18px;}
-        .stack-cards.collapsed ~ .stack-icon-toggle { transform: rotate(0deg); }
-        .stack-cards:not(.collapsed) ~ .stack-icon-toggle { transform: rotate(180deg); }
-        
         .stack-cards { display: flex; flex-direction: column; gap: 10px; overflow: hidden; transition: max-height 0.4s ease; max-height: 1000px;}
         .stack-cards.collapsed { max-height: 0; gap: 0; margin: 0; }
         
@@ -108,12 +106,12 @@
         .escala-info h4 { margin: 0; font-size: 16px; color: white; font-weight: bold; }
         .escala-info p { margin: 3px 0 0 0; font-size: 12px; color: var(--text-dim); }
 
-        /* MODAIS GENIE */
-        .genie-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000;}
-        .genie-modal { background: #111; border: 1px solid #333; border-radius: 20px; padding: 25px; width: 100%; max-width: 450px; height: auto; max-height: 90vh; overflow-y: auto; position: relative; animation: modalIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        /* MODAIS GENIE EXECUTIVOS */
+        .genie-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vw; min-height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000;}
+        .genie-modal { background: #111; border: 1px solid #333; border-radius: 20px; padding: 25px; width: 100%; max-width: 480px; height: auto; max-height: 85vh; overflow-y: auto; position: relative; animation: modalIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes modalIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
-        .btn-close-genie { position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: #888; font-size: 20px; cursor: pointer; transition: 0.2s;}
+        .btn-close-genie { position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: #888; font-size: 20px; cursor: pointer; transition: 0.2s; z-index: 10;}
         .btn-close-genie:hover { color: #ef4444; }
 
         .status-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #151719; border-radius: 10px; margin-bottom: 10px; border-left: 3px solid #333;}
@@ -123,6 +121,12 @@
         .status-badge { font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; }
         .badge-ready { background: rgba(16, 185, 129, 0.1); color: #10b981; }
         .badge-pending { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+        /* DESIGN DA LISTAGEM DOS LÍDERES COM FOTO */
+        .lider-card-row { display: flex; align-items: center; gap: 15px; padding: 12px; background: #151719; border-radius: 12px; margin-bottom: 10px; border: 1px solid #222; }
+        .lider-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); background: #222; }
+        .lider-meta h5 { margin: 0; font-size: 15px; color: #fff; font-weight: bold; }
+        .lider-meta p { margin: 3px 0 0 0; font-size: 11px; color: var(--primary); font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* FORMULÁRIO DO MODAL DE AGENDAR */
         .form-group { margin-bottom: 15px; }
@@ -151,7 +155,7 @@
         </div>
 
         <div class="ministry-row" id="linhaMinisterios">
-            <div style="color: var(--text-dim); padding: 15px;">Mapeando igreja...</div>
+            <div style="color: var(--text-dim); padding: 15px;">Sincronizando voluntários...</div>
         </div>
 
         <div class="main-layout">
@@ -165,8 +169,9 @@
                             <div class="kpi-icon" style="color: #10b981;"><i class="fas fa-users"></i></div>
                             <div class="kpi-text"><h4 id="kpiTotal">0</h4><p>Membros Gerais</p></div>
                         </div>
-                        <div class="kpi-item">
-                            <div class="kpi-icon" style="color: #3b82f6;"><i class="fas fa-crown"></i></div>
+                        
+                        <div class="kpi-item clickable" onclick="abrirGenieLideres()">
+                            <div class="kpi-icon" style="color: #3b82f6; background: rgba(59, 130, 246, 0.1);"><i class="fas fa-crown"></i></div>
                             <div class="kpi-text"><h4 id="kpiLideres">0</h4><p>Líderes de Área</p></div>
                         </div>
                     </div>
@@ -248,13 +253,22 @@
     <div class="genie-overlay" id="modalStatusEvento" onclick="if(event.target === this) fecharModal('modalStatusEvento')">
         <div class="genie-modal">
             <button class="btn-close-genie" onclick="fecharModal('modalStatusEvento')"><i class="fas fa-times"></i></button>
-            
             <div style="text-align: center; margin-bottom: 25px;">
                 <h2 style="margin: 0; font-size: 24px; color: #fff;" id="statusTitulo">Título</h2>
                 <p style="color: var(--primary); font-weight: bold; margin: 5px 0 0 0; font-size: 14px;" id="statusData">Data</p>
             </div>
+            <div id="statusListArea"></div>
+        </div>
+    </div>
 
-            <div id="statusListArea">
+    <div class="genie-overlay" id="modalGenieLideres" onclick="if(event.target === this) fecharModal('modalGenieLideres')">
+        <div class="genie-modal">
+            <button class="btn-close-genie" onclick="fecharModal('modalGenieLideres')"><i class="fas fa-times"></i></button>
+            <div style="text-align: center; margin-bottom: 25px; border-bottom: 2px solid #3b82f6; padding-bottom: 15px;">
+                <h2 style="margin: 0; font-size: 22px; color: #fff;"><i class="fas fa-crown" style="color:#3b82f6;"></i> Líderes de Área</h2>
+                <p style="color: var(--text-dim); margin: 5px 0 0 0; font-size: 13px;">Corpo de liderança ativa da igreja</p>
+            </div>
+            <div id="lideresListArea">
                 </div>
         </div>
     </div>
@@ -265,11 +279,10 @@
     if(userLogado.cargo !== 'PASTOR' && userLogado.cargo !== 'DEV' && userLogado.cargo !== 'ADMIN') { 
         window.location.href = 'portal.html'; 
     }
-    
-    document.getElementById('nomePastor').innerText = "| " + (userLogado.nome ? userLogado.nome.split(' ')[0] : 'Admin');
+    document.getElementById('nomePastor').innerText = "| Pr. " + (userLogado.nome ? userLogado.nome.split(' ')[0] : 'Admin');
 
     const tokenLocal = localStorage.getItem('token');
-    const getHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+    const getHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}` } : {};
 
     const DEPARTAMENTOS_CONFIG = {
         "LOUVOR": { cor: "#FF3300", icone: "fa-music" }, "MIDIA": { cor: "#a855f7", icone: "fa-camera" },
@@ -289,30 +302,56 @@
         renderizarMinisteriosVazios(); 
         
         try {
-            // BLINDAGEM MÁXIMA DE BUSCA DE DADOS
+            // BUSCA INTELIGENTE EM DOIS NÍVEIS CONTRA TRAVAS DO SERVIDOR
             let arraysMembros = [];
             try {
-                // Tenta puxar tudo de uma vez
                 const resM = await fetch('/api/membros', { headers: getHeaders });
                 if (resM.ok) arraysMembros = await resM.json();
             } catch(e) { }
 
-            // Se falhou ou veio vazio, tenta puxar por departamento passando o URL Encode
             if (!arraysMembros || arraysMembros.length === 0) {
                 const promessasMembros = Object.keys(DEPARTAMENTOS_CONFIG).map(d => 
-                    fetch(`/api/membros?departamento=${encodeURIComponent(d)}`, { headers: getHeaders })
-                    .then(r => r.ok ? r.json() : [])
+                    fetch(`/api/membros?departamento=${encodeURIComponent(d)}`, { headers: getHeaders }).then(r => r.ok ? r.json() : [])
                 );
                 const results = await Promise.all(promessasMembros);
                 arraysMembros = results.flat();
             }
             
-            // Remove duplicados pelo ID (se a pessoa estiver em 2 ministérios)
+            // MOTOR DE DISTRIBUIÇÃO E CONTAGEM (CORRIGIDO!)
             const mapaUnicos = {};
-            arraysMembros.forEach(m => { if (m.id) mapaUnicos[m.id] = m; else if(m.nome) mapaUnicos[m.nome] = m; });
+            const contagemDept = { "LOUVOR":0, "MIDIA":0, "SALT":0, "27+":0, "JOIN":0, "KIDS":0 };
+
+            arraysMembros.forEach(m => {
+                if (!m) return;
+                
+                // Mapeia os depto baseados no banco bruto para o termômetro não zerar
+                let depts = [];
+                if (Array.isArray(m.departamentos) && m.departamentos.length > 0) depts = m.departamentos;
+                else if (m.departamento) depts = [m.departamento];
+                
+                depts.forEach(d => {
+                    if (d) {
+                        const n = String(d).toUpperCase().trim();
+                        if (contagemDept[n] !== undefined) {
+                            if (!contagemDept[n + '_set']) contagemDept[n + '_set'] = new Set();
+                            contagemDept[n + '_set'].add(m.id || m.nome);
+                        }
+                    }
+                });
+
+                // Consolida na lista única global
+                if (m.id) mapaUnicos[m.id] = m;
+                else if(m.nome) mapaUnicos[m.nome.trim().toLowerCase()] = m;
+            });
+
+            // Aplica os tamanhos reais dos conjuntos de pessoas nas caixas
+            Object.keys(contagemDept).forEach(dept => {
+                if (contagemDept[dept + '_set']) contagemDept[dept] = contagemDept[dept + '_set'].size;
+            });
+
             membrosGlobais = Object.values(mapaUnicos);
 
-            // Busca escalas e faltas
+            // Busca as outras pontas do sistema
             const [resE, resF] = await Promise.all([
                 fetch('/api/escalas', { headers: getHeaders }), 
                 fetch('/api/indisponibilidade', { headers: getHeaders })
@@ -321,72 +360,54 @@
             if(resE.ok) escalasGlobais = await resE.json() || [];
             if(resF.ok) faltasGlobais = await resF.json() || [];
 
-            processarKpis();
+            // Injeta os dados na tela
+            document.getElementById('kpiTotal').innerText = membrosGlobais.length;
+            document.getElementById('kpiLideres').innerText = membrosGlobais.filter(m => {
+                const c = String(m.cargo).toUpperCase();
+                return ['LIDER', 'PASTOR', 'DEV', 'ADMIN'].includes(c);
+            }).length;
+
+            Object.keys(contagemDept).forEach(dept => {
+                const el = document.getElementById(`count-${dept}`);
+                if(el) el.innerText = contagemDept[dept];
+            });
+
             processarFaltasUltimoCulto();
             agruparEscalas();
             gerarCalendario();
-        } catch (e) { console.error("Falha ao buscar dados", e); }
+        } catch (e) { console.error("Falha ao processar dashboard", e); }
     }
 
     function renderizarMinisteriosVazios() {
         const container = document.getElementById('linhaMinisterios');
         container.innerHTML = '';
         Object.keys(DEPARTAMENTOS_CONFIG).forEach(dept => {
-            const cfg = DEPARTAMENTOS_CONFIG[dept];
             const div = document.createElement('div');
             div.className = 'min-card';
-            div.style.setProperty('--min-color', cfg.cor);
-            div.onclick = () => { localStorage.setItem('departamentoAtual', dept); localStorage.setItem('corAtual', cfg.cor); window.location.href = 'inicio.html'; };
-            div.innerHTML = `<div class="min-header"><span>${dept}</span><i class="fas ${cfg.icone}"></i></div><h3 class="min-value" id="count-${dept}">0</h3><p class="min-desc">voluntários totais</p>`;
+            div.style.setProperty('--min-color', DEPARTAMENTOS_CONFIG[dept].cor);
+            div.onclick = () => { localStorage.setItem('departamentoAtual', dept); localStorage.setItem('corAtual', DEPARTAMENTOS_CONFIG[dept].cor); window.location.href = 'inicio.html'; };
+            div.innerHTML = `<div class="min-header"><span>${dept}</span><i class="fas ${DEPARTAMENTOS_CONFIG[dept].icone}"></i></div><h3 class="min-value" id="count-${dept}">0</h3><p class="min-desc">voluntários totais</p>`;
             container.appendChild(div);
         });
     }
 
     function processarKpis() {
-        if (!membrosGlobais || membrosGlobais.length === 0) return;
-
-        const elTotal = document.getElementById('kpiTotal');
-        if(elTotal) elTotal.innerText = membrosGlobais.length;
-
-        const elLideres = document.getElementById('kpiLideres');
-        if(elLideres) {
-            elLideres.innerText = membrosGlobais.filter(m => {
-                const cargo = String(m.cargo).toUpperCase();
-                return cargo === 'LIDER' || cargo === 'PASTOR' || cargo === 'DEV' || cargo === 'ADMIN';
-            }).length;
-        }
-
-        const contagemDept = { "LOUVOR":0, "MIDIA":0, "SALT":0, "27+":0, "JOIN":0, "KIDS":0 };
-        membrosGlobais.forEach(m => {
-            let depts = [];
-            if (Array.isArray(m.departamentos) && m.departamentos.length > 0) depts = m.departamentos;
-            else if (m.departamento) depts = [m.departamento];
-            
-            depts.forEach(d => { if(contagemDept[d] !== undefined) contagemDept[d]++; });
-        });
-
-        Object.keys(contagemDept).forEach(dept => {
-            const el = document.getElementById(`count-${dept}`);
-            if(el) el.innerText = contagemDept[dept];
-        });
+        // Função mantida como backup de renderização dinâmica secundária
     }
 
     function processarFaltasUltimoCulto() {
         const hoje = new Date();
         const elLista = document.getElementById('listaFaltantes');
-        
-        // Pega as datas passadas ignorando reuniões de liderança pra essa checagem
         const passadas = escalasGlobais.filter(e => e.data && new Date(e.data) <= hoje && !(e.titulo || '').includes('[LIDERANÇA]')).sort((a,b) => new Date(b.data) - new Date(a.data));
         
         if (passadas.length === 0) {
-            elLista.innerHTML = '<p style="color: #888; font-size: 12px; margin: 0;">Ainda não houve nenhum evento no sistema.</p>';
+            elLista.innerHTML = '<p style="color: #888; font-size: 12px; margin: 0;">Nenhum culto anterior gravado.</p>';
             document.getElementById('dataUltimoCultoBadge').innerText = '--/--';
             return;
         }
 
         const dataUltimo = passadas[0].data; 
         document.getElementById('dataUltimoCultoBadge').innerText = dataUltimo.split('-').reverse().join('/');
-
         const faltasDaqueleDia = faltasGlobais.filter(f => f.data === dataUltimo);
         
         if (faltasDaqueleDia.length === 0) {
@@ -399,6 +420,54 @@
             html += `<div class="alert-item"><span class="alert-name"><i class="fas fa-user-times" style="color:#ef4444;"></i> ${f.nomeMembro}</span><span class="alert-reason">Faltou</span></div>`;
         });
         elLista.innerHTML = html;
+    }
+
+    // ===============================================
+    // LÓGICA DO MODAL DE LÍDERES COM MÁGICA DE CARGOS
+    // ===============================================
+    function abrirGenieLideres() {
+        const areaList = document.getElementById('lideresListArea');
+        
+        // Filtra todas as patentes de comando
+        const lideres = membrosGlobais.filter(m => {
+            const c = String(m.cargo).toUpperCase();
+            return ['LIDER', 'PASTOR', 'DEV', 'ADMIN'].includes(c);
+        });
+
+        if (lideres.length === 0) {
+            areaList.innerHTML = '<p style="color:gray; text-align:center;">Nenhum líder cadastrado na base.</p>';
+        } else {
+            areaList.innerHTML = lideres.map(lider => {
+                let foto = lider.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(lider.nome)}&background=222&color=a2ff00`;
+                
+                // LÓGICA EXECUTIVA DE CARGOS E ATRIBUIÇÕES MÚLTIPLAS
+                let tagCargo = 'Líder';
+                const cargoPuro = String(lider.cargo).toUpperCase();
+
+                if (cargoPuro === 'PASTOR') {
+                    tagCargo = 'Pastor / Líder do Ministério';
+                } else if (cargoPuro === 'DEV' || cargoPuro === 'ADMIN') {
+                    tagCargo = lider.liderDe ? `Líder - ${lider.liderDe} (Dev/Admin)` : 'Gestão do Sistema (Dev)';
+                } else if (lider.liderDe) {
+                    tagCargo = `Líder - ${lider.liderDe}`;
+                } else if (lider.departamentos && lider.departamentos.length > 0) {
+                    tagCargo = `Líder - ${lider.departamentos.join(', ')}`;
+                } else if (lider.departamento) {
+                    tagCargo = `Líder - ${lider.departamento}`;
+                }
+
+                return `
+                <div class="lider-card-row">
+                    <img src="${foto}" class="lider-avatar" alt="Líder">
+                    <div class="lider-meta">
+                        <h5>${lider.nome}</h5>
+                        <p>${tagCargo}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        document.getElementById('modalGenieLideres').style.display = 'flex';
     }
 
     function agruparEscalas() {
@@ -476,15 +545,10 @@
         const reunioes = eventosDoMes.filter(e => e.tipo === 'REUNIAO');
 
         let htmlFinal = '';
-
         if(cultos.length > 0) htmlFinal += gerarBlocoGaveta('Cultos Gerais', cultos, '#a2ff00', 'fa-church');
         if(reunioes.length > 0) htmlFinal += gerarBlocoGaveta('Reuniões de Liderança', reunioes, '#3b82f6', 'fa-user-tie');
 
-        if(htmlFinal === '') {
-            area.innerHTML = '<p style="color: gray; font-style: italic; text-align: center; margin-top:30px;">Nenhum evento agendado neste mês.</p>';
-        } else {
-            area.innerHTML = htmlFinal;
-        }
+        area.innerHTML = htmlFinal || '<p style="color: gray; font-style: italic; text-align: center; margin-top:30px;">Nenhum evento agendado neste mês.</p>';
     }
 
     function gerarBlocoGaveta(titulo, lista, cor, icone) {
@@ -513,20 +577,6 @@
         </div>`;
     }
 
-    function alternarGaveta(idGaveta) {
-        const gaveta = document.getElementById(idGaveta);
-        const icon = document.getElementById('icon-' + idGaveta);
-        if(!gaveta) return;
-        
-        if (gaveta.classList.contains('collapsed')) { 
-            gaveta.classList.remove('collapsed'); 
-            if(icon) icon.style.transform = 'rotate(180deg)';
-        } else { 
-            gaveta.classList.add('collapsed'); 
-            if(icon) icon.style.transform = 'rotate(0deg)';
-        }
-    }
-
     function abrirDetalheEvento(chave, event) {
         if(event) event.stopPropagation();
         const evento = eventosAgrupados[chave];
@@ -540,59 +590,37 @@
 
         if (evento.tipo === 'CULTO') {
             Object.keys(DEPARTAMENTOS_CONFIG).forEach(dept => {
-                const cfg = DEPARTAMENTOS_CONFIG[dept];
                 const escalaDoDepto = evento.escalas.find(e => e.departamento === dept);
                 if(!escalaDoDepto) return; 
 
                 const temGenteEscalada = escalaDoDepto.equipe && escalaDoDepto.equipe.trim().length > 0;
-                const classeRow = temGenteEscalada ? 'status-row ready' : 'status-row pending';
-                const badge = temGenteEscalada ? '<span class="status-badge badge-ready"><i class="fas fa-check"></i> Pronta</span>' : '<span class="status-badge badge-pending"><i class="fas fa-times"></i> Pendente</span>';
-
-                html += `<div class="${classeRow}"><div class="status-dept"><i class="fas ${cfg.icone}" style="color: ${cfg.cor};"></i> ${dept}</div>${badge}</div>`;
+                html += `<div class="status-row ${temGenteEscalada ? 'ready' : 'pending'}"><div class="status-dept"><i class="fas ${DEPARTAMENTOS_CONFIG[dept].icone}" style="color: ${DEPARTAMENTOS_CONFIG[dept].cor};"></i> ${dept}</div>${temGenteEscalada ? '<span class="status-badge badge-ready">Pronta</span>' : '<span class="status-badge badge-pending">Pendente</span>'}</div>`;
             });
         } 
         else {
             const confGerais = {};
             evento.escalas.forEach(esc => { if(esc.confirmacoes) { try { Object.assign(confGerais, JSON.parse(esc.confirmacoes)); } catch(e){} } });
+            const lideres = membrosGlobais.filter(m => ['LIDER', 'PASTOR', 'DEV', 'ADMIN'].includes(String(m.cargo).toUpperCase()));
             
-            // Filtra os líderes para as reuniões
-            const lideres = membrosGlobais.filter(m => {
-                const c = String(m.cargo).toUpperCase();
-                return c === 'LIDER' || c === 'PASTOR' || c === 'DEV' || c === 'ADMIN';
+            lideres.forEach(lider => {
+                const resposta = confGerais[lider.nome] || 'PENDENTE';
+                let classe = '', badge = '';
+                if(resposta === 'CONFIRMADO') { classe = 'ready'; badge = '<span class="status-badge badge-ready">Confirmado</span>'; }
+                else if(resposta === 'RECUSADO') { classe = 'pending'; badge = '<span class="status-badge badge-pending">Ausente</span>'; }
+                else { classe = ''; badge = '<span class="status-badge" style="background:#222; color:#888;">Pendente</span>'; }
+
+                html += `<div class="status-row ${classe}"><div><div class="status-dept" style="color: #ccc;">${lider.nome}</div></div>${badge}</div>`;
             });
-            
-            if(lideres.length === 0) { html = '<p style="color:gray; text-align:center;">Nenhum líder encontrado.</p>'; }
-            else {
-                lideres.forEach(lider => {
-                    const resposta = confGerais[lider.nome] || 'PENDENTE';
-                    let corRow = '', badgeHtml = '';
-                    
-                    if(resposta === 'CONFIRMADO') { corRow = 'ready'; badgeHtml = '<span class="status-badge badge-ready"><i class="fas fa-check"></i> Confirmado</span>'; }
-                    else if(resposta === 'RECUSADO') { corRow = 'pending'; badgeHtml = '<span class="status-badge badge-pending"><i class="fas fa-times"></i> Ausente</span>'; }
-                    else { corRow = ''; badgeHtml = '<span class="status-badge" style="background:#222; color:#888;"><i class="fas fa-clock"></i> Pendente</span>'; }
-
-                    // Lógica inteligente de Nomenclatura para Cargos
-                    let subtitulo = 'Líder';
-                    const c = String(lider.cargo).toUpperCase();
-                    if (c === 'PASTOR') {
-                        subtitulo = 'Pastor / Líder do Ministério';
-                    } else if (c === 'DEV' || c === 'ADMIN') {
-                        subtitulo = lider.liderDe ? `Líder - ${lider.liderDe} (Admin)` : 'Gestão do Sistema';
-                    } else if (lider.liderDe) {
-                        subtitulo = `Líder - ${lider.liderDe}`;
-                    } else if (lider.departamentos && lider.departamentos.length > 0) {
-                        subtitulo = `Líder - ${lider.departamentos.join(', ')}`;
-                    } else if (lider.departamento) {
-                        subtitulo = `Líder - ${lider.departamento}`;
-                    }
-
-                    html += `<div class="status-row ${corRow}"><div><div class="status-dept" style="color: #ccc;">${lider.nome}</div><div style="font-size: 10px; color: var(--text-dim); text-transform: uppercase;">${subtitulo}</div></div>${badgeHtml}</div>`;
-                });
-            }
         }
-        
-        areaList.innerHTML = html || '<p style="color:gray; text-align:center;">Detalhes indisponíveis no momento.</p>';
+        areaList.innerHTML = html;
         document.getElementById('modalStatusEvento').style.display = 'flex';
+    }
+
+    function alternarGaveta(idGaveta) {
+        const gaveta = document.getElementById(idGaveta);
+        const icon = document.getElementById('icon-' + idGaveta);
+        if (gaveta.classList.contains('collapsed')) { gaveta.classList.remove('collapsed'); icon.style.transform = 'rotate(180deg)'; } 
+        else { gaveta.classList.add('collapsed'); icon.style.transform = 'rotate(0deg)'; }
     }
 
     function abrirModalEvento() { document.getElementById('modalNovoEvento').style.display = 'flex'; }
@@ -613,47 +641,24 @@
         const tipoEvento = document.getElementById('evTipo').value;
         let tituloBase = document.getElementById('evTitulo').value.trim();
         const dataStr = document.getElementById('evData').value;
-        
-        const pillsAtivas = document.querySelectorAll('.dept-pill.active');
-        const deptsSelecionados = Array.from(pillsAtivas).map(p => p.dataset.dept);
+        const deptsSelecionados = Array.from(document.querySelectorAll('.dept-pill.active')).map(p => p.dataset.dept);
 
-        if(!tituloBase || !dataStr) { alert('Preencha o título e a data!'); return; }
-        if(deptsSelecionados.length === 0) { alert('Selecione pelo menos um ministério envolvido!'); return; }
-
+        if(!tituloBase || !dataStr) { alert('Preencha título e data!'); return; }
         if (tipoEvento === 'REUNIAO') tituloBase = "[LIDERANÇA] " + tituloBase;
 
         const btn = document.querySelector('.btn-salvar');
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agendando...'; btn.disabled = true;
+        btn.innerHTML = 'Agendando...'; btn.disabled = true;
 
         try {
-            let deptsParaCriar = [];
-            if (deptsSelecionados.includes('TODOS')) {
-                deptsParaCriar = Object.keys(DEPARTAMENTOS_CONFIG);
-            } else {
-                deptsParaCriar = deptsSelecionados;
-            }
-
-            const chamadasAPI = deptsParaCriar.map(d => fetch('/api/escalas', { 
-                method: 'POST', 
-                headers: getHeaders, 
-                body: JSON.stringify({ titulo: tituloBase, data: dataStr, departamento: d, equipe: "", repertorio: "", confirmacoes: "{}" }) 
-            }));
-            
-            await Promise.all(chamadasAPI);
-
-            document.getElementById('evTitulo').value = ''; document.getElementById('evData').value = '';
-            document.querySelectorAll('.dept-pill').forEach(el => el.classList.remove('active'));
-            document.querySelector('.dept-pill[data-dept="TODOS"]').classList.add('active');
-            
-            fecharModal('modalNovoEvento');
-            inicializarDashboard(); 
-            
-        } catch (e) { alert('Erro ao salvar evento. Verifique sua conexão.'); } 
+            let deptsParaCriar = deptsSelecionados.includes('TODOS') ? Object.keys(DEPARTAMENTOS_CONFIG) : deptsSelecionados;
+            const chamadas = deptsParaCriar.map(d => fetch('/api/escalas', { method: 'POST', headers: getHeaders, body: JSON.stringify({ titulo: tituloBase, data: dataStr, departamento: d, equipe: "", repertorio: "", confirmacoes: "{}" }) }));
+            await Promise.all(chamadas);
+            fecharModal('modalNovoEvento'); inicializarDashboard(); 
+        } catch (e) { alert('Erro ao salvar.'); } 
         finally { btn.innerHTML = "<i class='fas fa-check'></i> Agendar e Notificar"; btn.disabled = false; }
     }
 
     function sair() { localStorage.clear(); window.location.href = 'login.html'; }
-
     inicializarDashboard();
 </script>
 </body>
