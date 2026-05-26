@@ -3,646 +3,369 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Be One Tech - Início</title>
+    <title>Be One Tech - Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <script src="auth.js"></script>
-
+    
     <style>
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 30px; }
-        .stat-card { background: #111; border: 1px solid #333; padding: 25px; border-radius: 12px; display: flex; align-items: center; gap: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.3s; }
-        .stat-card:hover { border-color: var(--primary); transform: translateY(-3px); }
-        .stat-icon { font-size: 35px; color: var(--primary); background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 12px; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; }
-        .stat-info h3 { font-size: 32px; margin: 0; color: white; }
-        .stat-info p { color: var(--text-dim); margin: 0; font-size: 12px; text-transform: uppercase; font-weight: bold; margin-top: 5px; }
+        :root {
+            --bg-color: #050505;
+            --text-main: #ffffff;
+            --text-dim: #a1a1aa;
+        }
 
-        .welcome-box { background: linear-gradient(135deg, #111 0%, #0a0a0a 100%); border: 1px solid #333; padding: 40px; border-radius: 15px; margin-bottom: 30px; border-left: 5px solid var(--primary); }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Urbanist', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden; 
+        }
 
-        /* ========================================== */
-        /* MÁGICA DA PILHA DE ESCALAS (STACK) */
-        /* ========================================== */
-        .stack-group { margin-bottom: 35px; }
-        
-        .stack-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; border-bottom: 1px solid #222; padding-bottom: 10px;}
-        .stack-header h3 { margin: 0; font-size: 18px; color: white; display: flex; align-items: center; gap: 10px; }
-        
-        .btn-toggle-stack { background: #1a1a1a; border: 1px solid #333; color: white; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.3s; font-weight: bold; font-family: 'Urbanist', sans-serif;}
-        .btn-toggle-stack:hover { background: #222; border-color: var(--primary); }
+        /* ANIMAÇÃO DE ENTRADA SUAVE DO PAINEL INTEIRO */
+        @keyframes portalEntrada {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
 
-        .stack-cards { display: flex; flex-direction: column; gap: 12px; }
-        
-        .stack-cards.collapsed { gap: 0; padding-bottom: 30px; } /* Espaço para o "rabo" das cartas aparecer */
-        
-        .escala-mini-card { 
-            background: #111; border: 1px solid #222; border-radius: 12px; padding: 15px 20px; 
-            display: flex; align-items: center; gap: 20px; cursor: pointer; 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            border-left: 4px solid var(--stack-color, var(--primary)); 
+        .portal-wrapper {
+            text-align: center;
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            animation: portalEntrada 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        h1 { font-size: 36px; margin-bottom: 5px; font-weight: 900; }
+        p.subtitle { color: var(--text-dim); margin-bottom: 40px; font-size: 16px; }
+
+        /* ========================================================
+           O ACORDEÃO HORIZONTAL (DESIGN PREMIUM DO GIF)
+           ======================================================== */
+        .dept-grid {
+            display: flex;
+            width: 100%;
+            height: 450px; /* Altura fixa para o efeito sanfona rolar liso */
+            gap: 15px;
+            margin: 0 auto;
+        }
+
+        .dept-card {
+            flex: 1; /* Todos nascem com peso 1 (fatias iguais) */
             position: relative;
+            border-radius: 30px;
+            overflow: hidden;
+            cursor: pointer;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); /* Transição elástica de expansão */
         }
 
-        /* COMPORTAMENTO EXPANDIDO */
-        .stack-cards:not(.collapsed) .escala-mini-card:hover { 
-            background: #1a1a1a; transform: translateX(5px); border-color: var(--stack-color, var(--primary)); box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+        /* O QUE ACONTECE NO HOVER (EXPANSÃO) */
+        .dept-card:hover {
+            flex: 5; /* A fatia selecionada engorda e empurra as outras! */
+            border-color: var(--card-color);
+            box-shadow: 0 0 30px var(--card-glow);
         }
 
-        /* COMPORTAMENTO RECOLHIDO (AS CARTAS FICAM EMPILHADAS ATRÁS) */
-        .stack-cards.collapsed .escala-mini-card:nth-child(1) { z-index: 5; transform: scale(1); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .stack-cards.collapsed .escala-mini-card:nth-child(2) { z-index: 4; transform: scale(0.95); margin-top: -65px; opacity: 0.7; filter: brightness(0.7); }
-        .stack-cards.collapsed .escala-mini-card:nth-child(3) { z-index: 3; transform: scale(0.90); margin-top: -65px; opacity: 0.4; filter: brightness(0.4); }
-        .stack-cards.collapsed .escala-mini-card:nth-child(n+4) { display: none; } /* Esconde a 4ª em diante na pilha */
+        .bg-image {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            filter: grayscale(100%) brightness(0.3); /* Nasce cinza e escuro */
+            transition: all 0.6s ease;
+            z-index: 1;
+        }
 
-        .escala-date { text-align: center; line-height: 1.1; min-width: 60px; }
-        .escala-date .day { font-size: 28px; font-weight: 900; color: var(--stack-color, var(--primary)); }
-        .escala-date .month { font-size: 13px; color: var(--text-dim); text-transform: uppercase; font-weight: bold; }
-        .escala-info h4 { margin: 0; font-size: 18px; color: white; font-weight: bold; }
-        .escala-info p { margin: 5px 0 0 0; font-size: 13px; color: var(--text-dim); }
+        .dept-card:hover .bg-image {
+            filter: grayscale(0%) brightness(0.7); /* Ganha cor e ilumina no hover */
+            transform: scale(1.05); /* Efeito de câmera lenta na foto */
+        }
 
-        /* ========================================== */
+        /* TÍTULO VERTICAL (APARECE QUANDO ESTÁ RECOLHIDO) */
+        .vertical-title {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            writing-mode: vertical-rl; /* Vira o texto de lado */
+            text-orientation: mixed;
+            color: #666;
+            font-weight: 900;
+            letter-spacing: 6px;
+            font-size: 18px;
+            transition: 0.4s;
+            z-index: 2;
+        }
 
-        .genie-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 1001;}
-        .genie-overlay.active { opacity: 1; pointer-events: all; }
-        .genie-modal { position: fixed; background: #111; border: 1px solid #333; border-radius: 20px; padding: 0; width: 90%; max-width: 600px; height: auto; max-height: 90vh; overflow-y: auto; transform: scale(0); opacity: 0; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease; z-index: 1002;}
-        .genie-modal.active { transform: scale(1); opacity: 1; }
+        /* SOME QUANDO EXPANDIR */
+        .dept-card:hover .vertical-title {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+        }
 
-        .genie-header { background: #1a1a1a; padding: 30px; border-bottom: 2px solid var(--primary); border-radius: 20px 20px 0 0; text-align: center; }
-        .genie-title { font-size: 28px; font-weight: 900; margin-bottom: 5px; color: white; }
-        .genie-subtitle { color: var(--primary); font-size: 16px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
+        /* CONTEÚDO PRINCIPAL (FICA NO RODAPÉ) */
+        .content {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 30px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 60%);
+        }
 
-        .genie-content { padding: 30px; }
-        .detalhe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;}
-        .detalhe-box { background: #0a0a0a; border: 1px solid #222; border-radius: 12px; padding: 20px; }
-        .detalhe-box h5 { color: var(--primary); font-size: 12px; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; border-bottom: 1px solid #222; padding-bottom: 5px;}
-        .detalhe-box p { font-size: 14px; line-height: 1.6; color: #ddd; margin: 0; }
+        .icon-wrapper {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; color: #555;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            margin: 0 auto; /* Começa centralizado */
+        }
 
-        .btn-close-genie { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.1); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 16px; transition: 0.3s;}
-        .btn-close-genie:hover { background: #ef4444; }
+        /* O ÍCONE PULA PRO LADO E ACENDE NO HOVER */
+        .dept-card:hover .icon-wrapper {
+            background: var(--card-color);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 0 20px var(--card-glow);
+            margin: 0; /* Vai pra esquerda */
+            transform: translateY(-15px);
+        }
 
-        .rsvp-area { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 20px; text-align: center; }
-        .rsvp-status { font-size: 12px; text-transform: uppercase; font-weight: bold; margin-bottom: 15px; color: var(--text-dim); }
-        .rsvp-buttons { display: flex; gap: 10px; justify-content: center; }
-        .btn-rsvp { padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; flex: 1; transition: 0.2s; font-family: 'Urbanist', sans-serif;}
-        .btn-rsvp.yes { background: #10b981; color: #000; }
-        .btn-rsvp.yes:hover { background: #059669; transform: translateY(-2px);}
-        .btn-rsvp.no { background: transparent; border: 1px solid #ef4444; color: #ef4444; }
-        .btn-rsvp.no:hover { background: #ef4444; color: #fff; transform: translateY(-2px);}
+        .text-wrapper {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            white-space: nowrap; /* Impede o texto de quebrar linha enquanto expande */
+            overflow: hidden;
+            text-align: left;
+        }
 
-        .escala-musica-item { display: flex; align-items: center; gap: 12px; padding: 10px; background: #1a1a1a; border: 1px solid #222; border-radius: 8px; margin-bottom: 8px; transition: 0.2s; }
-        .escala-musica-item.clickable { cursor: pointer; }
-        .escala-musica-item.clickable:hover { border-color: var(--primary); transform: translateX(5px); }
-        .escala-musica-img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
-        .escala-musica-info { flex: 1; }
-        .escala-musica-info h6 { margin: 0; font-size: 14px; color: white; display: flex; justify-content: space-between; align-items: center;}
-        .escala-musica-info p { margin: 2px 0 0 0; font-size: 11px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;}
+        /* O TEXTO SOBE QUANDO EXPANDIR */
+        .dept-card:hover .text-wrapper {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: 0.1s; /* Um leve atraso pro efeito ficar chique */
+        }
 
-        .louvor-header-img { width: 100%; height: 250px; object-fit: cover; border-radius: 20px 20px 0 0; border-bottom: 2px solid var(--primary); }
-        .louvor-info-box { display: flex; gap: 20px; margin-bottom: 30px; }
-        .info-item { background: #1a1a1a; padding: 15px 20px; border-radius: 12px; border: 1px solid #222; text-align: center; flex: 1; }
-        .info-item span { display: block; font-size: 12px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 5px; font-weight: bold;}
-        .info-item strong { font-size: 24px; color: var(--primary); }
-        .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-link { background: #222; color: white; padding: 15px; text-align: center; border-radius: 10px; text-decoration: none; font-weight: bold; transition: 0.3s; border: 1px solid #333; display: block;}
-        .btn-link:hover { background: var(--primary); color: black; border-color: var(--primary); transform: translateY(-3px); }
-        .btn-youtube:hover { background: #ef4444; color: white; border-color: #ef4444; }
-        .btn-link.disabled { opacity: 0.3; pointer-events: none; }
+        .text-wrapper h3 {
+            margin: 0 0 5px 0;
+            font-size: 32px;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+        }
 
-        .admin-only, .boss-only { display: none !important; }
+        .text-wrapper p {
+            margin: 0;
+            color: #ccc;
+            font-size: 15px;
+        }
 
-        .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 10px 15px; border: 1px solid transparent; border-bottom: 1px solid #222; margin-bottom: 15px; cursor: pointer; transition: 0.3s; border-radius: 8px;}
-        .sidebar-user:hover { background: #1a1a1a; border-color: var(--primary); }
-        .sidebar-user img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
-        .sidebar-user-info { display: flex; flex-direction: column; }
-        .sidebar-user-info strong { color: white; font-size: 14px; }
-        .sidebar-user-info span { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
+        /* CLASSE DE BLOQUEIO */
+        .dept-card.disabled {
+            display: none !important;
+        }
+
+        /* ========================================================
+           RESPONSIVIDADE (CELULARES E TABLETS)
+           ======================================================== */
+        @media (max-width: 800px) {
+            .dept-grid {
+                flex-direction: column; /* Transforma a sanfona em gavetas verticais */
+                height: 75vh;
+            }
+            .vertical-title {
+                writing-mode: horizontal-tb; /* Volta o texto pra normal */
+                top: 50%;
+                transform: translate(-50%, -50%);
+                letter-spacing: 4px;
+            }
+            .dept-card:hover .vertical-title {
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            .icon-wrapper {
+                position: absolute;
+                left: 20px;
+                bottom: 50%;
+                transform: translateY(50%);
+                margin: 0;
+                width: 50px; height: 50px; font-size: 20px;
+            }
+            .dept-card:hover .icon-wrapper {
+                top: 20px; bottom: auto; transform: translateY(0);
+            }
+            .content { padding: 20px; }
+            .text-wrapper h3 { font-size: 24px; }
+        }
+
+        .btn-sair {
+            margin-top: 40px;
+            background: transparent;
+            color: #ef4444;
+            border: 1px dashed #ef4444;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Urbanist', sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-sair:hover {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
     </style>
 </head>
 <body>
 
-<div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
+<div class="portal-wrapper">
+    <h1 id="tituloPortal">Bem-vindo, <span class="highlight">Visitante</span>!</h1>
+    <p class="subtitle">Selecione o ministério que deseja acessar</p>
 
-<header class="mobile-header">
-    <button class="hamburger-btn" onclick="toggleMenu()">
-        <i class="fas fa-bars"></i>
-    </button>
-    <h2>Be One <span class="highlight">Tech</span></h2>
-</header>
-
-<aside class="sidebar" id="sidebar">
-    <h2>Be One <span class="highlight">Tech</span></h2>
-    
-    <div class="sidebar-user" id="sidebarUserBox" onclick="window.location.href='perfil.html'" title="Acessar Meu Perfil">
-        <img src="https://ui-avatars.com/api/?name=User&background=222&color=fff" id="sidebarAvatar" alt="Avatar">
-        <div class="sidebar-user-info">
-            <strong id="sidebarUserName">Carregando...</strong>
-            <span id="sidebarUserRole">Membro</span>
-        </div>
-    </div>
-
-    <a href="inicio.html" class="active"><i class="fas fa-home"></i> Início</a>
-    <a href="dashboard.html"><i class="fas fa-lightbulb"></i> Sugestões</a>
-    <a href="louvores.html"><i class="fas fa-music"></i> Repertório</a>
-    <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
-    <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
-    <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
-    <a href="#" onclick="sairSistema()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
-</aside>
-
-<main class="main-content">
-    <div class="welcome-box">
-        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-            <h1 id="txtBoasVindas" style="margin: 0;">Bem-vindo(a)</h1>
-            <span id="nomeDeptBadge" style="font-size: 12px; border: 1px solid var(--primary); padding: 5px 10px; border-radius: 15px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;"></span>
-        </div>
-        <p style="color: var(--text-dim); margin-top: 10px;" id="subtxtBoasVindas">Carregando informações do ministério...</p>
-    </div>
-
-    <div id="areaAdmin" class="boss-only">
-        <h2 style="font-size: 18px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim);">Visão Geral do Ministério</h2>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-users"></i></div>
-                <div class="stat-info"><h3 id="countMembros">0</h3><p>Equipe Ativa</p></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-calendar-check" style="color: #3b82f6; background: rgba(59, 130, 246, 0.1);"></i></div>
-                <div class="stat-info"><h3 id="countEscalas">0</h3><p>Escalas no Mês</p></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-user-clock" style="color: #f59e0b; background: rgba(245, 158, 11, 0.1);"></i></div>
-                <div class="stat-info"><h3 id="countFaltas">0</h3><p>Ausências (Mês)</p></div>
-            </div>
-        </div>
-    </div>
-
-    <div style="margin-top: 40px;">
-        <h2 style="font-size: 22px; margin-bottom: 5px; color: white;">
-            Minhas Próximas Escalas
-        </h2>
-        <p style="color: var(--text-dim); margin-bottom: 25px; font-size: 14px;">Visão global de todos os seus compromissos.</p>
+    <div class="dept-grid" id="gridDepartamentos">
         
-        <div id="listaMinhasEscalas">
-            <p style="color: gray; font-style: italic;">Buscando escalas na rede...</p>
-        </div>
-    </div>
-
-    <div id="areaMembro" style="display: none; margin-top: 20px;">
-        <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid #333; padding: 25px; border-radius: 12px;">
-            <h3 style="color: var(--primary); margin-bottom: 15px;"><i class="fas fa-info-circle"></i> Primeiros Passos</h3>
-            <ul style="list-style: none; color: var(--text-dim); line-height: 1.8;">
-                <li><i class="fas fa-check-circle highlight" style="margin-right: 10px;"></i> Consulte a aba <strong>Escalas</strong> para confirmar quando você tocará/cantará.</li>
-                <li><i class="fas fa-check-circle highlight" style="margin-right: 10px;"></i> Registre suas indisponibilidades no calendário da equipe.</li>
-                <li><i class="fas fa-check-circle highlight" style="margin-right: 10px;"></i> Estude os arranjos oficiais na aba de <strong>Repertório</strong> se estiver disponível.</li>
-            </ul>
-        </div>
-    </div>
-</main>
-
-<div class="genie-overlay" id="escalaOverlay" onclick="fecharEscalaModal()"></div>
-<div class="genie-modal" id="escalaModal">
-    <button class="btn-close-genie" onclick="fecharEscalaModal()"><i class="fas fa-times"></i></button>
-
-    <div class="genie-header">
-        <h2 class="genie-title" id="modalEscalaTitulo">Título do Culto</h2>
-        <div class="genie-subtitle" id="modalEscalaData">DD/MM/YYYY</div>
-    </div>
-
-    <div class="genie-content">
-        <div class="detalhe-grid">
-            <div class="detalhe-box">
-                <h5><i class="fas fa-users"></i> Equipe Escalada</h5>
-                <div id="modalEscalaEquipe" style="font-size: 14px; line-height: 1.6; color: #ddd;">Carregando...</div>
-            </div>
-            <div class="detalhe-box">
-                <h5><i class="fas fa-music"></i> Repertório</h5>
-                <div id="modalEscalaRepertorio">Carregando...</div>
+        <div class="dept-card" id="card-LOUVOR" style="--card-color: #FF3300; --card-glow: rgba(255, 51, 0, 0.5);" onclick="entrarDept('LOUVOR', '#FF3300')">
+            <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="vertical-title">LOUVOR</div>
+            <div class="content">
+                <div class="icon-wrapper"><i class="fas fa-music"></i></div>
+                <div class="text-wrapper">
+                    <h3>LOUVOR</h3>
+                    <p>Equipe de Música e Adoração</p>
+                </div>
             </div>
         </div>
 
-        <div class="rsvp-area">
-            <div class="rsvp-status" id="statusPresenca">Seu status: <span style="color: #f59e0b;">PENDENTE</span></div>
-            <div class="rsvp-buttons" id="rsvpBotoes">
-                <button class="btn-rsvp yes" onclick="responderEscala('CONFIRMADO')"><i class="fas fa-check"></i> Estarei Presente!</button>
-                <button class="btn-rsvp no" onclick="responderEscala('RECUSADO')"><i class="fas fa-times"></i> Não poderei ir</button>
+        <div class="dept-card" id="card-MIDIA" style="--card-color: #a855f7; --card-glow: rgba(168, 85, 247, 0.5);" onclick="entrarDept('MIDIA', '#a855f7')">
+            <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="vertical-title">MÍDIA</div>
+            <div class="content">
+                <div class="icon-wrapper"><i class="fas fa-camera"></i></div>
+                <div class="text-wrapper">
+                    <h3>MÍDIA</h3>
+                    <p>Comunicação e Transmissão</p>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="genie-overlay" id="louvorOverlay" onclick="fecharLouvorGenie()"></div>
-<div class="genie-modal" id="louvorModal">
-    <button class="btn-close-genie" onclick="fecharLouvorGenie()"><i class="fas fa-times"></i></button>
-    <img src="" id="louvorCapaModal" class="louvor-header-img" alt="Capa">
-    <div class="genie-content">
-        <h2 class="genie-title" id="louvorTituloModal">Título da Música</h2>
-        <p class="genie-subtitle" id="louvorArtistaModal" style="color: var(--text-dim); font-size: 16px; margin-bottom: 20px;">Cantor</p>
-        <div class="louvor-info-box">
-            <div class="info-item"><span>Tom Oficial</span><strong id="louvorTomModal">C</strong></div>
-            <div class="info-item"><span>BPM</span><strong id="louvorBpmModal">120</strong></div>
-            <div class="info-item"><span>Compasso</span><strong id="louvorCompassoModal">4/4</strong></div>
+        <div class="dept-card" id="card-SALT" style="--card-color: #3b82f6; --card-glow: rgba(59, 130, 246, 0.5);" onclick="entrarDept('SALT', '#3b82f6')">
+            <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1529070538774-1843cb1665e8?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="vertical-title">SALT</div>
+            <div class="content">
+                <div class="icon-wrapper"><i class="fas fa-users"></i></div>
+                <div class="text-wrapper">
+                    <h3>SALT</h3>
+                    <p>Apoio, Intercessão e Liderança</p>
+                </div>
+            </div>
         </div>
-        <div class="link-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <a href="#" target="_blank" class="btn-link" id="btnCifra"><i class="fas fa-guitar"></i> Cifra</a>
-            <a href="#" target="_blank" class="btn-link" id="btnLetra"><i class="fas fa-align-left"></i> Letra</a>
-            <a href="#" target="_blank" class="btn-link" id="btnVs"><i class="fas fa-headphones"></i> Multitrack/VS</a>
-            <a href="#" target="_blank" class="btn-link btn-youtube" id="btnYoutube"><i class="fab fa-youtube"></i> YouTube</a>
+
+        <div class="dept-card" id="card-27+" style="--card-color: #10b981; --card-glow: rgba(16, 185, 129, 0.5);" onclick="entrarDept('27+', '#10b981')">
+            <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="vertical-title">27+</div>
+            <div class="content">
+                <div class="icon-wrapper"><i class="fas fa-plus-circle"></i></div>
+                <div class="text-wrapper">
+                    <h3>27+</h3>
+                    <p>Organização e Conselheiros</p>
+                </div>
+            </div>
         </div>
+
+        <div class="dept-card" id="card-JOIN" style="--card-color: #6366f1; --card-glow: rgba(99, 102, 241, 0.5);" onclick="entrarDept('JOIN', '#6366f1')">
+            <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1576383617300-84ccfd1cda8e?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="vertical-title">JOIN</div>
+            <div class="content">
+                <div class="icon-wrapper"><i class="fas fa-handshake"></i></div>
+                <div class="text-wrapper">
+                    <h3>JOIN</h3>
+                    <p>Recepção e Boas-Vindas</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dept-card" id="card-KIDS" style="--card-color: #facc15; --card-glow: rgba(250, 204, 21, 0.5);" onclick="entrarDept('KIDS', '#facc15')">
+            <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="vertical-title">KIDS</div>
+            <div class="content">
+                <div class="icon-wrapper"><i class="fas fa-child"></i></div>
+                <div class="text-wrapper">
+                    <h3>KIDS</h3>
+                    <p>Ministério Infantil e Teatrinho</p>
+                </div>
+            </div>
+        </div>
+
     </div>
+
+    <button class="btn-sair" onclick="deslogarSistema()"><i class="fas fa-sign-out-alt"></i> Sair do Sistema</button>
 </div>
 
 <script>
-    function toggleMenu() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
+    // 1. CHECAGEM DE AUTENTICAÇÃO E NOME
+    const userLogado = JSON.parse(localStorage.getItem('usuario'));
+    if (!userLogado) {
+        window.location.href = 'login.html';
     }
 
-    const user = JSON.parse(localStorage.getItem('usuario')) || {nome: 'Visitante', cargo: 'MEMBRO'};
-    const cargoUser = String(user.cargo).toUpperCase().trim();
-    const deptAtual = localStorage.getItem('departamentoAtual') || 'LOUVOR';
+    const primeiroNome = userLogado.nome.split(' ')[0];
+    document.getElementById('tituloPortal').innerHTML = `Bem-vindo, <span style="color: #10b981;">${primeiroNome}</span>!`;
 
-    let todasEscalas = [];
-    let escalaAtualAberta = null;
-    let louvoresGlobais = [];
+    // 2. FILTRO DE ACESSO AOS CARDS
+    const deptsDoUsuario = userLogado.departamentos || [];
+    const cargo = String(userLogado.cargo).toUpperCase().trim();
 
-    const DEPARTAMENTOS_CONFIG = {
-        "LOUVOR": { cor: "#FF3300", icone: "fa-music" },
-        "MIDIA": { cor: "#190B28", icone: "fa-camera" },
-        "SALT": { cor: "#121831", icone: "fa-users" },
-        "27+": { cor: "#10251A", icone: "fa-plus-circle" },
-        "JOIN": { cor: "#2F3C64", icone: "fa-handshake" },
-        "KIDS": { cor: "#FDD835", icone: "fa-child" }
-    };
-
-    const DEFAULT_IMG = "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80";
-
-    async function carregarSidebar() {
-        try {
-            const userLogado = JSON.parse(localStorage.getItem('usuario'));
-            if (!userLogado) return;
-
-            let fotoFinal = userLogado.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userLogado.nome || 'User')}&background=222&color=10b981`;
-            const avatarElem = document.getElementById('sidebarAvatar');
-            const nameElem = document.getElementById('sidebarUserName');
-            const roleElem = document.getElementById('sidebarUserRole');
-
-            if (avatarElem) avatarElem.src = fotoFinal;
-            
-            if (nameElem) {
-                let primeiroNome = userLogado.nome ? userLogado.nome.split(' ')[0] : 'Visitante';
-                if (String(userLogado.cargo).toUpperCase().trim() === 'PASTOR') { 
-                    primeiroNome = "Pr. " + primeiroNome; 
-                }
-                nameElem.innerText = primeiroNome;
+    // Se o usuário não for DEV nem ADMIN, escondemos os cards que ele não tem acesso
+    if (cargo !== 'DEV' && cargo !== 'ADMIN') {
+        const todosOsCards = document.querySelectorAll('.dept-card');
+        todosOsCards.forEach(card => {
+            const nomeCard = card.id.replace('card-', '');
+            // Se o departamento do card não estiver na lista do cara, esconde!
+            if (!deptsDoUsuario.includes(nomeCard)) {
+                card.classList.add('disabled');
             }
-            
-            if (roleElem) {
-                let cargoLocal = userLogado.cargo;
-                if (cargoLocal === 'LIDER') {
-                    const mochila = userLogado.liderDe || "";
-                    if (!mochila.includes(deptAtual)) cargoLocal = 'MEMBRO';
-                }
-                roleElem.innerText = cargoLocal || 'Membro';
-            }
-        } catch(e) { console.log("Erro ao processar sidebar"); }
-    }
-
-    function agruparEquipe(equipeStr) {
-        if (!equipeStr) return [];
-        const linhas = equipeStr.split('\n').filter(Boolean);
-        const mapa = {};
-
-        linhas.forEach(linha => {
-            let nome = linha;
-            let funcao = '';
-            if (linha.includes('(') && linha.includes(')')) {
-                const openIdx = linha.lastIndexOf('(');
-                const closeIdx = linha.lastIndexOf(')');
-                nome = linha.substring(0, openIdx).trim();
-                funcao = linha.substring(openIdx + 1, closeIdx).trim();
-            }
-            if (!mapa[nome]) mapa[nome] = [];
-            if (funcao) mapa[nome].push(funcao);
         });
-
-        return Object.entries(mapa).map(([n, f]) => f.length > 0 ? `${n} (${f.join(', ')})` : n);
     }
 
-    function inicializarPainel() {
-        const primeiroNome = user.nome.split(' ')[0];
+    // 3. FUNÇÃO DE ENTRADA NO MINISTÉRIO
+    function entrarDept(nomeDept, corDept) {
+        // Salva as escolhas na memória
+        localStorage.setItem('departamentoAtual', nomeDept);
+        localStorage.setItem('corAtual', corDept);
+
+        // Faz uma transição suave da página inteira sumindo antes de abrir a aba Início
+        document.body.style.opacity = '0';
+        document.body.style.transition = '0.4s ease';
         
-        let saudacaoNome = primeiroNome;
-        if (cargoUser === 'PASTOR') {
-            saudacaoNome = "Pr. " + primeiroNome;
-        }
-
-        document.getElementById('txtBoasVindas').innerHTML = `Bem-vindo(a), <span class="highlight">${saudacaoNome}</span>`;
-
-        if (cargoUser === 'DEV') {
-            const linkAdmin = document.getElementById('linkAdmin');
-            if(linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
-        }
-
-        let isChefiaLocal = false;
-        if (['ADMIN', 'DEV', 'PASTOR'].includes(cargoUser)) isChefiaLocal = true;
-        else if (cargoUser === 'LIDER' && (user.liderDe || "").includes(deptAtual)) isChefiaLocal = true;
-
-        if (isChefiaLocal) {
-            document.getElementById('subtxtBoasVindas').innerText = "Aqui está o resumo operacional do ministério neste mês.";
-            document.querySelectorAll('.boss-only').forEach(el => { el.classList.remove('boss-only'); el.style.display = 'block'; });
-            carregarDadosServidor();
-        } else {
-            document.getElementById('subtxtBoasVindas').innerText = "Acompanhe seus compromissos e mantenha-se alinhado com a equipe.";
-            document.getElementById('areaMembro').style.display = 'block';
-        }
-
-        carregarSidebar();
-        carregarTudo();
+        setTimeout(() => {
+            window.location.href = 'inicio.html';
+        }, 400);
     }
 
-    async function carregarTudo() {
-        try {
-            // MÁGICA: Agora busca TODAS as escalas de todos os ministérios
-            const [resEscalas, resLouvores] = await Promise.all([
-                fetch('/api/escalas'), 
-                fetch('/api/louvores')
-            ]);
-            
-            if(resLouvores.ok) louvoresGlobais = await resLouvores.json();
-            if(resEscalas.ok) {
-                todasEscalas = await resEscalas.json();
-                
-                // Filtra apenas as que o nome do usuário aparece
-                const minhas = todasEscalas.filter(e => e.equipe && e.equipe.toUpperCase().includes(user.nome.toUpperCase()));
-                minhas.sort((a, b) => new Date(a.data) - new Date(b.data));
-                
-                renderizarEscalasEmPilha(minhas);
-            }
-        } catch (error) { console.error(error); }
+    // 4. FUNÇÃO DE DESLOGAR (LIMPA TUDO E VOLTA PRO LOGIN)
+    function deslogarSistema() {
+        localStorage.clear(); 
+        window.location.href = 'login.html';
     }
-
-    async function carregarDadosServidor() {
-        try {
-            const [resMembros, resEscalas, resFaltas] = await Promise.all([
-                fetch(`/api/membros?departamento=${deptAtual}`), 
-                fetch(`/api/escalas?departamento=${deptAtual}`), 
-                fetch('/api/indisponibilidade')
-            ]);
-            
-            const dataAtual = new Date(); const mesAtual = dataAtual.getMonth(); const anoAtual = dataAtual.getFullYear();
-
-            let membrosDaExtensao = [];
-
-            if (resMembros.ok) { 
-                membrosDaExtensao = await resMembros.json(); 
-                animarNumero('countMembros', membrosDaExtensao.length); 
-            }
-
-            if (resEscalas.ok) {
-                const escalas = await resEscalas.json();
-                const escalasDoMes = escalas.filter(e => {
-                    if(!e.data) return false;
-                    const d = new Date(e.data); return d.getMonth() === mesAtual && d.getFullYear() === anoAtual;
-                });
-                animarNumero('countEscalas', escalasDoMes.length);
-            }
-
-            if (resFaltas.ok) {
-                const faltas = await resFaltas.json();
-                const nomesDestaExtensao = membrosDaExtensao.map(m => m.nome.trim().toLowerCase());
-
-                const faltasDoMes = faltas.filter(f => {
-                    if(!f.data) return false;
-                    if(!nomesDestaExtensao.includes(f.nomeMembro.trim().toLowerCase())) return false;
-                    const d = new Date(f.data); return d.getMonth() === mesAtual && d.getFullYear() === anoAtual;
-                });
-                animarNumero('countFaltas', faltasDoMes.length);
-            }
-        } catch (e) {}
-    }
-
-    function animarNumero(id, valorFinal) {
-        let atual = 0; const elem = document.getElementById(id);
-        if (!elem || valorFinal === 0) return;
-        const incremento = Math.ceil(valorFinal / 20) || 1;
-        const timer = setInterval(() => {
-            atual += incremento;
-            if (atual >= valorFinal) { elem.innerText = valorFinal; clearInterval(timer); }
-            else { elem.innerText = atual; }
-        }, 40);
-    }
-
-    // =======================================================
-    // MOTOR DA PILHA EXPANSÍVEL (O ACORDEON APPLE WALLET)
-    // =======================================================
-    function renderizarEscalasEmPilha(escalas) {
-        const container = document.getElementById('listaMinhasEscalas');
-        if (escalas.length === 0) {
-            container.innerHTML = `<div style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 12px; text-align: center; border: 1px dashed #333;">
-                <i class="fas fa-mug-hot" style="font-size: 30px; color: var(--text-dim); margin-bottom: 15px;"></i>
-                <p style="color: var(--text-dim);">Você não está escalado para os próximos dias.<br>Aproveite o descanso!</p></div>`;
-            return;
-        }
-
-        // 1. Agrupa as escalas por Ministério (Se não tiver salvo, chuta pro deptAtual)
-        const grupos = {};
-        escalas.forEach(e => {
-            const min = e.departamento || deptAtual; 
-            if(!grupos[min]) grupos[min] = [];
-            grupos[min].push(e);
-        });
-
-        const mesesNomes = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-
-        let htmlFinal = '';
-
-        Object.keys(grupos).forEach(min => {
-            const escalasDesteMin = grupos[min];
-            const configInfo = DEPARTAMENTOS_CONFIG[min] || DEPARTAMENTOS_CONFIG["LOUVOR"];
-            const cor = configInfo.cor;
-            const icone = configInfo.icone;
-            
-            // Só começa colapsado se tiver mais de 1 escala nesse bloco
-            const startClass = escalasDesteMin.length > 1 ? 'collapsed' : '';
-            const txtBotao = startClass === 'collapsed' ? `Expandir (${escalasDesteMin.length}) <i class="fas fa-chevron-down"></i>` : 'Ocultar <i class="fas fa-chevron-up"></i>';
-            const btnVisibility = escalasDesteMin.length > 1 ? `block` : `none`;
-
-            let cardsHtml = escalasDesteMin.map(e => {
-                let dia = '--', mes = '---';
-                if (e.data) { const p = e.data.split('-'); dia = p[2]; mes = mesesNomes[parseInt(p[1]) - 1]; }
-
-                return `
-                <div class="escala-mini-card" style="--stack-color: ${cor};" onclick="abrirEscalaModal(${e.id}, event)">
-                    <div class="escala-date"><div class="day">${dia}</div><div class="month">${mes}</div></div>
-                    <div class="escala-info">
-                        <h4>${e.titulo || 'Evento sem Título'}</h4>
-                        <p>Clique para ver detalhes do repertório e equipe</p>
-                    </div>
-                </div>`;
-            }).join('');
-
-            htmlFinal += `
-            <div class="stack-group">
-                <div class="stack-header">
-                    <h3 style="color: ${cor};"><i class="fas ${icone}"></i> ${min}</h3>
-                    <button class="btn-toggle-stack" style="display: ${btnVisibility};" onclick="togglePilha(this, 'stack-${min}')">${txtBotao}</button>
-                </div>
-                <div class="stack-cards ${startClass}" id="stack-${min}">
-                    ${cardsHtml}
-                </div>
-            </div>`;
-        });
-
-        container.innerHTML = htmlFinal;
-    }
-
-    function togglePilha(btn, idStack) {
-        const stack = document.getElementById(idStack);
-        const qtdCards = stack.children.length;
-
-        if (stack.classList.contains('collapsed')) {
-            stack.classList.remove('collapsed');
-            btn.innerHTML = `Ocultar <i class="fas fa-chevron-up"></i>`;
-        } else {
-            stack.classList.add('collapsed');
-            btn.innerHTML = `Expandir (${qtdCards}) <i class="fas fa-chevron-down"></i>`;
-        }
-    }
-
-    // =======================================================
-
-    function abrirEscalaModal(id, event) {
-        escalaAtualAberta = todasEscalas.find(e => e.id == id);
-        if(!escalaAtualAberta) return;
-
-        document.getElementById('modalEscalaTitulo').innerText = escalaAtualAberta.titulo || 'Sem Título';
-        document.getElementById('modalEscalaData').innerText = escalaAtualAberta.data ? escalaAtualAberta.data.split('-').reverse().join('/') : 'Sem Data';
-
-        const equipeFormatada = agruparEquipe(escalaAtualAberta.equipe);
-        document.getElementById('modalEscalaEquipe').innerHTML = equipeFormatada.length > 0 ? equipeFormatada.join('<br>') : 'Ninguém escalado.';
-
-        let htmlRepertorio = '';
-        if (escalaAtualAberta.repertorio) {
-            const linhasMusicas = escalaAtualAberta.repertorio.split('\n').filter(Boolean);
-            linhasMusicas.forEach(linha => {
-                let tituloPuro = linha;
-                let tomInfo = '';
-                if (linha.includes('(') && linha.includes(')')) {
-                    const openIdx = linha.lastIndexOf('(');
-                    tituloPuro = linha.substring(0, openIdx).trim();
-                    tomInfo = linha.substring(openIdx);
-                }
-
-                const louvorOficial = louvoresGlobais.find(l => l.titulo.toLowerCase().trim() === tituloPuro.toLowerCase().trim());
-                const img = louvorOficial && louvorOficial.imagemUrl ? louvorOficial.imagemUrl : DEFAULT_IMG;
-                const artista = louvorOficial && louvorOficial.artista ? louvorOficial.artista : 'Música';
-                const isClickable = louvorOficial ? `class="escala-musica-item clickable" onclick="abrirLouvorGenie(${louvorOficial.id}, event)"` : `class="escala-musica-item"`;
-
-                htmlRepertorio += `
-                    <div ${isClickable}>
-                        <img src="${img}" class="escala-musica-img">
-                        <div class="escala-musica-info">
-                            <h6>${tituloPuro} <span style="color: var(--primary); font-size: 11px;">${tomInfo}</span></h6>
-                            <p>${artista}</p>
-                        </div>
-                    </div>
-                `;
-            });
-        } else { htmlRepertorio = 'Nenhuma música definida.'; }
-        document.getElementById('modalEscalaRepertorio').innerHTML = htmlRepertorio;
-
-        let status = 'PENDENTE', cor = '#f59e0b';
-        if (escalaAtualAberta.confirmacoes) {
-            try {
-                const confJSON = JSON.parse(escalaAtualAberta.confirmacoes);
-                if (confJSON[user.nome] === 'CONFIRMADO') { status = 'CONFIRMADO'; cor = '#10b981'; }
-                else if (confJSON[user.nome] === 'RECUSADO') { status = 'NÃO VOU'; cor = '#ef4444'; }
-            } catch(e) {}
-        }
-
-        document.getElementById('statusPresenca').innerHTML = `Seu status: <span style="color: ${cor};">${status}</span>`;
-        if (status !== 'PENDENTE') { document.getElementById('rsvpBotoes').style.display = 'none'; }
-        else { document.getElementById('rsvpBotoes').style.display = 'flex'; }
-
-        const modal = document.getElementById('escalaModal');
-        modal.style.transformOrigin = `${event.clientX}px ${event.clientY}px`;
-        modal.style.left = '50%'; modal.style.top = '50%';
-        modal.style.transform = 'translate(-50%, -50%) scale(0)';
-        document.getElementById('escalaOverlay').classList.add('active');
-
-        setTimeout(() => { modal.style.transform = 'translate(-50%, -50%) scale(1)'; modal.style.opacity = '1'; }, 10);
-    }
-
-    function fecharEscalaModal() {
-        document.getElementById('escalaOverlay').classList.remove('active');
-        const modal = document.getElementById('escalaModal');
-        modal.style.transform = 'translate(-50%, -50%) scale(0)';
-        modal.style.opacity = '0';
-    }
-
-    async function responderEscala(resposta) {
-        if(!escalaAtualAberta) return;
-        let confJSON = {};
-        if (escalaAtualAberta.confirmacoes) { try { confJSON = JSON.parse(escalaAtualAberta.confirmacoes); } catch(e) {} }
-        confJSON[user.nome] = resposta;
-
-        const escalaAtualizada = { ...escalaAtualAberta, confirmacoes: JSON.stringify(confJSON) };
-
-        const res = await fetch(`/api/escalas/${escalaAtualAberta.id}`, {
-            method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(escalaAtualizada)
-        });
-
-        if (res.ok) {
-            escalaAtualAberta.confirmacoes = JSON.stringify(confJSON);
-            let cor = resposta === 'CONFIRMADO' ? '#10b981' : '#ef4444';
-            let texto = resposta === 'CONFIRMADO' ? 'CONFIRMADO' : 'NÃO VOU';
-            document.getElementById('statusPresenca').innerHTML = `Seu status: <span style="color: ${cor};">${texto}</span>`;
-            document.getElementById('rsvpBotoes').style.display = 'none';
-            carregarTudo();
-        } else { alert('Erro ao confirmar presença!'); }
-    }
-
-    function abrirLouvorGenie(idLouvor, event) {
-        event.stopPropagation();
-        const louvor = louvoresGlobais ? louvoresGlobais.find(l => l.id == idLouvor) : null;
-        if(!louvor) return;
-
-        document.getElementById('louvorCapaModal').src = louvor.imagemUrl || DEFAULT_IMG;
-        document.getElementById('louvorTituloModal').innerText = louvor.titulo;
-        document.getElementById('louvorArtistaModal').innerText = louvor.artista || 'Sem Ministro';
-        document.getElementById('louvorTomModal').innerText = louvor.tom || '--';
-        document.getElementById('louvorBpmModal').innerText = louvor.bpm || '--';
-        document.getElementById('louvorCompassoModal').innerText = louvor.compasso || '--';
-
-        configurarLink('btnCifra', louvor.linkCifra);
-        configurarLink('btnLetra', louvor.linkLetra);
-        configurarLink('btnVs', louvor.linkVs);
-        configurarLink('btnYoutube', louvor.linkYoutube);
-
-        const modal = document.getElementById('louvorModal');
-        modal.style.transformOrigin = `${event.clientX}px ${event.clientY}px`;
-        modal.style.left = '50%'; modal.style.top = '50%';
-        modal.style.transform = 'translate(-50%, -50%) scale(0)';
-        document.getElementById('louvorOverlay').classList.add('active');
-
-        setTimeout(() => { modal.style.transform = 'translate(-50%, -50%) scale(1)'; modal.style.opacity = '1'; }, 10);
-    }
-
-    function fecharLouvorGenie() {
-        document.getElementById('louvorOverlay').classList.remove('active');
-        const modal = document.getElementById('louvorModal');
-        modal.style.transform = 'translate(-50%, -50%) scale(0)';
-        modal.style.opacity = '0';
-    }
-
-    function configurarLink(btnId, url) {
-        const btn = document.getElementById(btnId);
-        if(url && url.trim() !== "") { btn.href = url; btn.classList.remove('disabled'); }
-        else { btn.removeAttribute('href'); btn.classList.add('disabled'); }
-    }
-
-    inicializarPainel();
 </script>
+
 </body>
 </html>
