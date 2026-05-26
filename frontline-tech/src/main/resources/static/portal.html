@@ -14,6 +14,12 @@
             --text-dim: #a1a1aa;
         }
 
+        /* SCROLLBAR CUSTOMIZADO */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
@@ -27,7 +33,6 @@
             overflow: hidden; 
         }
 
-        /* ANIMAÇÃO DE ENTRADA SUAVE DO PAINEL INTEIRO */
         @keyframes portalEntrada {
             0% { opacity: 0; transform: translateY(30px); }
             100% { opacity: 1; transform: translateY(0); }
@@ -44,31 +49,30 @@
         h1 { font-size: 36px; margin-bottom: 5px; font-weight: 900; }
         p.subtitle { color: var(--text-dim); margin-bottom: 40px; font-size: 16px; }
 
-        /* ========================================================
-           O ACORDEÃO HORIZONTAL (DESIGN PREMIUM DO GIF)
-           ======================================================== */
         .dept-grid {
             display: flex;
             width: 100%;
-            height: 450px; /* Altura fixa para o efeito sanfona rolar liso */
+            height: 450px; 
             gap: 15px;
             margin: 0 auto;
         }
 
         .dept-card {
-            flex: 1; /* Todos nascem com peso 1 (fatias iguais) */
+            flex: 1; 
             position: relative;
             border-radius: 30px;
             overflow: hidden;
             cursor: pointer;
             background: #0a0a0a;
             border: 1px solid #222;
-            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); /* Transição elástica de expansão */
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); 
+            user-select: none;
+            -webkit-user-select: none;
         }
 
-        /* O QUE ACONTECE NO HOVER (EXPANSÃO) */
-        .dept-card:hover {
-            flex: 5; /* A fatia selecionada engorda e empurra as outras! */
+        /* EFEITO DE EXPANSÃO */
+        .dept-card:hover, .dept-card.active {
+            flex: 5; 
             border-color: var(--card-color);
             box-shadow: 0 0 30px var(--card-glow);
         }
@@ -78,23 +82,22 @@
             inset: 0;
             background-size: cover;
             background-position: center;
-            filter: grayscale(100%) brightness(0.3); /* Nasce cinza e escuro */
+            filter: grayscale(100%) brightness(0.3); 
             transition: all 0.6s ease;
             z-index: 1;
         }
 
-        .dept-card:hover .bg-image {
-            filter: grayscale(0%) brightness(0.7); /* Ganha cor e ilumina no hover */
-            transform: scale(1.05); /* Efeito de câmera lenta na foto */
+        .dept-card:hover .bg-image, .dept-card.active .bg-image {
+            filter: grayscale(0%) brightness(0.7); 
+            transform: scale(1.05); 
         }
 
-        /* TÍTULO VERTICAL (APARECE QUANDO ESTÁ RECOLHIDO) */
         .vertical-title {
             position: absolute;
             top: 40px;
             left: 50%;
             transform: translateX(-50%);
-            writing-mode: vertical-rl; /* Vira o texto de lado */
+            writing-mode: vertical-rl; 
             text-orientation: mixed;
             color: #666;
             font-weight: 900;
@@ -104,13 +107,11 @@
             z-index: 2;
         }
 
-        /* SOME QUANDO EXPANDIR */
-        .dept-card:hover .vertical-title {
+        .dept-card:hover .vertical-title, .dept-card.active .vertical-title {
             opacity: 0;
             transform: translateX(-50%) translateY(-20px);
         }
 
-        /* CONTEÚDO PRINCIPAL (FICA NO RODAPÉ) */
         .content {
             position: absolute;
             inset: 0;
@@ -131,16 +132,15 @@
             font-size: 24px; color: #555;
             border: 1px solid rgba(255,255,255,0.1);
             transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-            margin: 0 auto; /* Começa centralizado */
+            margin: 0 auto; 
         }
 
-        /* O ÍCONE PULA PRO LADO E ACENDE NO HOVER */
-        .dept-card:hover .icon-wrapper {
+        .dept-card:hover .icon-wrapper, .dept-card.active .icon-wrapper {
             background: var(--card-color);
             color: #fff;
             border-color: transparent;
             box-shadow: 0 0 20px var(--card-glow);
-            margin: 0; /* Vai pra esquerda */
+            margin: 0; 
             transform: translateY(-15px);
         }
 
@@ -148,52 +148,35 @@
             opacity: 0;
             transform: translateY(30px);
             transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-            white-space: nowrap; /* Impede o texto de quebrar linha enquanto expande */
+            white-space: nowrap; 
             overflow: hidden;
             text-align: left;
         }
 
-        /* O TEXTO SOBE QUANDO EXPANDIR */
-        .dept-card:hover .text-wrapper {
+        .dept-card:hover .text-wrapper, .dept-card.active .text-wrapper {
             opacity: 1;
             transform: translateY(0);
-            transition-delay: 0.1s; /* Um leve atraso pro efeito ficar chique */
+            transition-delay: 0.1s; 
         }
 
-        .text-wrapper h3 {
-            margin: 0 0 5px 0;
-            font-size: 32px;
-            font-weight: 900;
-            color: #fff;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
-        }
+        .text-wrapper h3 { margin: 0 0 5px 0; font-size: 32px; font-weight: 900; color: #fff; text-shadow: 0 5px 15px rgba(0,0,0,0.8); }
+        .text-wrapper p { margin: 0; color: #ccc; font-size: 15px; }
 
-        .text-wrapper p {
-            margin: 0;
-            color: #ccc;
-            font-size: 15px;
-        }
+        .dept-card.disabled { display: none !important; }
 
-        /* CLASSE DE BLOQUEIO */
-        .dept-card.disabled {
-            display: none !important;
-        }
-
-        /* ========================================================
-           RESPONSIVIDADE (CELULARES E TABLETS)
-           ======================================================== */
+        /* RESPONSIVIDADE PARA CELULAR */
         @media (max-width: 800px) {
             .dept-grid {
-                flex-direction: column; /* Transforma a sanfona em gavetas verticais */
+                flex-direction: column; 
                 height: 75vh;
             }
             .vertical-title {
-                writing-mode: horizontal-tb; /* Volta o texto pra normal */
+                writing-mode: horizontal-tb; 
                 top: 50%;
                 transform: translate(-50%, -50%);
                 letter-spacing: 4px;
             }
-            .dept-card:hover .vertical-title {
+            .dept-card:hover .vertical-title, .dept-card.active .vertical-title {
                 transform: translate(-50%, -50%) scale(0.8);
             }
             .icon-wrapper {
@@ -204,7 +187,7 @@
                 margin: 0;
                 width: 50px; height: 50px; font-size: 20px;
             }
-            .dept-card:hover .icon-wrapper {
+            .dept-card:hover .icon-wrapper, .dept-card.active .icon-wrapper {
                 top: 20px; bottom: auto; transform: translateY(0);
             }
             .content { padding: 20px; }
@@ -242,7 +225,7 @@
 
     <div class="dept-grid" id="gridDepartamentos">
         
-        <div class="dept-card" id="card-LOUVOR" style="--card-color: #FF3300; --card-glow: rgba(255, 51, 0, 0.5);" onclick="entrarDept('LOUVOR', '#FF3300')">
+        <div class="dept-card" id="card-LOUVOR" style="--card-color: #FF3300; --card-glow: rgba(255, 51, 0, 0.5);" onclick="entrarDept('LOUVOR', '#FF3300', this)">
             <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80');"></div>
             <div class="vertical-title">LOUVOR</div>
             <div class="content">
@@ -254,7 +237,7 @@
             </div>
         </div>
 
-        <div class="dept-card" id="card-MIDIA" style="--card-color: #a855f7; --card-glow: rgba(168, 85, 247, 0.5);" onclick="entrarDept('MIDIA', '#a855f7')">
+        <div class="dept-card" id="card-MIDIA" style="--card-color: #a855f7; --card-glow: rgba(168, 85, 247, 0.5);" onclick="entrarDept('MIDIA', '#a855f7', this)">
             <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80');"></div>
             <div class="vertical-title">MÍDIA</div>
             <div class="content">
@@ -266,7 +249,7 @@
             </div>
         </div>
 
-        <div class="dept-card" id="card-SALT" style="--card-color: #3b82f6; --card-glow: rgba(59, 130, 246, 0.5);" onclick="entrarDept('SALT', '#3b82f6')">
+        <div class="dept-card" id="card-SALT" style="--card-color: #3b82f6; --card-glow: rgba(59, 130, 246, 0.5);" onclick="entrarDept('SALT', '#3b82f6', this)">
             <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1529070538774-1843cb1665e8?auto=format&fit=crop&w=800&q=80');"></div>
             <div class="vertical-title">SALT</div>
             <div class="content">
@@ -278,7 +261,7 @@
             </div>
         </div>
 
-        <div class="dept-card" id="card-27+" style="--card-color: #10b981; --card-glow: rgba(16, 185, 129, 0.5);" onclick="entrarDept('27+', '#10b981')">
+        <div class="dept-card" id="card-27+" style="--card-color: #10b981; --card-glow: rgba(16, 185, 129, 0.5);" onclick="entrarDept('27+', '#10b981', this)">
             <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80');"></div>
             <div class="vertical-title">27+</div>
             <div class="content">
@@ -290,7 +273,7 @@
             </div>
         </div>
 
-        <div class="dept-card" id="card-JOIN" style="--card-color: #6366f1; --card-glow: rgba(99, 102, 241, 0.5);" onclick="entrarDept('JOIN', '#6366f1')">
+        <div class="dept-card" id="card-JOIN" style="--card-color: #6366f1; --card-glow: rgba(99, 102, 241, 0.5);" onclick="entrarDept('JOIN', '#6366f1', this)">
             <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1576383617300-84ccfd1cda8e?auto=format&fit=crop&w=800&q=80');"></div>
             <div class="vertical-title">JOIN</div>
             <div class="content">
@@ -302,7 +285,7 @@
             </div>
         </div>
 
-        <div class="dept-card" id="card-KIDS" style="--card-color: #facc15; --card-glow: rgba(250, 204, 21, 0.5);" onclick="entrarDept('KIDS', '#facc15')">
+        <div class="dept-card" id="card-KIDS" style="--card-color: #facc15; --card-glow: rgba(250, 204, 21, 0.5);" onclick="entrarDept('KIDS', '#facc15', this)">
             <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=800&q=80');"></div>
             <div class="vertical-title">KIDS</div>
             <div class="content">
@@ -320,38 +303,44 @@
 </div>
 
 <script>
-    // 1. CHECAGEM DE AUTENTICAÇÃO E NOME
     const userLogado = JSON.parse(localStorage.getItem('usuario'));
     if (!userLogado) {
         window.location.href = 'login.html';
     }
 
-    const primeiroNome = userLogado.nome.split(' ')[0];
+    let primeiroNome = userLogado.nome.split(' ')[0];
+    if(String(userLogado.cargo).toUpperCase() === 'PASTOR') primeiroNome = 'Pr. ' + primeiroNome;
+    
     document.getElementById('tituloPortal').innerHTML = `Bem-vindo, <span style="color: #10b981;">${primeiroNome}</span>!`;
 
-    // 2. FILTRO DE ACESSO AOS CARDS
     const deptsDoUsuario = userLogado.departamentos || [];
     const cargo = String(userLogado.cargo).toUpperCase().trim();
 
-    // Se o usuário não for DEV nem ADMIN, escondemos os cards que ele não tem acesso
-    if (cargo !== 'DEV' && cargo !== 'ADMIN') {
+    if (cargo !== 'DEV' && cargo !== 'ADMIN' && cargo !== 'PASTOR') {
         const todosOsCards = document.querySelectorAll('.dept-card');
         todosOsCards.forEach(card => {
             const nomeCard = card.id.replace('card-', '');
-            // Se o departamento do card não estiver na lista do cara, esconde!
             if (!deptsDoUsuario.includes(nomeCard)) {
                 card.classList.add('disabled');
             }
         });
     }
 
-    // 3. FUNÇÃO DE ENTRADA NO MINISTÉRIO
-    function entrarDept(nomeDept, corDept) {
-        // Salva as escolhas na memória
+    // NOVA FUNÇÃO INTELIGENTE DE "DOIS CLIQUES" NO CELULAR
+    function entrarDept(nomeDept, corDept, elementoCard) {
+        // Verifica se a tela é de celular
+        if (window.innerWidth <= 800) {
+            if (!elementoCard.classList.contains('active')) {
+                document.querySelectorAll('.dept-card').forEach(c => c.classList.remove('active'));
+                elementoCard.classList.add('active');
+                return; // Impede a navegação no primeiro toque
+            }
+        }
+
+        // Navegação real
         localStorage.setItem('departamentoAtual', nomeDept);
         localStorage.setItem('corAtual', corDept);
 
-        // Faz uma transição suave da página inteira sumindo antes de abrir a aba Início
         document.body.style.opacity = '0';
         document.body.style.transition = '0.4s ease';
         
@@ -360,7 +349,6 @@
         }, 400);
     }
 
-    // 4. FUNÇÃO DE DESLOGAR (LIMPA TUDO E VOLTA PRO LOGIN)
     function deslogarSistema() {
         localStorage.clear(); 
         window.location.href = 'login.html';
