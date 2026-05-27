@@ -489,6 +489,15 @@
         }
     }
 
+    function sairSistema() {
+        // NÃO APAGA O CRACHÁ! Apaga apenas a memória de qual ministério você estava
+        localStorage.removeItem('departamentoAtual');
+        localStorage.removeItem('corAtual');
+        
+        // Te manda direto e reto para o Portal
+        window.location.href = 'portal.html';
+    }
+
     carregarSidebar();
     carregarLouvores();
 </script>
