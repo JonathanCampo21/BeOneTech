@@ -5,7 +5,7 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # Etapa 2: Rodar o projeto
-FROM openjdk:17.0.2-jdk-slim
+FROM openjdk:26-jdk-slim
 WORKDIR /app
 COPY --from=build /app/target/frontline_tech-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
