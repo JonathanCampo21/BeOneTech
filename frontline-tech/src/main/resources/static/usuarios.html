@@ -85,12 +85,13 @@
     <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
     <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
     <a href="painel_pastor.html" id="linkPastor" class="admin-only" style="color: #a2ff00;"><i class="fas fa-chart-pie"></i> Painel Executivo</a>
-    <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
+    <a href="usuarios.html" id="linkAdmin" class="admin-only active"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
     
     <div style="flex-grow: 1;"></div> 
 
     <a href="javascript:void(0)" onclick="sairSistema()" class="btn-sair" style="margin-top: auto; margin-bottom: 20px;"><i class="fas fa-sign-out-alt"></i> Sair da Área</a>
 </aside>
+
 <main class="main-content">
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
@@ -162,7 +163,8 @@
     const cargoUser = String(userLogado.cargo).toUpperCase().trim();
     let membrosDB = [];
 
-    if (cargoUser !== 'DEV') {
+    // Proteção de Rota
+    if (cargoUser !== 'DEV' && cargoUser !== 'ADMIN') {
         window.location.href = 'inicio.html';
     }
 
@@ -230,7 +232,6 @@
         membro.cargo = cargo; 
         membro.senha = senha;
 
-        // ATUALIZADO: O Objeto 'membro' completo mantém o array 'departamentos' intacto na requisição PUT
         const res = await fetch(`/api/membros/${idMembro}`, { 
             method: 'PUT', 
             headers: { 'Content-Type': 'application/json' }, 
@@ -256,14 +257,14 @@
     }
 
     async function excluir(id) {
-        if(confirm("Issoft removerá o acesso e o cadastro do membro. Confirma?")) {
+        if(confirm("Isso removerá o acesso e o cadastro do membro. Confirma?")) {
             await fetch(`/api/membros/${id}`, { method: 'DELETE' });
             carregarDados();
         }
     }
 
     // ==========================================
-    // FUNÇÕES DO RADAR DE ACESSOS
+    // FUNÇÕES DO RADAR DE ACESSOS (CORRIGIDO)
     // ==========================================
     function abrirHistorico() {
         document.getElementById('historicoOverlay').classList.add('active');
@@ -283,11 +284,13 @@
             const res = await fetch('/api/membros');
             let membros = await res.json();
             
+            // Só mostra quem tem acesso (Cargos acima de MEMBRO comum)
             membros = membros.filter(m => m.cargo && m.cargo.toUpperCase() !== 'MEMBRO');
 
+            // Ordena do acesso mais recente para o mais antigo (Injetando o 'Z' para correção UTC)
             membros.sort((a, b) => {
-                const dataA = a.ultimaAtividade ? new Date(a.ultimaAtividade) : new Date(0);
-                const dataB = b.ultimaAtividade ? new Date(b.ultimaAtividade) : new Date(0);
+                const dataA = a.ultimaAtividade ? new Date(a.ultimaAtividade + (a.ultimaAtividade.endsWith('Z') ? '' : 'Z')) : new Date(0);
+                const dataB = b.ultimaAtividade ? new Date(b.ultimaAtividade + (b.ultimaAtividade.endsWith('Z') ? '' : 'Z')) : new Date(0);
                 return dataB - dataA;
             });
             
@@ -299,11 +302,18 @@
                 let bolinha = 'fa-user-clock';
 
                 if (m.ultimaAtividade) {
-                    const ultimoAcesso = new Date(m.ultimaAtividade);
-                    const diferencaEmMilissegundos = agora - ultimoAcesso;
-                    const minutosInativo = Math.floor(diferencaEmMilissegundos / 1000 / 60);
+                    // BLINDAGEM UTC: Coloca o Z no final se o banco tiver mandado sem fuso!
+                    let stringData = m.ultimaAtividade;
+                    if (!stringData.endsWith('Z')) {
+                        stringData += 'Z'; 
+                    }
 
-                    if (minutosInativo <= 5) {
+                    const ultimoAcesso = new Date(stringData);
+                    const diferencaMs = agora - ultimoAcesso;
+                    const minutosInativo = Math.floor(diferencaMs / 60000);
+
+                    // REGRA CIRÚRGICA DE 3 MINUTOS (Se der negativo por bug de relógio local, conta como 0)
+                    if (minutosInativo <= 3) {
                         statusColor = '#10b981';
                         statusTexto = 'Online agora';
                         bolinha = 'fa-circle';
@@ -341,11 +351,8 @@
     }
 
     function sairSistema() {
-        // NÃO APAGA O CRACHÁ! Apaga apenas a memória de qual ministério você estava
         localStorage.removeItem('departamentoAtual');
         localStorage.removeItem('corAtual');
-        
-        // Te manda direto e reto para o Portal
         window.location.href = 'portal.html';
     }
 
