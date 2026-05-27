@@ -20,15 +20,12 @@
         .welcome-box { background: linear-gradient(135deg, #111 0%, #0a0a0a 100%); border: 1px solid #333; padding: 40px; border-radius: 15px; margin-bottom: 30px; border-left: 5px solid var(--primary); }
 
         .stack-group { margin-bottom: 35px; }
-        
         .stack-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; border-bottom: 1px solid #222; padding-bottom: 10px;}
         .stack-header h3 { margin: 0; font-size: 18px; color: white; display: flex; align-items: center; gap: 10px; }
-        
         .btn-toggle-stack { background: #1a1a1a; border: 1px solid #333; color: white; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.3s; font-weight: bold; font-family: 'Urbanist', sans-serif;}
         .btn-toggle-stack:hover { background: #222; border-color: var(--primary); }
 
         .stack-cards { display: flex; flex-direction: column; gap: 12px; }
-        
         .stack-cards.collapsed { gap: 0; padding-bottom: 30px; } 
         
         .escala-mini-card { 
@@ -39,10 +36,7 @@
             position: relative;
         }
 
-        .stack-cards:not(.collapsed) .escala-mini-card:hover { 
-            background: #1a1a1a; transform: translateX(5px); border-color: var(--stack-color, var(--primary)); box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
-        }
-
+        .stack-cards:not(.collapsed) .escala-mini-card:hover { background: #1a1a1a; transform: translateX(5px); border-color: var(--stack-color, var(--primary)); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .stack-cards.collapsed .escala-mini-card:nth-child(1) { z-index: 5; transform: scale(1); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .stack-cards.collapsed .escala-mini-card:nth-child(2) { z-index: 4; transform: scale(0.95); margin-top: -65px; opacity: 0.7; filter: brightness(0.7); }
         .stack-cards.collapsed .escala-mini-card:nth-child(3) { z-index: 3; transform: scale(0.90); margin-top: -65px; opacity: 0.4; filter: brightness(0.4); }
@@ -81,7 +75,6 @@
         .btn-rsvp.no { background: transparent; border: 1px solid #ef4444; color: #ef4444; }
         .btn-rsvp.no:hover { background: #ef4444; color: #fff; transform: translateY(-2px);}
 
-        /* ÁREA DA CHAMADA DO LÍDER */
         .area-chamada { background: #151719; border: 1px dashed #444; border-radius: 12px; padding: 20px; margin-top: 20px; }
         .area-chamada h4 { margin: 0 0 15px 0; color: #a2ff00; font-size: 14px; text-transform: uppercase; display: flex; align-items: center; gap: 8px;}
         .chamada-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #222; }
@@ -121,13 +114,27 @@
         .sidebar-user-info { display: flex; flex-direction: column; }
         .sidebar-user-info strong { color: white; font-size: 14px; }
         .sidebar-user-info span { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
+
+        /* Botões laterais arrumados */
+        .btn-sidebar-acao { 
+            width: 100%; background: transparent; padding: 12px; border-radius: 8px; 
+            font-weight: bold; cursor: pointer; font-family: 'Urbanist', sans-serif; 
+            transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; 
+        }
+        .btn-trocar { color: #3b82f6; border: 1px dashed #3b82f6; margin-top: 20px; margin-bottom: 10px; }
+        .btn-trocar:hover { background: #3b82f6; color: white; }
+        .btn-sair-conta { color: #ef4444; border: 1px dashed #ef4444; }
+        .btn-sair-conta:hover { background: #ef4444; color: white; }
     </style>
 </head>
 <body>
 
 <div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
+
 <header class="mobile-header">
-    <button class="hamburger-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+    <button class="hamburger-btn" onclick="toggleMenu()">
+        <i class="fas fa-bars"></i>
+    </button>
     <h2>Be One <span class="highlight">Tech</span></h2>
 </header>
 
@@ -149,7 +156,9 @@
     <a href="escalas.html"><i class="fas fa-calendar-alt"></i> Escalas</a>
     <a href="painel_pastor.html" id="linkPastor" class="admin-only" style="color: #a2ff00;"><i class="fas fa-chart-pie"></i> Painel Executivo</a>
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
-    <a href="#" onclick="sairSistema()" class="btn-sair" style="margin-top: 20px; color: #ef4444;"><i class="fas fa-sign-out-alt"></i> Sair</a>
+    
+    <button onclick="window.location.replace('portal.html')" class="btn-sidebar-acao btn-trocar"><i class="fas fa-exchange-alt"></i> Trocar Área</button>
+    <button onclick="sairSistema()" class="btn-sidebar-acao btn-sair-conta"><i class="fas fa-sign-out-alt"></i> Sair da Conta</button>
 </aside>
 
 <main class="main-content">
@@ -367,7 +376,6 @@
 
     async function carregarTudo() {
         try {
-            // Busca blindada para garantir tudo funcionando
             const [resEscalas, resLouvores] = await Promise.all([
                 fetch('/api/escalas', { headers: getHeaders }), 
                 fetch('/api/louvores', { headers: getHeaders })
@@ -375,7 +383,6 @@
             
             if(resLouvores.ok) louvoresGlobais = await resLouvores.json();
             
-            // Busca todos os membros do banco para resolver os líderes nas reuniões
             const promessasMembros = Object.keys(DEPARTAMENTOS_CONFIG).map(async d => {
                 try {
                     const r = await fetch(`/api/membros?departamento=${encodeURIComponent(d)}`, { headers: getHeaders });
@@ -395,18 +402,15 @@
 
                 const escalasFiltradas = todasEscalas.filter(e => {
                     const deptoDaEscala = e.departamento || 'LOUVOR';
-                    
-                    // REGRAS DE CONFIDENCIALIDADE:
-                    // Se não for do departamento que o cara clicou na página inicial, já corta fora.
                     if (deptoDaEscala !== deptAtual) return false;
 
                     const ehLiderDestaEscala = isAdminOuPastor || (cargoUser === 'LIDER' && mochilaLider.includes(deptoDaEscala));
                     const ehReuniaoFechada = (e.titulo || '').includes('[LIDERANÇA]');
                     const meuNomeTaNaLista = e.equipe && e.equipe.toUpperCase().includes(user.nome.toUpperCase());
 
-                    if (ehReuniaoFechada) return ehLiderDestaEscala; // Só vê a reunião DESSA aba se ele for o líder DELA.
-                    if (ehLiderDestaEscala) return true; // Chefe vê todos os cultos do seu setor
-                    return meuNomeTaNaLista; // Membro comum só vê onde foi escalado
+                    if (ehReuniaoFechada) return ehLiderDestaEscala; 
+                    if (ehLiderDestaEscala) return true; 
+                    return meuNomeTaNaLista; 
                 });
 
                 escalasFiltradas.sort((a, b) => new Date(a.data) - new Date(b.data));
@@ -526,9 +530,6 @@
         }
     }
 
-    // =======================================================
-    // MODAL DE DETALHES (LEITURA INTELIGENTE DE LÍDERES)
-    // =======================================================
     function abrirEscalaModal(id, event) {
         escalaAtualAberta = todasEscalas.find(e => e.id == id);
         if(!escalaAtualAberta) return;
@@ -580,13 +581,11 @@
             document.getElementById('modalEscalaRepertorio').innerHTML = htmlRepertorio;
         }
 
-        // MONTAGEM DA EQUIPE E CHAMADA
         let htmlEquipe = '';
         let nomesParaChamada = [];
         const confJSON = escalaAtualAberta.confirmacoes ? JSON.parse(escalaAtualAberta.confirmacoes) : {};
 
         if (isReuniao) {
-            // MÁGICA: Buscar Líderes do Departamento Automaticamente!
             const lideresDoDepto = membrosGlobais.filter(m => {
                 const c = String(m.cargo).toUpperCase();
                 if (['PASTOR', 'DEV', 'ADMIN'].includes(c)) return true;
@@ -619,7 +618,6 @@
                 htmlEquipe = '<p style="font-size:12px; color:gray;">Nenhum líder cadastrado nesse departamento.</p>';
             }
         } else {
-            // CULTO NORMAL: Equipe da Prancheta
             const equipeFormatada = agruparEquipe(escalaAtualAberta.equipe);
             if (equipeFormatada.length > 0) {
                 equipeFormatada.forEach(obj => {
@@ -635,7 +633,6 @@
         }
         document.getElementById('modalEscalaEquipe').innerHTML = htmlEquipe;
 
-        // RSVP - Confirmação de Presença
         let meuNomeNaLista = false;
         if (isReuniao) {
             const mochila = user.liderDe || "";
@@ -657,9 +654,7 @@
             document.getElementById('rsvpAreaContainer').style.display = 'none';
         }
 
-        // ÁREA DA CHAMADA DO CHEFE
         const ehChefe = ['DEV', 'ADMIN', 'PASTOR'].includes(cargoUser) || (cargoUser === 'LIDER' && (user.liderDe || "").includes(deptoDaEscala));
-        
         if (ehChefe && nomesParaChamada.length > 0) {
             document.getElementById('areaChamadaLider').style.display = 'block';
             carregarTabelaDeChamada(nomesParaChamada, escalaAtualAberta.data);
@@ -690,7 +685,6 @@
         confJSON[user.nome] = resposta;
 
         const escalaAtualizada = { ...escalaAtualAberta, confirmacoes: JSON.stringify(confJSON) };
-
         const putHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
 
         const res = await fetch(`/api/escalas/${escalaAtualAberta.id}`, {
