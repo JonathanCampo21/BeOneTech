@@ -63,9 +63,8 @@
         .genie-title { font-size: 28px; font-weight: 900; margin-bottom: 5px; color: white; }
         .genie-subtitle { color: var(--primary); font-size: 16px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
         
-        .genie-content { padding: 30px; }
-        .detalhe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; transition: 0.3s ease;}
-        @media (max-width: 800px) { .detalhe-grid { grid-template-columns: 1fr !important; } }
+        .genie-content { padding: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; transition: 0.3s ease;}
+        @media (max-width: 800px) { .genie-content { grid-template-columns: 1fr !important; } }
         
         .detalhe-box { background: #0a0a0a; border: 1px solid #222; border-radius: 12px; padding: 20px; }
         .detalhe-box h5 { color: var(--primary); font-size: 12px; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; border-bottom: 1px solid #222; padding-bottom: 5px;}
@@ -96,6 +95,17 @@
         .sidebar-user-info { display: flex; flex-direction: column; }
         .sidebar-user-info strong { color: white; font-size: 14px; }
         .sidebar-user-info span { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
+        
+        /* Botões laterais arrumados */
+        .btn-sidebar-acao { 
+            width: 100%; background: transparent; padding: 12px; border-radius: 8px; 
+            font-weight: bold; cursor: pointer; font-family: 'Urbanist', sans-serif; 
+            transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; 
+        }
+        .btn-trocar { color: #3b82f6; border: 1px dashed #3b82f6; margin-top: 20px; margin-bottom: 10px; }
+        .btn-trocar:hover { background: #3b82f6; color: white; }
+        .btn-sair-conta { color: #ef4444; border: 1px dashed #ef4444; }
+        .btn-sair-conta:hover { background: #ef4444; color: white; }
     </style>
 </head>
 <body>
@@ -125,7 +135,9 @@
     <a href="escalas.html" class="active"><i class="fas fa-calendar-alt"></i> Escalas</a>
     <a href="painel_pastor.html" id="linkPastor" class="admin-only" style="color: #a2ff00;"><i class="fas fa-chart-pie"></i> Painel Executivo</a>
     <a href="usuarios.html" id="linkAdmin" class="admin-only"><i class="fas fa-user-shield"></i> Gestão de Usuários</a>
-    <a href="#" onclick="sairSistema()" class="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</a>
+    
+    <button onclick="window.location.replace('portal.html')" class="btn-sidebar-acao btn-trocar"><i class="fas fa-exchange-alt"></i> Trocar Área</button>
+    <button onclick="sairSistema()" class="btn-sidebar-acao btn-sair-conta"><i class="fas fa-sign-out-alt"></i> Sair da Conta</button>
 </aside>
 
 <main class="main-content">
@@ -207,24 +219,21 @@
         <h2 class="genie-title" id="modalEscalaTitulo">Título do Culto</h2>
         <div class="genie-subtitle" id="modalEscalaData">DD/MM/YYYY</div>
     </div>
-    <div class="genie-content">
-        <div class="detalhe-grid" id="modalGridConteudo">
-            <div class="detalhe-box">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 10px;">
-                    <h5 style="margin: 0; border: none; padding: 0;"><i class="fas fa-users"></i> Status da Equipe</h5>
-                    <div style="font-size: 11px; color: gray;">
-                        <i class="fas fa-circle" style="color: #10b981;"></i> Conf <span style="margin:0 5px;">|</span>
-                        <i class="fas fa-circle" style="color: #f59e0b;"></i> Pend <span style="margin:0 5px;">|</span>
-                        <i class="fas fa-circle" style="color: #ef4444;"></i> Rec
-                    </div>
+    <div class="genie-content" id="modalGridConteudo">
+        <div class="detalhe-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 10px;">
+                <h5 style="margin: 0; border: none; padding: 0;"><i class="fas fa-users"></i> Status da Equipe</h5>
+                <div style="font-size: 11px; color: gray;">
+                    <i class="fas fa-circle" style="color: #10b981;"></i> Conf <span style="margin:0 5px;">|</span>
+                    <i class="fas fa-circle" style="color: #f59e0b;"></i> Pend <span style="margin:0 5px;">|</span>
+                    <i class="fas fa-circle" style="color: #ef4444;"></i> Rec
                 </div>
-                <div id="modalEscalaEquipeStatus" style="font-size: 15px; line-height: 1.8;">Carregando...</div>
             </div>
-            
-            <div class="detalhe-box" id="modalBoxRepertorio">
-                <h5><i class="fas fa-music"></i> Repertório</h5>
-                <div id="modalEscalaRepertorio">Carregando...</div>
-            </div>
+            <div id="modalEscalaEquipeStatus" style="font-size: 15px; line-height: 1.8;">Carregando...</div>
+        </div>
+        <div class="detalhe-box" id="modalBoxRepertorio">
+            <h5><i class="fas fa-music"></i> Repertório</h5>
+            <div id="modalEscalaRepertorio">Carregando...</div>
         </div>
     </div>
 </div>
@@ -272,12 +281,12 @@
     const DEFAULT_IMG = "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80";
     const DEPARTAMENTOS_CONFIG = { "LOUVOR": { cor: "#FF3300" }, "MIDIA": { cor: "#a855f7" }, "SALT": { cor: "#3b82f6" }, "27+": { cor: "#10b981" }, "JOIN": { cor: "#6366f1" }, "KIDS": { cor: "#facc15" } };
 
-    async function carregarSidebar() {
+    function carregarSidebar() {
         if (!user || !user.nome) return;
         let fotoFinal = user.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nome)}&background=222&color=10b981`;
         document.getElementById('sidebarAvatar').src = fotoFinal;
         
-        let primeiroNome = user.nome.split(' ')[0];
+        let primeiroNome = user.nome ? user.nome.split(' ')[0] : 'Visitante';
         if (cargoUser === 'PASTOR') primeiroNome = "Pr. " + primeiroNome; 
         document.getElementById('sidebarUserName').innerText = primeiroNome;
         
@@ -330,7 +339,7 @@
             document.querySelectorAll('.boss-only').forEach(el => el.classList.remove('boss-only'));
         }
 
-        // MÁGICA: ESCONDE O REPERTÓRIO SE NÃO FOR LOUVOR
+        // ESCONDE O REPERTÓRIO SE NÃO FOR LOUVOR
         if (deptAtual.toUpperCase() !== 'LOUVOR') {
             const boxBuilder = document.getElementById('boxBuilderRepertorio');
             if(boxBuilder) boxBuilder.style.display = 'none';
@@ -348,13 +357,10 @@
         carregarSidebar();
         ajustarAcessos();
         
-        // Desenha o calendário vazio primeiro pra tela não parecer travada
         desenharCalendario();
         document.getElementById('containerEscalas').innerHTML = '<p style="color: gray; font-style: italic; text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Sincronizando agenda com a nuvem...</p>';
         
         await carregarDadosDoServidor();
-        
-        // Agora redesenha com os dados reais preenchidos
         desenharCalendario();
         renderizarEscalas();
     }
@@ -395,7 +401,6 @@
 
         for(let d=1; d<=ultimoDia; d++) {
             const dataStr = `${ano}-${String(mes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            // Blindagem no trim()
             const falta = faltasDB.find(f => f.data === dataStr && (f.nomeMembro||'').trim().toLowerCase() === (user.nome||'').trim().toLowerCase());
             const isAdmin = ['ADMIN','DEV','LIDER','PASTOR'].includes(cargoUser);
 
@@ -410,11 +415,8 @@
         const isChefia = ['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser);
         if (cargoUser === 'MEMBRO' || modoMarcarAusencia) {
             const falta = faltasDB.find(f => f.data === dataStr && (f.nomeMembro||'').trim().toLowerCase() === (user.nome||'').trim().toLowerCase());
-            
-            // Usando Headers para autorização nas faltas também
             if(falta) await fetch(`/api/indisponibilidade/${falta.id}`, { method:'DELETE', headers: getHeaders });
             else await fetch('/api/indisponibilidade', { method:'POST', headers: postHeaders, body:JSON.stringify({nomeMembro: user.nome, data: dataStr})});
-            
             await carregarDadosDoServidor(); desenharCalendario(); renderizarEscalas();
         } else if (isChefia) {
             abrirPrancheta(dataStr);
@@ -569,9 +571,7 @@
 
         const escalasDoMes = escalasDB.filter(e => {
             if (!e.data) return false;
-            // FILTRA AS REUNIÕES DE LIDERANÇA DA TELA DE ESCALAS!
             if ((e.titulo || '').includes('[LIDERANÇA]')) return false; 
-            
             const [ano, mes] = e.data.split('-');
             return parseInt(ano) === anoFoco && (parseInt(mes) - 1) === mesFoco;
         });
@@ -773,7 +773,9 @@
         }
     }
 
-    function sairSistema() { localStorage.clear(); window.location.href = 'login.html'; }
+    function sairSistema() {
+        localStorage.clear(); window.location.replace('login.html');
+    }
 
     carregarPagina();
 </script>
