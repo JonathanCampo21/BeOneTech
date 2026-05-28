@@ -729,12 +729,15 @@
         else { btn.removeAttribute('href'); btn.classList.add('disabled'); }
     }
 
-    async function baixarPdfMensal() {
+   async function baixarPdfMensal() {
         try {
             const mesNum = dataFoco.getMonth() + 1;
             const ano = dataFoco.getFullYear();
             const mesFormatado = `${ano}-${String(mesNum).padStart(2, '0')}`;
-            const res = await fetch(`/api/escalas/pdf?mes=${mesFormatado}&departamento=${encodeURIComponent(deptAtual)}`, { headers: getHeaders });
+            
+            // Retirado o 'headers: getHeaders' para o SpringBoot não barrar o download do Blob
+            const res = await fetch(`/api/escalas/pdf?mes=${mesFormatado}&departamento=${encodeURIComponent(deptAtual)}`);
+            
             if (res.ok) {
                 const blob = await res.blob();
                 const url = window.URL.createObjectURL(blob);
@@ -747,7 +750,9 @@
 
     async function baixarPdfIndividual(id) {
         try {
-            const res = await fetch(`/api/escalas/pdf?id=${id}&departamento=${encodeURIComponent(deptAtual)}`, { headers: getHeaders });
+            // Retirado o 'headers: getHeaders' aqui também
+            const res = await fetch(`/api/escalas/pdf?id=${id}&departamento=${encodeURIComponent(deptAtual)}`);
+            
             if (res.ok) {
                 const blob = await res.blob();
                 const url = window.URL.createObjectURL(blob);
@@ -757,7 +762,6 @@
             } else { alert("O servidor recusou a emissão do PDF."); }
         } catch (e) { alert("Erro de conexão ao tentar gerar o PDF."); }
     }
-
     function enviarZap(id) {
         const e = escalasDB.find(x => x.id == id);
         const d = e.data ? e.data.split('-').reverse().join('/') : 'Data Indefinida';
