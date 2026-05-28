@@ -38,27 +38,27 @@
 <body>
 
 <div th:each="esc : ${escalas}" class="escala-container"
-     th:with="corDept=${esc.departamento == 'LOUVOR' ? '#FF3300' :
-                       esc.departamento == 'MIDIA' ? '#a855f7' :
-                       esc.departamento == 'SALT' ? '#3b82f6' :
-                       esc.departamento == '27+' ? '#10b981' :
-                       esc.departamento == 'JOIN' ? '#6366f1' :
-                       esc.departamento == 'KIDS' ? '#facc15' : '#ffffff'}">
+     th:with="corDept=${esc?.departamento == 'LOUVOR' ? '#FF3300' :
+                       esc?.departamento == 'MIDIA' ? '#a855f7' :
+                       esc?.departamento == 'SALT' ? '#3b82f6' :
+                       esc?.departamento == '27+' ? '#10b981' :
+                       esc?.departamento == 'JOIN' ? '#6366f1' :
+                       esc?.departamento == 'KIDS' ? '#facc15' : '#ffffff'}">
                        
     <div class="header" th:style="'border-bottom-color: ' + ${corDept}">
         <h2 th:style="'color: ' + ${corDept}"><span th:text="${esc.titulo}"></span></h2>
         <p><span th:text="${esc.data}"></span></p>
     </div>
 
-    <div th:if="${esc.departamento == 'LOUVOR'}" style="width: 100%;">
+    <div th:if="${esc?.departamento == 'LOUVOR'}" style="width: 100%;">
         <div style="width: 48%; float: left;">
             <h3 th:style="'color: ' + ${corDept}">Vocal / Ministros</h3>
             <table class="equipe-table">
-                <tr th:if="${not #lists.isEmpty(esc.vocal)}" th:each="membro : ${esc.vocal}">
+                <tr th:if="${esc.vocal != null and !esc.vocal.empty}" th:each="membro : ${esc.vocal}">
                     <td style="font-weight: bold; width: 45%; color: #fff;"><span th:text="${membro.nome}"></span></td>
                     <td><span th:text="${membro.funcao}"></span></td>
                 </tr>
-                <tr th:if="${#lists.isEmpty(esc.vocal)}">
+                <tr th:if="${esc.vocal == null or esc.vocal.empty}">
                     <td colspan="2" style="color: gray; text-align: center;">Ninguém escalado</td>
                 </tr>
             </table>
@@ -66,11 +66,11 @@
         <div style="width: 48%; float: right;">
             <h3 th:style="'color: ' + ${corDept}">Banda</h3>
             <table class="equipe-table">
-                <tr th:if="${not #lists.isEmpty(esc.banda)}" th:each="membro : ${esc.banda}">
+                <tr th:if="${esc.banda != null and !esc.banda.empty}" th:each="membro : ${esc.banda}">
                     <td style="font-weight: bold; width: 45%; color: #fff;"><span th:text="${membro.nome}"></span></td>
                     <td><span th:text="${membro.funcao}"></span></td>
                 </tr>
-                <tr th:if="${#lists.isEmpty(esc.banda)}">
+                <tr th:if="${esc.banda == null or esc.banda.empty}">
                     <td colspan="2" style="color: gray; text-align: center;">Ninguém escalado</td>
                 </tr>
             </table>
@@ -78,24 +78,19 @@
         <div style="clear: both;"></div>
     </div>
     
-    <div th:unless="${esc.departamento == 'LOUVOR'}" style="width: 100%;">
+    <div th:unless="${esc?.departamento == 'LOUVOR'}" style="width: 100%;">
         <h3 th:style="'color: ' + ${corDept}">Equipe Escalada</h3>
         <table class="equipe-table">
-            <tbody th:if="${not #lists.isEmpty(esc.vocal) or not #lists.isEmpty(esc.banda)}">
-                <tr th:if="${not #lists.isEmpty(esc.vocal)}" th:each="membro : ${esc.vocal}">
+            <tbody>
+                <tr th:if="${esc.vocal != null}" th:each="membro : ${esc.vocal}">
                     <td style="font-weight: bold; width: 45%; color: #fff;"><span th:text="${membro.nome}"></span></td>
                     <td><span th:text="${membro.funcao}"></span></td>
                 </tr>
-                <tr th:if="${not #lists.isEmpty(esc.banda)}" th:each="membro : ${esc.banda}">
+                <tr th:if="${esc.banda != null}" th:each="membro : ${esc.banda}">
                     <td style="font-weight: bold; width: 45%; color: #fff;"><span th:text="${membro.nome}"></span></td>
                     <td><span th:text="${membro.funcao}"></span></td>
                 </tr>
-            </tbody>
-            <tbody th:if="${#lists.isEmpty(esc.vocal) and #lists.isEmpty(esc.banda)}">
-                <tr th:if="${esc.equipe != null and esc.equipe != ''}">
-                    <td colspan="2" style="white-space: pre-wrap; color: #fff;" th:text="${esc.equipe}"></td>
-                </tr>
-                <tr th:if="${esc.equipe == null or esc.equipe == ''}">
+                <tr th:if="${(esc.vocal == null or esc.vocal.empty) and (esc.banda == null or esc.banda.empty)}">
                     <td colspan="2" style="color: gray; text-align: center;">Ninguém escalado</td>
                 </tr>
             </tbody>
@@ -103,7 +98,7 @@
     </div>
 </div>
 
-<div th:if="${isIndividual != null and isIndividual and escala != null and escala.departamento == 'LOUVOR'}" 
+<div th:if="${isIndividual != null and isIndividual and escala != null and escala?.departamento == 'LOUVOR'}" 
      th:with="corDept='#FF3300'" style="page-break-before: always;">
      
     <div class="header" style="margin-top: 10px; border-bottom-color: #FF3300;">
@@ -111,7 +106,7 @@
         <p><span th:text="${escala.titulo}"></span> - <span th:text="${escala.data}"></span></p>
     </div>
 
-    <div th:if="${not #lists.isEmpty(escala.repertorio)}" th:each="musica : ${escala.repertorio}" class="musica-box" style="border-left-color: #FF3300;">
+    <div th:if="${escala.repertorio != null and !escala.repertorio.empty}" th:each="musica : ${escala.repertorio}" class="musica-box" style="border-left-color: #FF3300;">
         <h3 style="margin: 0 0 5px 0; color: #fff; text-transform: none; font-size: 16px;">
             <span th:text="${musica.titulo}"></span>
             <span style="color: #FF3300;">(<span th:text="${musica.tom}"></span>)</span>
@@ -130,7 +125,7 @@
         </div>
     </div>
     
-    <div th:if="${#lists.isEmpty(escala.repertorio)}">
+    <div th:if="${escala.repertorio == null or escala.repertorio.empty}">
         <p style="text-align: center; color: gray;">Nenhuma música definida.</p>
     </div>
 </div>
