@@ -114,8 +114,7 @@
         .sidebar-user-info { display: flex; flex-direction: column; }
         .sidebar-user-info strong { color: white; font-size: 14px; }
         .sidebar-user-info span { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
-
-        /* Botões laterais arrumados */
+        
         .btn-sidebar-acao { 
             width: 100%; background: transparent; padding: 12px; border-radius: 8px; 
             font-weight: bold; cursor: pointer; font-family: 'Urbanist', sans-serif; 
@@ -132,9 +131,7 @@
 <div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
 
 <header class="mobile-header">
-    <button class="hamburger-btn" onclick="toggleMenu()">
-        <i class="fas fa-bars"></i>
-    </button>
+    <button class="hamburger-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
     <h2>Be One <span class="highlight">Tech</span></h2>
 </header>
 
@@ -149,7 +146,7 @@
         </div>
     </div>
 
-    <a href="inicio.html"><i class="fas fa-home"></i> Início</a>
+    <a href="inicio.html" class="active"><i class="fas fa-home"></i> Início</a>
     <a href="dashboard.html"><i class="fas fa-lightbulb"></i> Sugestões</a>
     <a href="louvores.html"><i class="fas fa-music"></i> Repertório</a>
     <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
@@ -182,7 +179,7 @@
                 <div class="stat-icon"><i class="fas fa-calendar-check" style="color: #3b82f6; background: rgba(59, 130, 246, 0.1);"></i></div>
                 <div class="stat-info"><h3 id="countEscalas">0</h3><p>Escalas no Mês</p></div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" style="cursor: pointer;" onclick="abrirModalFaltas()">
                 <div class="stat-icon"><i class="fas fa-user-clock" style="color: #f59e0b; background: rgba(245, 158, 11, 0.1);"></i></div>
                 <div class="stat-info"><h3 id="countFaltas">0</h3><p>Ausências (Mês)</p></div>
             </div>
@@ -209,6 +206,23 @@
         </div>
     </div>
 </main>
+
+<div class="genie-overlay" id="faltasOverlay" onclick="if(event.target === this) fecharModalFaltas()"></div>
+<div class="genie-modal" id="faltasModal" style="border: 1px solid #f59e0b;">
+    <button class="btn-close-genie" onclick="fecharModalFaltas()"><i class="fas fa-times"></i></button>
+    <div class="genie-header" style="border-bottom-color: #f59e0b;">
+        <h2 class="genie-title" style="color: #f59e0b;"><i class="fas fa-user-clock"></i> Relatório de Ausências</h2>
+        <div class="genie-subtitle" style="color: #f59e0b;">Neste Mês Atual</div>
+    </div>
+    <div class="genie-content" style="padding-top: 20px;">
+        <div class="detalhe-box" style="grid-column: 1 / -1;">
+            <h5 style="color: #f59e0b; border-bottom-color: #333;"><i class="fas fa-calendar-times"></i> Membros Indisponíveis</h5>
+            <div id="listaFaltasMes" style="margin-top: 15px; max-height: 350px; overflow-y: auto; padding-right: 5px;">
+                <p style="color: gray; text-align: center; font-style: italic;">Carregando dados...</p>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="genie-overlay" id="escalaOverlay" onclick="if(event.target === this) fecharEscalaModal()"></div>
 <div class="genie-modal" id="escalaModal">
@@ -291,6 +305,9 @@
     let louvoresGlobais = [];
     let faltasDoBancoCache = [];
     let estadoChamada = {};
+    
+    // Variável para armazenar as faltas e mostrar no novo modal
+    let faltasDoMesGlobais = [];
 
     const DEPARTAMENTOS_CONFIG = {
         "LOUVOR": { cor: "#FF3300", icone: "fa-music" }, "MIDIA": { cor: "#a855f7", icone: "fa-camera" },
@@ -449,12 +466,12 @@
                 const faltas = await resFaltas.json();
                 const nomesDestaExtensao = membrosDaExtensao.map(m => m.nome.trim().toLowerCase());
 
-                const faltasDoMes = faltas.filter(f => {
+                faltasDoMesGlobais = faltas.filter(f => {
                     if(!f.data) return false;
                     if(!nomesDestaExtensao.includes(f.nomeMembro.trim().toLowerCase())) return false;
                     const d = new Date(f.data); return d.getMonth() === mesAtual && d.getFullYear() === anoAtual;
                 });
-                animarNumero('countFaltas', faltasDoMes.length);
+                animarNumero('countFaltas', faltasDoMesGlobais.length);
             }
         } catch (e) {}
     }
@@ -529,6 +546,49 @@
             stack.classList.add('collapsed');
             btn.innerHTML = `Expandir (${qtdCards}) <i class="fas fa-chevron-down"></i>`;
         }
+    }
+
+    // ==========================================
+    // NOVO: LÓGICA DO MODAL DE FALTAS DO MÊS
+    // ==========================================
+    function abrirModalFaltas() {
+        const container = document.getElementById('listaFaltasMes');
+        
+        if (faltasDoMesGlobais.length === 0) {
+            container.innerHTML = '<p style="color: gray; text-align: center; font-style: italic;">Nenhuma ausência registrada neste mês.</p>';
+        } else {
+            faltasDoMesGlobais.sort((a, b) => new Date(a.data) - new Date(b.data));
+            
+            let html = '';
+            faltasDoMesGlobais.forEach(f => {
+                const d = f.data ? f.data.split('-').reverse().join('/') : '--/--/----';
+                html += `
+                <div style="background: #1a1a1a; border: 1px solid #333; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="color: #fff; font-size: 14px;">${f.nomeMembro}</strong>
+                        <div style="color: #f59e0b; font-size: 11px; margin-top: 4px; font-weight: bold; text-transform: uppercase;">${f.motivo || 'Indisponível'}</div>
+                    </div>
+                    <div style="background: #222; color: #ccc; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; border: 1px solid #444;">
+                        <i class="fas fa-calendar-day"></i> ${d}
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        document.getElementById('faltasOverlay').classList.add('active');
+        const modal = document.getElementById('faltasModal');
+        modal.style.left = '50%'; modal.style.top = '50%';
+        modal.style.transformOrigin = 'center center';
+        modal.style.transform = 'translate(-50%, -50%) scale(1)';
+        modal.style.opacity = '1';
+    }
+
+    function fecharModalFaltas() {
+        document.getElementById('faltasOverlay').classList.remove('active');
+        const modal = document.getElementById('faltasModal');
+        modal.style.transform = 'translate(-50%, -50%) scale(0)';
+        modal.style.opacity = '0';
     }
 
     function abrirEscalaModal(id, event) {
@@ -656,6 +716,7 @@
         }
 
         const ehChefe = ['DEV', 'ADMIN', 'PASTOR'].includes(cargoUser) || (cargoUser === 'LIDER' && (user.liderDe || "").includes(deptoDaEscala));
+        
         if (ehChefe && nomesParaChamada.length > 0) {
             document.getElementById('areaChamadaLider').style.display = 'block';
             carregarTabelaDeChamada(nomesParaChamada, escalaAtualAberta.data);
@@ -672,13 +733,6 @@
         setTimeout(() => { modal.style.transform = 'translate(-50%, -50%) scale(1)'; modal.style.opacity = '1'; }, 10);
     }
 
-    function fecharEscalaModal() {
-        document.getElementById('escalaOverlay').classList.remove('active');
-        const modal = document.getElementById('escalaModal');
-        modal.style.transform = 'translate(-50%, -50%) scale(0)';
-        modal.style.opacity = '0';
-    }
-
     async function responderEscala(resposta) {
         if(!escalaAtualAberta) return;
         let confJSON = {};
@@ -686,6 +740,7 @@
         confJSON[user.nome] = resposta;
 
         const escalaAtualizada = { ...escalaAtualAberta, confirmacoes: JSON.stringify(confJSON) };
+
         const putHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
 
         const res = await fetch(`/api/escalas/${escalaAtualAberta.id}`, {
@@ -814,12 +869,9 @@
         else { btn.removeAttribute('href'); btn.classList.add('disabled'); }
     }
 
-   function sairSistema() {
-        // NÃO APAGA O CRACHÁ! Apaga apenas a memória de qual ministério você estava
+    function sairSistema() {
         localStorage.removeItem('departamentoAtual');
         localStorage.removeItem('corAtual');
-        
-        // Te manda direto e reto para o Portal
         window.location.href = 'portal.html';
     }
 
