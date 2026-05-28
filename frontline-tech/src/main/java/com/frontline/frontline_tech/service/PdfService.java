@@ -25,10 +25,19 @@ public class PdfService {
 
         List<Louvor> bancoDeLouvores = louvorRepository.findAll();
         List<Map<String, Object>> escalasFormatadas = new ArrayList<>();
+        boolean isIndividual = escalas.size() == 1;
 
         for (Escala e : escalas) {
+            // 🛑 FILTRO DE LIDERANÇA: Pula as reuniões na impressão mensal!
+            if (!isIndividual && e.getTitulo() != null && e.getTitulo().contains("[LIDERANÇA]")) {
+                continue;
+            }
+
             Map<String, Object> map = new HashMap<>();
             map.put("titulo", e.getTitulo() != null ? e.getTitulo() : "Evento sem título");
+            
+            // 👉 A VARIÁVEL QUE FALTAVA PRO PDF NÃO DAR ERRO 500:
+            map.put("departamento", e.getDepartamento() != null ? e.getDepartamento() : "LOUVOR");
 
             String dataStr = e.getData();
             if (dataStr != null && dataStr.contains("-")) {
@@ -84,6 +93,12 @@ public class PdfService {
                 m.put("funcao", entry.getValue());
                 banda.add(m);
             }
+            
+            // 👉 AJUSTE DA MÍDIA: Junta todos pra não imprimir a palavra "Banda" na Mídia
+            List<Map<String, String>> equipeGeral = new ArrayList<>();
+            equipeGeral.addAll(vocal);
+            equipeGeral.addAll(banda);
+            map.put("equipeGeral", equipeGeral);
 
             map.put("vocal", vocal);
             map.put("banda", banda);
@@ -137,20 +152,25 @@ public class PdfService {
 
         Context context = new Context();
         context.setVariable("escalas", escalasFormatadas);
-
-        boolean isIndividual = escalas.size() == 1;
         context.setVariable("isIndividual", isIndividual);
 
-        // A CORREÇÃO ESTÁ AQUI 👇
-        // Sempre enviamos uma variável "escala" para o HTML, evitando que ele dê erro 500
-        // ao tentar ler uma página invisível.
         if (!escalasFormatadas.isEmpty()) {
             context.setVariable("escala", escalasFormatadas.get(0));
         } else {
             context.setVariable("escala", new HashMap<>());
         }
 
-        String html = templateEngine.process("template-pdf-escala", context);
+        // 🔀 ROTEAMENTO DE TEMPLATES (A Solução que você pediu!)
+        String templateName = "template-pdf-padrao"; // Puxa esse arquivo pra Mídia, Salt, Kids (Sem Músicas)
+        
+        if (!escalasFormatadas.isEmpty()) {
+            String dept = (String) escalasFormatadas.get(0).get("departamento");
+            if ("LOUVOR".equalsIgnoreCase(dept)) {
+                templateName = "template-pdf-louvor"; // Puxa esse arquivo só pro Louvor!
+            }
+        }
+
+        String html = templateEngine.process(templateName, context);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ITextRenderer renderer = new ITextRenderer();
