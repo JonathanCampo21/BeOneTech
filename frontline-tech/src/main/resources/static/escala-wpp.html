@@ -8,7 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
-        /* ESTILO "DOCUMENTO PDF" - Limpo, Branco e Formal */
+        :root {
+            --primary: #ff5722; /* Cor padrão, o JS vai mudar de acordo com o ministério! */
+        }
+        
         body { 
             background: #e5e7eb; 
             font-family: 'Urbanist', sans-serif; 
@@ -28,7 +31,7 @@
         }
         .header { 
             text-align: center; 
-            border-bottom: 3px solid #ff5722; /* Cor de destaque da sua logo */
+            border-bottom: 3px solid var(--primary); 
             padding-bottom: 20px; 
             margin-bottom: 30px; 
         }
@@ -38,7 +41,7 @@
         .section-title { 
             font-size: 18px; 
             font-weight: 900; 
-            color: #ff5722; 
+            color: var(--primary); 
             margin-top: 30px; 
             margin-bottom: 10px; 
             border-bottom: 1px solid #ddd; 
@@ -51,8 +54,8 @@
         th { background: #f8f9fa; color: #333; font-weight: bold; text-transform: uppercase; font-size: 12px; }
         
         .badge { 
-            background: rgba(255, 87, 34, 0.1); 
-            color: #ff5722; 
+            background: rgba(0, 0, 0, 0.05); 
+            color: var(--primary); 
             padding: 4px 8px; 
             border-radius: 4px; 
             font-size: 11px; 
@@ -63,7 +66,7 @@
             display: block; 
             width: 100%; 
             padding: 15px; 
-            background: #ff5722; 
+            background: var(--primary); 
             color: white; 
             text-align: center; 
             border: none; 
@@ -75,7 +78,7 @@
             margin-top: 40px; 
             transition: 0.3s; 
         }
-        .btn-print:hover { background: #e64a19; }
+        .btn-print:hover { filter: brightness(0.9); }
 
         .msg-erro {
             text-align: center;
@@ -86,7 +89,6 @@
             font-weight: bold;
         }
 
-        /* Esconde o botão de imprimir quando for gerar PDF ou imprimir a folha */
         @media print {
             body { background: white; padding: 0; }
             .page-pdf { box-shadow: none; padding: 0; }
@@ -106,151 +108,132 @@
         <p id="dataEscala">Buscando informações</p>
     </div>
 
-    <div id="conteudoEscala" style="display: none;">
-        
-        <div class="section-title"><i class="fas fa-microphone"></i> Vocal & Ministros</div>
-        <table>
-            <thead><tr><th>Nome</th><th>Função</th></tr></thead>
-            <tbody id="tabelaVocal"></tbody>
-        </table>
-
-        <div class="section-title"><i class="fas fa-guitar"></i> Banda</div>
-        <table>
-            <thead><tr><th>Nome</th><th>Instrumento</th></tr></thead>
-            <tbody id="tabelaBanda"></tbody>
-        </table>
-
-        <div class="section-title"><i class="fas fa-list"></i> Repertório</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Música</th>
-                    <th style="text-align: center;">Tom</th>
-                    <th style="text-align: center;">BPM</th>
-                    <th style="text-align: center;">Compasso</th>
-                </tr>
-            </thead>
-            <tbody id="tabelaRepertorio"></tbody>
-        </table>
-
-        <button class="btn-print" onclick="window.print()">
-            <i class="fas fa-file-pdf"></i> Salvar Folha como PDF
-        </button>
-    </div>
+    <div id="conteudoEscala" style="display: none;"></div>
 
     <div id="mensagemErro" class="msg-erro" style="display: none;"></div>
 </div>
 
 <script>
+    const DEPARTAMENTOS_CONFIG = {
+        "LOUVOR": { cor: "#FF3300", icone: "fa-music" }, "MIDIA": { cor: "#a855f7", icone: "fa-camera" },
+        "SALT": { cor: "#3b82f6", icone: "fa-users" }, "27+": { cor: "#10b981", icone: "fa-plus-circle" },
+        "JOIN": { cor: "#6366f1", icone: "fa-handshake" }, "KIDS": { cor: "#facc15", icone: "fa-child" }
+    };
+
     async function carregarEscalaWpp() {
         const params = new URLSearchParams(window.location.search);
         const idEscala = params.get('id');
 
-        if (!idEscala) {
-            mostrarErro("Link inválido. Escala não encontrada.");
-            return;
-        }
+        if (!idEscala) { mostrarErro("Link inválido. Escala não encontrada."); return; }
 
-        // Tenta pegar o token do cache caso o usuário seja da liderança testando do próprio PC
         const token = localStorage.getItem('token');
         const headers = { 'Content-Type': 'application/json' };
         if (token) headers['Authorization'] = 'Bearer ' + token;
 
         try {
-            // Busca Escalas e Louvores simultaneamente
             const [resEscalas, resLouvores] = await Promise.all([
                 fetch('/api/escalas', { headers }),
                 fetch('/api/louvores', { headers })
             ]);
 
             if (resEscalas.status === 403 || resEscalas.status === 401) {
-                mostrarErro("Acesso Negado! O servidor exige login para ver a escala. Peça ao TI para liberar a rota pública.");
-                return;
+                mostrarErro("Acesso Negado! O servidor exige login para ver a escala. Peça ao TI para liberar a rota pública."); return;
             }
 
             const escalas = await resEscalas.json();
             const louvoresGlobais = resLouvores.ok ? await resLouvores.json() : [];
-            
             const escala = escalas.find(e => e.id == idEscala);
 
-            if (!escala) {
-                mostrarErro("Escala removida ou inexistente.");
-                return;
-            }
+            if (!escala) { mostrarErro("Escala removida ou inexistente."); return; }
 
-            // 1. Renderiza Cabeçalho
-            document.getElementById('tituloEscala').innerText = escala.titulo || 'Escala Sem Título';
+            // Configuração do Ministério (Cor Mágica)
+            const dept = escala.departamento || 'LOUVOR';
+            const config = DEPARTAMENTOS_CONFIG[dept] || { cor: "#333", icone: "fa-star" };
+            document.documentElement.style.setProperty('--primary', config.cor);
+
+            document.getElementById('tituloEscala').innerHTML = `<i class="fas ${config.icone}"></i> ${escala.titulo || 'Escala Sem Título'}`;
             document.getElementById('dataEscala').innerText = escala.data ? escala.data.split('-').reverse().join('/') : 'Data Indefinida';
 
-            // 2. Processa Equipe (Separando Vocal e Banda igualzinho o PDF)
-            const vocal = [];
-            const banda = [];
-
+            // Separação de Equipe
+            const vocal = []; const banda = []; const geral = [];
+            
             if (escala.equipe) {
                 const linhasEquipe = escala.equipe.split('\n').filter(Boolean);
                 linhasEquipe.forEach(linha => {
-                    let nome = linha;
-                    let funcao = 'Membro';
-
+                    let nome = linha; let funcao = 'Membro';
                     if (linha.includes('(') && linha.includes(')')) {
-                        const openIdx = linha.lastIndexOf('(');
-                        const closeIdx = linha.lastIndexOf(')');
-                        nome = linha.substring(0, openIdx).trim();
-                        funcao = linha.substring(openIdx + 1, closeIdx).trim();
+                        const openIdx = linha.lastIndexOf('('); const closeIdx = linha.lastIndexOf(')');
+                        nome = linha.substring(0, openIdx).trim(); funcao = linha.substring(openIdx + 1, closeIdx).trim();
                     }
 
                     const fLow = funcao.toLowerCase();
                     const htmlLinha = `<tr><td><strong>${nome}</strong></td><td>${funcao}</td></tr>`;
+                    
+                    geral.push(htmlLinha); // Guarda todos aqui pra usar em outros ministérios
 
                     if (fLow.includes('vocal') || fLow.includes('ministr') || fLow.includes('voz') || fLow.includes('backing')) {
                         vocal.push(htmlLinha);
-                    } else {
-                        banda.push(htmlLinha);
-                    }
+                    } else { banda.push(htmlLinha); }
                 });
             }
 
-            document.getElementById('tabelaVocal').innerHTML = vocal.length > 0 ? vocal.join('') : '<tr><td colspan="2" style="text-align:center; color: gray;">Nenhum vocal escalado</td></tr>';
-            document.getElementById('tabelaBanda').innerHTML = banda.length > 0 ? banda.join('') : '<tr><td colspan="2" style="text-align:center; color: gray;">Nenhum músico escalado</td></tr>';
+            const htmlVazia = '<tr><td colspan="2" style="text-align:center; color: gray;">Nenhum voluntário escalado</td></tr>';
+            let htmlDinamico = '';
 
-            // 3. Processa Repertório
-            let repertorioHtml = [];
-            if (escala.repertorio) {
-                const linhasMusicas = escala.repertorio.split('\n').filter(Boolean);
-                linhasMusicas.forEach(linha => {
-                    let tituloPuro = linha;
-                    let tomInfo = '--';
+            // LÓGICA DE EXIBIÇÃO: Louvor (Banda/Vocal/Repertório) vs Outros (Tabela Única)
+            if (dept.toUpperCase() === 'LOUVOR') {
+                htmlDinamico += `
+                    <div class="section-title"><i class="fas fa-microphone"></i> Vocal & Ministros</div>
+                    <table><thead><tr><th>Nome</th><th>Função</th></tr></thead><tbody>${vocal.length > 0 ? vocal.join('') : htmlVazia}</tbody></table>
                     
-                    if (linha.includes('(') && linha.includes(')')) {
-                        const openIdx = linha.lastIndexOf('(');
-                        tituloPuro = linha.substring(0, openIdx).trim();
-                        tomInfo = linha.substring(openIdx + 1, linha.length - 1).trim();
-                    }
+                    <div class="section-title"><i class="fas fa-guitar"></i> Banda</div>
+                    <table><thead><tr><th>Nome</th><th>Instrumento</th></tr></thead><tbody>${banda.length > 0 ? banda.join('') : htmlVazia}</tbody></table>
+                `;
 
-                    // Encontra a música no banco para puxar BPM e Compasso
-                    const louvorOficial = louvoresGlobais.find(l => l.titulo.toLowerCase().trim() === tituloPuro.toLowerCase().trim());
-                    const bpmInfo = louvorOficial && louvorOficial.bpm ? louvorOficial.bpm : '--';
-                    const compInfo = louvorOficial && louvorOficial.compasso ? louvorOficial.compasso : '--';
+                let repertorioHtml = [];
+                if (escala.repertorio) {
+                    const linhasMusicas = escala.repertorio.split('\n').filter(Boolean);
+                    linhasMusicas.forEach(linha => {
+                        let tituloPuro = linha; let tomInfo = '--';
+                        if (linha.includes('(') && linha.includes(')')) {
+                            const openIdx = linha.lastIndexOf('(');
+                            tituloPuro = linha.substring(0, openIdx).trim();
+                            tomInfo = linha.substring(openIdx + 1, linha.length - 1).trim();
+                        }
+                        const louvorOficial = louvoresGlobais.find(l => l.titulo.toLowerCase().trim() === tituloPuro.toLowerCase().trim());
+                        const bpmInfo = louvorOficial && louvorOficial.bpm ? louvorOficial.bpm : '--';
+                        const compInfo = louvorOficial && louvorOficial.compasso ? louvorOficial.compasso : '--';
 
-                    repertorioHtml.push(`
-                        <tr>
+                        repertorioHtml.push(`<tr>
                             <td><strong>${tituloPuro}</strong></td>
                             <td style="text-align: center;"><span class="badge">${tomInfo}</span></td>
                             <td style="text-align: center;">${bpmInfo}</td>
                             <td style="text-align: center;">${compInfo}</td>
-                        </tr>
-                    `);
-                });
+                        </tr>`);
+                    });
+                }
+                
+                htmlDinamico += `
+                    <div class="section-title"><i class="fas fa-list"></i> Repertório</div>
+                    <table>
+                        <thead><tr><th>Música</th><th style="text-align: center;">Tom</th><th style="text-align: center;">BPM</th><th style="text-align: center;">Compasso</th></tr></thead>
+                        <tbody>${repertorioHtml.length > 0 ? repertorioHtml.join('') : '<tr><td colspan="4" style="text-align:center; color: gray;">Nenhum repertório definido</td></tr>'}</tbody>
+                    </table>
+                `;
+            } else {
+                // Outros Ministérios
+                htmlDinamico += `
+                    <div class="section-title"><i class="fas fa-users"></i> Equipe Escalada</div>
+                    <table><thead><tr><th>Nome</th><th>Função</th></tr></thead><tbody>${geral.length > 0 ? geral.join('') : htmlVazia}</tbody></table>
+                `;
             }
 
-            document.getElementById('tabelaRepertorio').innerHTML = repertorioHtml.length > 0 ? repertorioHtml.join('') : '<tr><td colspan="4" style="text-align:center; color: gray;">Nenhum repertório definido</td></tr>';
-
-            // Mostra o conteúdo
+            htmlDinamico += `<button class="btn-print" onclick="window.print()"><i class="fas fa-file-pdf"></i> Salvar como PDF</button>`;
+            
+            document.getElementById('conteudoEscala').innerHTML = htmlDinamico;
             document.getElementById('conteudoEscala').style.display = 'block';
 
-        } catch (error) {
-            mostrarErro("Erro de conexão com o banco de dados.");
-        }
+        } catch (error) { mostrarErro("Erro de conexão com o banco de dados."); }
     }
 
     function mostrarErro(mensagem) {
