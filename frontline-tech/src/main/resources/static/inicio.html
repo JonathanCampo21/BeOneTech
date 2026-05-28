@@ -114,16 +114,6 @@
         .sidebar-user-info { display: flex; flex-direction: column; }
         .sidebar-user-info strong { color: white; font-size: 14px; }
         .sidebar-user-info span { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
-        
-        .btn-sidebar-acao { 
-            width: 100%; background: transparent; padding: 12px; border-radius: 8px; 
-            font-weight: bold; cursor: pointer; font-family: 'Urbanist', sans-serif; 
-            transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; 
-        }
-        .btn-trocar { color: #3b82f6; border: 1px dashed #3b82f6; margin-top: 20px; margin-bottom: 10px; }
-        .btn-trocar:hover { background: #3b82f6; color: white; }
-        .btn-sair-conta { color: #ef4444; border: 1px dashed #ef4444; }
-        .btn-sair-conta:hover { background: #ef4444; color: white; }
     </style>
 </head>
 <body>
@@ -170,15 +160,18 @@
 
     <div id="areaAdmin" class="boss-only">
         <h2 style="font-size: 18px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim);">Visão Geral do Ministério</h2>
+        
         <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card" style="cursor: pointer;" onclick="window.location.href='membros.html'">
                 <div class="stat-icon"><i class="fas fa-users"></i></div>
                 <div class="stat-info"><h3 id="countMembros">0</h3><p>Equipe Ativa</p></div>
             </div>
-            <div class="stat-card">
+            
+            <div class="stat-card" style="cursor: pointer;" onclick="window.location.href='escalas.html'">
                 <div class="stat-icon"><i class="fas fa-calendar-check" style="color: #3b82f6; background: rgba(59, 130, 246, 0.1);"></i></div>
                 <div class="stat-info"><h3 id="countEscalas">0</h3><p>Escalas no Mês</p></div>
             </div>
+            
             <div class="stat-card" style="cursor: pointer;" onclick="abrirModalFaltas()">
                 <div class="stat-icon"><i class="fas fa-user-clock" style="color: #f59e0b; background: rgba(245, 158, 11, 0.1);"></i></div>
                 <div class="stat-info"><h3 id="countFaltas">0</h3><p>Ausências (Mês)</p></div>
@@ -548,9 +541,6 @@
         }
     }
 
-    // ==========================================
-    // NOVO: LÓGICA DO MODAL DE FALTAS DO MÊS
-    // ==========================================
     function abrirModalFaltas() {
         const container = document.getElementById('listaFaltasMes');
         
