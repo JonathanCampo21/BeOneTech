@@ -729,14 +729,14 @@
         else { btn.removeAttribute('href'); btn.classList.add('disabled'); }
     }
 
-   async function baixarPdfMensal() {
+ async function baixarPdfMensal() {
         try {
             const mesNum = dataFoco.getMonth() + 1;
             const ano = dataFoco.getFullYear();
             const mesFormatado = `${ano}-${String(mesNum).padStart(2, '0')}`;
             
-            // Retirado o 'headers: getHeaders' para o SpringBoot não barrar o download do Blob
-            const res = await fetch(`/api/escalas/pdf?mes=${mesFormatado}&departamento=${encodeURIComponent(deptAtual)}`);
+            // O TOKEN VOLTOU AQUI PRA LIBERAR A CATRACA DO SERVIDOR:
+            const res = await fetch(`/api/escalas/pdf?mes=${mesFormatado}&departamento=${encodeURIComponent(deptAtual)}`, { headers: getHeaders });
             
             if (res.ok) {
                 const blob = await res.blob();
@@ -750,8 +750,8 @@
 
     async function baixarPdfIndividual(id) {
         try {
-            // Retirado o 'headers: getHeaders' aqui também
-            const res = await fetch(`/api/escalas/pdf?id=${id}&departamento=${encodeURIComponent(deptAtual)}`);
+            // O TOKEN VOLTOU AQUI TAMBÉM:
+            const res = await fetch(`/api/escalas/pdf?id=${id}&departamento=${encodeURIComponent(deptAtual)}`, { headers: getHeaders });
             
             if (res.ok) {
                 const blob = await res.blob();
@@ -762,22 +762,6 @@
             } else { alert("O servidor recusou a emissão do PDF."); }
         } catch (e) { alert("Erro de conexão ao tentar gerar o PDF."); }
     }
-    function enviarZap(id) {
-        const e = escalasDB.find(x => x.id == id);
-        const d = e.data ? e.data.split('-').reverse().join('/') : 'Data Indefinida';
-        const baseUrl = window.location.origin;
-        const linkWeb = `${baseUrl}/escala-wpp.html?id=${id}`;
-        const mensagem = `🎵 *ESCALA ${deptAtual}: ${e.titulo}*\n📅 *Data:* ${d}\n\nConfira a equipe escalada clicando abaixo:\n🔗 ${linkWeb}`;
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensagem)}`, '_blank');
-    }
-
-    async function excluirEscala(id) {
-        if(confirm("Tem certeza que deseja apagar essa escala?")) {
-            await fetch(`/api/escalas/${id}`, { method: 'DELETE', headers: getHeaders });
-            carregarPagina();
-        }
-    }
-
    function sairSistema() {
         // NÃO APAGA O CRACHÁ! Apaga apenas a memória de qual ministério você estava
         localStorage.removeItem('departamentoAtual');
