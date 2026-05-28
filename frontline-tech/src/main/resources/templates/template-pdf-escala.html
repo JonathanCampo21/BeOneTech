@@ -4,106 +4,59 @@
     <meta charset="UTF-8"/>
     <title>Escala Be One Tech</title>
     <style>
-        @page { size: A4 landscape; margin: 0; }
+        @page { size: A4 portrait; margin: 0; }
         body { font-family: sans-serif; background-color: #0a0a0a; color: #f3f4f6; margin: 0; padding: 15mm; }
-        .escala-container { margin-bottom: 30px; page-break-inside: avoid; }
+        .escala-container { margin-bottom: 30px; page-break-inside: avoid; border-bottom: 1px dashed #333; padding-bottom: 20px;}
+        .escala-container:last-child { border-bottom: none; }
+        
         .header { text-align: center; border-bottom: 2px solid; padding-bottom: 10px; margin-bottom: 20px; }
         .header h2 { margin: 0; text-transform: uppercase; font-weight: 900; letter-spacing: 2px;}
         .header p { color: #9ca3af; margin: 5px 0 0 0; }
-        h3 { margin-bottom: 5px; text-transform: uppercase; font-size: 15px; letter-spacing: 1px;}
-        .equipe-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        .equipe-table td { border: 1px solid #222; padding: 8px; text-align: left; background-color: #111; color: #ddd; font-size: 13px; }
-        .musica-box { background: #111; border: 1px solid #222; border-left: 4px solid; padding: 12px; margin-bottom: 10px; }
-        .btn-pdf { display: inline-block; padding: 6px 10px; margin-right: 8px; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: bold; background: #1a1a1a; border: 1px solid #333; }
-        .btn-yt { color: #ff4b4b; border-color: #ff4b4b; }
-        .btn-cifra { color: #3b82f6; border-color: #3b82f6; }
-        .btn-vs { color: #a78bfa; border-color: #a78bfa; }
-        .btn-letra { color: #10b981; border-color: #10b981; }
+        
+        h3 { margin-bottom: 10px; text-transform: uppercase; font-size: 14px; letter-spacing: 1px;}
+        
+        /* Box onde a lista de equipe e repertório será impressa */
+        .text-box { 
+            background: #111; 
+            border: 1px solid #222; 
+            padding: 15px; 
+            border-radius: 8px; 
+            color: #ddd; 
+            font-size: 14px; 
+            white-space: pre-wrap; /* Garante que as quebras de linha funcionem */
+            line-height: 1.8; 
+            border-left: 4px solid;
+        }
     </style>
 </head>
 <body>
 
-<div th:with="deptStr=${param.departamento != null ? param.departamento[0] : 'LOUVOR'},
-              corDept=${(param.departamento != null and param.departamento[0] == 'MIDIA') ? '#a855f7' :
-                        (param.departamento != null and param.departamento[0] == 'SALT') ? '#3b82f6' :
-                        (param.departamento != null and param.departamento[0] == '27+') ? '#10b981' :
-                        (param.departamento != null and param.departamento[0] == 'JOIN') ? '#6366f1' :
-                        (param.departamento != null and param.departamento[0] == 'KIDS') ? '#facc15' : '#FF3300'}">
-
-    <div th:each="esc : ${escalas}" class="escala-container">
-                           
-        <div class="header" th:style="'border-bottom-color: ' + ${corDept}">
-            <h2 th:style="'color: ' + ${corDept}"><span th:text="${esc.titulo}"></span></h2>
-            <p><span th:text="${esc.data}"></span></p>
-        </div>
-
-        <div th:if="${deptStr == 'LOUVOR'}" style="width: 100%;">
-            <div style="width: 48%; float: left;">
-                <h3 th:style="'color: ' + ${corDept}">Vocal / Ministros</h3>
-                <table class="equipe-table">
-                    <tr th:each="membro : ${esc.vocal}">
-                        <td style="font-weight: bold; width: 45%; color: #fff;"><span th:text="${membro.nome}"></span></td>
-                        <td><span th:text="${membro.funcao}"></span></td>
-                    </tr>
-                </table>
-            </div>
-            <div style="width: 48%; float: right;">
-                <h3 th:style="'color: ' + ${corDept}">Banda</h3>
-                <table class="equipe-table">
-                    <tr th:each="membro : ${esc.banda}">
-                        <td style="font-weight: bold; width: 45%; color: #fff;"><span th:text="${membro.nome}"></span></td>
-                        <td><span th:text="${membro.funcao}"></span></td>
-                    </tr>
-                </table>
-            </div>
-            <div style="clear: both;"></div>
-        </div>
-        
-        <div th:unless="${deptStr == 'LOUVOR'}" style="width: 100%;">
-            <h3 th:style="'color: ' + ${corDept}">Equipe Escalada</h3>
-            <table class="equipe-table">
-                <tr th:each="membro : ${esc.vocal}">
-                    <td style="font-weight: bold; width: 45%; color: #fff;"><span th:text="${membro.nome}"></span></td>
-                    <td><span th:text="${membro.funcao}"></span></td>
-                </tr>
-                <tr th:each="membro : ${esc.banda}">
-                    <td style="font-weight: bold; width: 45%; color: #fff;"><span th:text="${membro.nome}"></span></td>
-                    <td><span th:text="${membro.funcao}"></span></td>
-                </tr>
-            </table>
-        </div>
+<div th:each="esc : ${escalas}" class="escala-container"
+     th:with="corDept=${esc.departamento == 'LOUVOR' ? '#FF3300' :
+                       esc.departamento == 'MIDIA' ? '#a855f7' :
+                       esc.departamento == 'SALT' ? '#3b82f6' :
+                       esc.departamento == '27+' ? '#10b981' :
+                       esc.departamento == 'JOIN' ? '#6366f1' :
+                       esc.departamento == 'KIDS' ? '#facc15' : '#ffffff'}">
+                       
+    <div class="header" th:style="'border-bottom-color: ' + ${corDept}">
+        <h2 th:style="'color: ' + ${corDept}"><span th:text="${esc.titulo}"></span></h2>
+        <p><span th:text="${esc.data}"></span></p>
     </div>
 
-    <div th:if="${isIndividual and deptStr == 'LOUVOR'}" style="page-break-before: always;">
-         
-        <div class="header" style="margin-top: 10px; border-bottom-color: #FF3300;">
-            <h2 style="color: #FF3300;">Guia de Estudo - Repertório</h2>
-            <p><span th:text="${escala.titulo}"></span> - <span th:text="${escala.data}"></span></p>
-        </div>
-
-        <div th:each="musica : ${escala.repertorio}" class="musica-box" style="border-left-color: #FF3300;">
-            <h3 style="margin: 0 0 5px 0; color: #fff; text-transform: none; font-size: 16px;">
-                <span th:text="${musica.titulo}"></span>
-                <span style="color: #FF3300;">(<span th:text="${musica.tom}"></span>)</span>
-            </h3>
-
-            <p style="margin: 0 0 10px 0; font-size: 11px; color: #aaa;">
-                <strong style="color: #FF3300;">BPM:</strong> <span th:text="${musica.bpm}"></span> |
-                <strong style="color: #FF3300;">COMPASSO:</strong> <span th:text="${musica.compasso}"></span>
-            </p>
-
-            <div style="margin-top: 5px;">
-                <a th:if="${musica.linkYoutube != ''}" th:href="${musica.linkYoutube}" class="btn-pdf btn-yt">▶ YOUTUBE</a>
-                <a th:if="${musica.linkCifra != ''}" th:href="${musica.linkCifra}" class="btn-pdf btn-cifra">🎵 CIFRA</a>
-                <a th:if="${musica.linkLetra != ''}" th:href="${musica.linkLetra}" class="btn-pdf btn-letra">📝 LETRA</a>
-                <a th:if="${musica.linkVs != ''}" th:href="${musica.linkVs}" class="btn-pdf btn-vs">🎧 VS / MULTITRACK</a>
-            </div>
-        </div>
+    <div style="width: 100%; margin-bottom: 20px;">
+        <h3 th:style="'color: ' + ${corDept}"><span th:text="${esc.departamento != null ? esc.departamento + ' - EQUIPE' : 'EQUIPE ESCALADA'}"></span></h3>
+        <div class="text-box" th:style="'border-left-color: ' + ${corDept}" th:text="${esc.equipe != null and esc.equipe != '' ? esc.equipe : 'Nenhum voluntário escalado.'}"></div>
     </div>
-
+    
+    <div th:if="${esc.departamento == 'LOUVOR' and esc.repertorio != null and esc.repertorio != ''}" style="width: 100%;">
+        <h3 th:style="'color: ' + ${corDept}">Repertório Musical</h3>
+        <div class="text-box" th:style="'border-left-color: ' + ${corDept}" th:text="${esc.repertorio}"></div>
+    </div>
+    
 </div>
 
-<p style="text-align: center; color: #444; font-size: 9px; margin-top: 20px;">DOCUMENTO GERADO POR BE ONE TECH</p>
+<p style="text-align: center; color: #444; font-size: 9px; margin-top: 20px;">DOCUMENTO OFICIAL GERADO POR BE ONE TECH</p>
 
 </body>
 </html>
