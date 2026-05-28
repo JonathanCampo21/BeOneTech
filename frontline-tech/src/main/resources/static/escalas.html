@@ -336,7 +336,16 @@
             const linkAdmin = document.getElementById('linkAdmin');
             if (linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
         }
-        if (['ADMIN', 'DEV', 'LIDER', 'PASTOR'].includes(cargoUser)) {
+
+        // 🔒 TRAVA DE LIDERANÇA: Só exibe botão mensal e prancheta se for Pastor/Dev ou Lider DESTE departamento
+        let isChefiaLocal = false;
+        if (['ADMIN', 'DEV', 'PASTOR'].includes(cargoUser)) {
+            isChefiaLocal = true;
+        } else if (cargoUser === 'LIDER' && (user.liderDe || "").includes(deptAtual)) {
+            isChefiaLocal = true;
+        }
+
+        if (isChefiaLocal) {
             document.querySelectorAll('.boss-only').forEach(el => el.classList.remove('boss-only'));
         }
 
@@ -729,13 +738,22 @@
         else { btn.removeAttribute('href'); btn.classList.add('disabled'); }
     }
 
- async function baixarPdfMensal() {
+    async function baixarPdfMensal() {
+        // 🔒 SEGUNDA CAMADA DE TRAVA (Segurança no Front): Bloqueia execução indevida
+        let isChefiaLocal = false;
+        if (['ADMIN', 'DEV', 'PASTOR'].includes(cargoUser)) isChefiaLocal = true;
+        else if (cargoUser === 'LIDER' && (user.liderDe || "").includes(deptAtual)) isChefiaLocal = true;
+        
+        if (!isChefiaLocal) {
+            alert("Acesso Restrito: Apenas a liderança do ministério pode gerar o relatório mensal.");
+            return; // Interrompe tudo e chuta o usuário!
+        }
+
         try {
             const mesNum = dataFoco.getMonth() + 1;
             const ano = dataFoco.getFullYear();
             const mesFormatado = `${ano}-${String(mesNum).padStart(2, '0')}`;
             
-            // O TOKEN VOLTOU AQUI PRA LIBERAR A CATRACA DO SERVIDOR:
             const res = await fetch(`/api/escalas/pdf?mes=${mesFormatado}&departamento=${encodeURIComponent(deptAtual)}`, { headers: getHeaders });
             
             if (res.ok) {
@@ -750,7 +768,6 @@
 
     async function baixarPdfIndividual(id) {
         try {
-            // O TOKEN VOLTOU AQUI TAMBÉM:
             const res = await fetch(`/api/escalas/pdf?id=${id}&departamento=${encodeURIComponent(deptAtual)}`, { headers: getHeaders });
             
             if (res.ok) {
@@ -762,12 +779,10 @@
             } else { alert("O servidor recusou a emissão do PDF."); }
         } catch (e) { alert("Erro de conexão ao tentar gerar o PDF."); }
     }
-   function sairSistema() {
-        // NÃO APAGA O CRACHÁ! Apaga apenas a memória de qual ministério você estava
+
+    function sairSistema() {
         localStorage.removeItem('departamentoAtual');
         localStorage.removeItem('corAtual');
-        
-        // Te manda direto e reto para o Portal
         window.location.href = 'portal.html';
     }
 
