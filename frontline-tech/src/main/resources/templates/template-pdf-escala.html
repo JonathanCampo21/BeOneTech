@@ -54,18 +54,24 @@
         <div style="width: 48%; float: left;">
             <h3 th:style="'color: ' + ${corDept}">Vocal / Ministros</h3>
             <table class="equipe-table">
-                <tr th:each="membro : ${esc.vocal}">
+                <tr th:if="${esc.vocal != null and !esc.vocal.isEmpty()}" th:each="membro : ${esc.vocal}">
                     <td style="font-weight: bold; width: 45%; color: #fff;"><span th:text="${membro.nome}"></span></td>
                     <td><span th:text="${membro.funcao}"></span></td>
+                </tr>
+                <tr th:if="${esc.vocal == null or esc.vocal.isEmpty()}">
+                    <td colspan="2" style="color: gray; text-align: center;">Ninguém escalado</td>
                 </tr>
             </table>
         </div>
         <div style="width: 48%; float: right;">
             <h3 th:style="'color: ' + ${corDept}">Banda</h3>
             <table class="equipe-table">
-                <tr th:each="membro : ${esc.banda}">
+                <tr th:if="${esc.banda != null and !esc.banda.isEmpty()}" th:each="membro : ${esc.banda}">
                     <td style="font-weight: bold; width: 45%; color: #fff;"><span th:text="${membro.nome}"></span></td>
                     <td><span th:text="${membro.funcao}"></span></td>
+                </tr>
+                <tr th:if="${esc.banda == null or esc.banda.isEmpty()}">
+                    <td colspan="2" style="color: gray; text-align: center;">Ninguém escalado</td>
                 </tr>
             </table>
         </div>
@@ -75,19 +81,22 @@
     <div th:unless="${esc.departamento == 'LOUVOR'}" style="width: 100%;">
         <h3 th:style="'color: ' + ${corDept}">Equipe Escalada</h3>
         <table class="equipe-table">
-            <tr th:each="membro : ${esc.vocal}">
+            <tr th:if="${esc.vocal != null}" th:each="membro : ${esc.vocal}">
                 <td style="font-weight: bold; width: 45%; color: #fff;"><span th:text="${membro.nome}"></span></td>
                 <td><span th:text="${membro.funcao}"></span></td>
             </tr>
-            <tr th:each="membro : ${esc.banda}">
+            <tr th:if="${esc.banda != null}" th:each="membro : ${esc.banda}">
                 <td style="font-weight: bold; width: 45%; color: #fff;"><span th:text="${membro.nome}"></span></td>
                 <td><span th:text="${membro.funcao}"></span></td>
+            </tr>
+            <tr th:if="${(esc.vocal == null or esc.vocal.isEmpty()) and (esc.banda == null or esc.banda.isEmpty())}">
+                <td colspan="2" style="color: gray; text-align: center;">Ninguém escalado</td>
             </tr>
         </table>
     </div>
 </div>
 
-<div th:if="${isIndividual != null and isIndividual and escala.departamento == 'LOUVOR'}" 
+<div th:if="${isIndividual != null and isIndividual and escala != null and escala.departamento == 'LOUVOR'}" 
      th:with="corDept='#FF3300'" style="page-break-before: always;">
      
     <div class="header" style="margin-top: 10px; border-bottom-color: #FF3300;">
@@ -95,22 +104,22 @@
         <p><span th:text="${escala.titulo}"></span> - <span th:text="${escala.data}"></span></p>
     </div>
 
-    <div th:each="musica : ${escala.repertorio}" class="musica-box" th:style="'border-left-color: ' + ${corDept}">
+    <div th:if="${escala.repertorio != null}" th:each="musica : ${escala.repertorio}" class="musica-box" style="border-left-color: #FF3300;">
         <h3 style="margin: 0 0 5px 0; color: #fff; text-transform: none; font-size: 16px;">
             <span th:text="${musica.titulo}"></span>
-            <span th:style="'color: ' + ${corDept} + ';'">(<span th:text="${musica.tom}"></span>)</span>
+            <span style="color: #FF3300;">(<span th:text="${musica.tom}"></span>)</span>
         </h3>
 
         <p style="margin: 0 0 10px 0; font-size: 11px; color: #aaa;">
-            <strong th:style="'color: ' + ${corDept} + ';'">BPM:</strong> <span th:text="${musica.bpm}"></span> |
-            <strong th:style="'color: ' + ${corDept} + ';'">COMPASSO:</strong> <span th:text="${musica.compasso}"></span>
+            <strong style="color: #FF3300;">BPM:</strong> <span th:text="${musica.bpm}"></span> |
+            <strong style="color: #FF3300;">COMPASSO:</strong> <span th:text="${musica.compasso}"></span>
         </p>
 
         <div style="margin-top: 5px;">
-            <a th:if="${musica.linkYoutube != ''}" th:href="${musica.linkYoutube}" class="btn-pdf btn-yt">▶ YOUTUBE</a>
-            <a th:if="${musica.linkCifra != ''}" th:href="${musica.linkCifra}" class="btn-pdf btn-cifra">🎵 CIFRA</a>
-            <a th:if="${musica.linkLetra != ''}" th:href="${musica.linkLetra}" class="btn-pdf btn-letra">📝 LETRA</a>
-            <a th:if="${musica.linkVs != ''}" th:href="${musica.linkVs}" class="btn-pdf btn-vs">🎧 VS / MULTITRACK</a>
+            <a th:if="${musica.linkYoutube != null and musica.linkYoutube != ''}" th:href="${musica.linkYoutube}" class="btn-pdf btn-yt">▶ YOUTUBE</a>
+            <a th:if="${musica.linkCifra != null and musica.linkCifra != ''}" th:href="${musica.linkCifra}" class="btn-pdf btn-cifra">🎵 CIFRA</a>
+            <a th:if="${musica.linkLetra != null and musica.linkLetra != ''}" th:href="${musica.linkLetra}" class="btn-pdf btn-letra">📝 LETRA</a>
+            <a th:if="${musica.linkVs != null and musica.linkVs != ''}" th:href="${musica.linkVs}" class="btn-pdf btn-vs">🎧 VS / MULTITRACK</a>
         </div>
     </div>
 </div>
