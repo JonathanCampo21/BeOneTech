@@ -786,6 +786,35 @@
         window.location.href = 'portal.html';
     }
 
+
+    function enviarZap(id) {
+        const escala = escalasDB.find(e => e.id == id);
+        if (!escala) return;
+        
+        const dataFmt = escala.data ? escala.data.split('-').reverse().join('/') : '';
+        const link = window.location.origin + `/escala-wpp.html?id=${id}`;
+        
+        const mensagem = `*ESCALA BE ONE TECH*\n\nOlá equipe! A escala para *${escala.titulo}* (${dataFmt}) já está montada.\n\n👉 *Confira os detalhes e confirme sua presença no link:*\n${link}`;
+        
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensagem)}`, '_blank');
+    }
+
+    async function excluirEscala(id) {
+        if (!confirm("Atenção: Tem certeza que deseja deletar esta escala permanentemente?")) return;
+        
+        try {
+            const res = await fetch(`/api/escalas/${id}`, { method: 'DELETE', headers: getHeaders });
+            if (res.ok) {
+                await carregarDadosDoServidor();
+                desenharCalendario();
+                renderizarEscalas();
+            } else {
+                alert("Erro ao tentar excluir a escala.");
+            }
+        } catch (e) {
+            alert("Erro de conexão com o servidor.");
+        }
+    }
     carregarPagina();
 </script>
 </body>
