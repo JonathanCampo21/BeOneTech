@@ -232,7 +232,7 @@
                 <div class="dept-pills" id="deptPillsContainer">
                     <div class="dept-pill active" onclick="toggleDeptPill(this)" data-dept="TODOS">TODOS</div>
                     <div class="dept-pill" onclick="toggleDeptPill(this)" data-dept="LOUVOR">LOUVOR</div>
-                    <div class="dept-pill" onclick="toggleDeptPill(this)" data-dept="MIDIA">MÍDIA</div>
+                    <div class="dept-pill" onclick="toggleDeptPill(this)" data-dept="COMUNICAÇÃO">COMUNICAÇÃO</div>
                     <div class="dept-pill" onclick="toggleDeptPill(this)" data-dept="SALT">SALT</div>
                     <div class="dept-pill" onclick="toggleDeptPill(this)" data-dept="27+">27+</div>
                     <div class="dept-pill" onclick="toggleDeptPill(this)" data-dept="JOIN">JOIN</div>
@@ -312,14 +312,15 @@
     const getHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}` } : {};
     const postHeaders = tokenLocal ? { 'Authorization': `Bearer ${tokenLocal}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
 
+    // 👉 COMUNICAÇÃO ATUALIZADA AQUI!
     const DEPARTAMENTOS_CONFIG = {
-        "LOUVOR": { cor: "#FF3300", icone: "fa-music" }, "MIDIA": { cor: "#a855f7", icone: "fa-camera" },
+        "LOUVOR": { cor: "#FF3300", icone: "fa-music" }, "COMUNICAÇÃO": { cor: "#a855f7", icone: "fa-camera" },
         "SALT": { cor: "#3b82f6", icone: "fa-users" }, "27+": { cor: "#10b981", icone: "fa-plus-circle" },
         "JOIN": { cor: "#6366f1", icone: "fa-handshake" }, "KIDS": { cor: "#facc15", icone: "fa-child" }
     };
 
     let escalasGlobais = []; let membrosGlobais = []; let faltasGlobais = []; let eventosAgrupados = {}; 
-    let contagemDeptReal = { "LOUVOR":0, "MIDIA":0, "SALT":0, "27+":0, "JOIN":0, "KIDS":0 };
+    let contagemDeptReal = { "LOUVOR":0, "COMUNICAÇÃO":0, "SALT":0, "27+":0, "JOIN":0, "KIDS":0 };
     let mesExibicao = new Date().getMonth(); let anoExibicao = new Date().getFullYear();
     let eventoAbertoChave = null; 
 
@@ -451,9 +452,13 @@
         escalasGlobais.forEach(e => {
             if(!e.data) return;
             const isReuniao = (e.titulo || '').includes('[LIDERANÇA]');
-            const tituloLimpo = (e.titulo || 'Sem Título').replace('[LIDERANÇA]', '').trim();
-            const chave = `${e.data}|${tituloLimpo}`;
-            if(!eventosAgrupados[chave]) eventosAgrupados[chave] = { data: e.data, titulo: tituloLimpo, tipo: isReuniao ? 'REUNIAO' : 'CULTO', escalas: [] };
+            // 👉 INTELIGÊNCIA MELHORADA: Ignora espaços a mais e letras maiúsculas/minúsculas para agrupar tudo 100% certo!
+            const tituloCru = (e.titulo || 'Sem Título').replace('[LIDERANÇA]', '').trim();
+            const chave = `${e.data}|${tituloCru.toUpperCase()}`;
+            
+            if(!eventosAgrupados[chave]) {
+                eventosAgrupados[chave] = { data: e.data, titulo: tituloCru, tipo: isReuniao ? 'REUNIAO' : 'CULTO', escalas: [] };
+            }
             eventosAgrupados[chave].escalas.push(e);
         });
     }
@@ -487,7 +492,7 @@
             const evtsDia = evsMes.filter(ev => parseInt(ev.data.split('-')[2]) === dia);
             if(evtsDia.length > 0) {
                 divDia.style.cursor = 'pointer';
-                divDia.onclick = () => { abrirDetalheEvento(`${evtsDia[0].data}|${evtsDia[0].titulo}`); };
+                divDia.onclick = () => { abrirDetalheEvento(`${evtsDia[0].data}|${evtsDia[0].titulo.toUpperCase()}`); };
 
                 const containerDots = document.createElement('div'); containerDots.className = 'event-dot-container';
                 evtsDia.forEach(ev => {
@@ -518,7 +523,7 @@
         const cardsHtml = lista.map(ev => {
             const p = ev.data.split('-'); const dia = p[2]; const mes = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][parseInt(p[1]) - 1];
             return `
-            <div class="escala-mini-card" style="--stack-color: ${cor};" onclick="abrirDetalheEvento('${ev.data}|${ev.titulo}', event)">
+            <div class="escala-mini-card" style="--stack-color: ${cor};" onclick="abrirDetalheEvento('${ev.data}|${ev.titulo.toUpperCase()}', event)">
                 <div class="escala-date"><div class="day">${dia}</div><div class="month">${mes}</div></div>
                 <div class="escala-info">
                     <h4>${ev.titulo}</h4>
