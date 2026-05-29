@@ -25,7 +25,6 @@
             color: var(--text-main);
             font-family: 'Urbanist', sans-serif;
             margin: 0;
-            /* Removemos o travamento de tela (flex/hidden) para o Chrome respirar */
             display: block; 
             min-height: 100vh;
             overflow-x: hidden;
@@ -41,7 +40,6 @@
             text-align: center;
             width: 100%;
             max-width: 1200px;
-            /* Margem fantasma gigante em baixo (100px) para fugir da barra do navegador */
             padding: 40px 20px 100px 20px; 
             margin: 0 auto;
             box-sizing: border-box;
@@ -76,7 +74,6 @@
             -webkit-user-select: none;
         }
 
-        /* EFEITO DE EXPANSÃO */
         .dept-card:hover, .dept-card.active {
             flex: 5; 
             border-color: var(--card-color);
@@ -170,7 +167,6 @@
 
         .dept-card.disabled { display: none !important; }
 
-        /* RESPONSIVIDADE PARA CELULAR */
         @media (max-width: 800px) {
             .dept-grid {
                 flex-direction: column; 
@@ -249,14 +245,14 @@
             </div>
         </div>
 
-        <div class="dept-card" id="card-MIDIA" style="--card-color: #a855f7; --card-glow: rgba(168, 85, 247, 0.5);" onclick="entrarDept('MIDIA', '#a855f7', this)">
+        <div class="dept-card" id="card-COMUNICAÇÃO" style="--card-color: #a855f7; --card-glow: rgba(168, 85, 247, 0.5);" onclick="entrarDept('COMUNICAÇÃO', '#a855f7', this)">
             <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80');"></div>
-            <div class="vertical-title">MÍDIA</div>
+            <div class="vertical-title">COMUNICAÇÃO</div>
             <div class="content">
                 <div class="icon-wrapper"><i class="fas fa-camera"></i></div>
                 <div class="text-wrapper">
-                    <h3>MÍDIA</h3>
-                    <p>Comunicação e Transmissão</p>
+                    <h3>COMUNICAÇÃO</h3>
+                    <p>Mídia e Transmissão</p>
                 </div>
             </div>
         </div>
@@ -340,17 +336,14 @@
         });
     }
 
-    // LÓGICA DE PROTEÇÃO DE TOQUE ACIDENTAL (TOUCH TRACKING)
     let isDragging = false;
     let startY = 0;
 
-    // Quando o usuário encosta o dedo
     document.addEventListener('touchstart', (e) => {
         startY = e.touches[0].clientY;
         isDragging = false;
     }, { passive: true });
 
-    // Se o dedo se mover mais de 10 pixels na tela, marcamos como "Rolagem" (Arrasto)
     document.addEventListener('touchmove', (e) => {
         let moveY = e.touches[0].clientY;
         if (Math.abs(moveY - startY) > 10) {
@@ -359,19 +352,16 @@
     }, { passive: true });
 
     function entrarDept(nomeDept, corDept, elementoCard) {
-        // Se a inteligência detectou que foi um arrasto de tela, aborta o clique!
         if (isDragging) return;
 
-        // Regra de "Dois Toques" para celulares
         if (window.innerWidth <= 800) {
             if (!elementoCard.classList.contains('active')) {
                 document.querySelectorAll('.dept-card').forEach(c => c.classList.remove('active'));
                 elementoCard.classList.add('active');
-                return; // Para aqui no primeiro toque
+                return; 
             }
         }
 
-        // Navegação de fato (Segundo toque ou clique no PC)
         localStorage.setItem('departamentoAtual', nomeDept);
         localStorage.setItem('corAtual', corDept);
 
