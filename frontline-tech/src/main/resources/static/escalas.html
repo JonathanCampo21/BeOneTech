@@ -337,7 +337,6 @@
             if (linkAdmin) { linkAdmin.classList.remove('admin-only'); linkAdmin.style.display = 'flex'; }
         }
 
-        // 🔒 TRAVA DE LIDERANÇA: Só exibe botão mensal e prancheta se for Pastor/Dev ou Lider DESTE departamento
         let isChefiaLocal = false;
         if (['ADMIN', 'DEV', 'PASTOR'].includes(cargoUser)) {
             isChefiaLocal = true;
@@ -349,7 +348,6 @@
             document.querySelectorAll('.boss-only').forEach(el => el.classList.remove('boss-only'));
         }
 
-        // ESCONDE O REPERTÓRIO SE NÃO FOR LOUVOR
         if (deptAtual.toUpperCase() !== 'LOUVOR') {
             const boxBuilder = document.getElementById('boxBuilderRepertorio');
             if(boxBuilder) boxBuilder.style.display = 'none';
@@ -465,7 +463,6 @@
                 const fLow = f.toLowerCase();
                 let deOutroMinisterio = false;
                 
-                // Dicionário de palavras exclusivas (O sistema esconde essas palavras se você não estiver no departamento delas)
                 const palavrasExclusivas = {
                     "LOUVOR": ["vocal", "ministr", "backing", "voz", "violão", "violao", "guitarra", "baixo", "bateria", "teclado", "baterista", "tecladista", "sax", "percussão", "sanfona", "cantor"],
                     "MIDIA": ["câmera", "camera", "corte", "transmissão", "transmissao", "foto", "storymaker", "projeção", "projecao", "iluminação", "iluminacao", "som", "áudio", "audio", "switcher", "social media", "led"],
@@ -474,44 +471,20 @@
                     "JOIN": ["integração", "integracao", "consolidação", "consolidacao"]
                 };
 
-                // Verifica se a função bate com alguma palavra de OUTRO ministério
                 for (const [nomeDept, palavras] of Object.entries(palavrasExclusivas)) {
                     if (nomeDept !== deptAtual.toUpperCase()) {
                         if (palavras.some(palavra => fLow.includes(palavra))) {
-                            deOutroMinisterio = true; // É de outro ministério, então vamos esconder!
+                            deOutroMinisterio = true;
                             break;
                         }
                     }
                 }
                 
-                // Mostra a função apenas se ELA NÃO for de outro ministério (ex: funções como 'Líder' ou 'Apoio' passam livre)
                 return !deOutroMinisterio;
             });
 
-            // Se o filtro acabou escondendo todas as funções (ex: o cara só é Vocal e vc tá na Mídia), coloca uma tag genérica para não ficar vazio.
             if (funcoes.length === 0) funcoes = ['Equipe'];
 
-            const ausente = faltasDB.some(f => f.data === dataFiltro && (f.nomeMembro||'').trim().toLowerCase() === (d.nome||'').trim().toLowerCase());
-            const estiloBlock = ausente ? 'opacity: 0.4; pointer-events: none;' : '';
-            const tagAusente = ausente ? '<span style="color:#ef4444; font-size:10px; font-weight:bold; display:block; margin-top:2px;">INDISPONÍVEL</span>' : '';
-
-            return `
-            <div class="item-wrapper" style="${estiloBlock}">
-                <div class="item-row" onclick="toggleAccordion('sub-${d.id}', this)">
-                    <div><strong>${d.nome}</strong>${tagAusente}</div>
-                    <i class="fas fa-chevron-down" style="font-size:10px; color:var(--primary)"></i>
-                </div>
-                <div id="sub-${d.id}" class="sub-options">
-                    ${funcoes.map(f => `<div class="role-btn" onclick="selecionarFuncao(this, '${d.nome}', '${f}')">${f}</div>`).join('')}
-                </div>
-            </div>`;
-        }).join('');
-        });
-        
-        membrosFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
-
-        document.getElementById('listaMembros').innerHTML = membrosFiltrados.map(d => {
-            const funcoes = (d.funcao || 'Membro').split(',').map(f => f.trim());
             const ausente = faltasDB.some(f => f.data === dataFiltro && (f.nomeMembro||'').trim().toLowerCase() === (d.nome||'').trim().toLowerCase());
             const estiloBlock = ausente ? 'opacity: 0.4; pointer-events: none;' : '';
             const tagAusente = ausente ? '<span style="color:#ef4444; font-size:10px; font-weight:bold; display:block; margin-top:2px;">INDISPONÍVEL</span>' : '';
@@ -792,14 +765,13 @@
     }
 
     async function baixarPdfMensal() {
-        // 🔒 SEGUNDA CAMADA DE TRAVA (Segurança no Front): Bloqueia execução indevida
         let isChefiaLocal = false;
         if (['ADMIN', 'DEV', 'PASTOR'].includes(cargoUser)) isChefiaLocal = true;
         else if (cargoUser === 'LIDER' && (user.liderDe || "").includes(deptAtual)) isChefiaLocal = true;
         
         if (!isChefiaLocal) {
             alert("Acesso Restrito: Apenas a liderança do ministério pode gerar o relatório mensal.");
-            return; // Interrompe tudo e chuta o usuário!
+            return; 
         }
 
         try {
@@ -833,13 +805,6 @@
         } catch (e) { alert("Erro de conexão ao tentar gerar o PDF."); }
     }
 
-    function sairSistema() {
-        localStorage.removeItem('departamentoAtual');
-        localStorage.removeItem('corAtual');
-        window.location.href = 'portal.html';
-    }
-
-
     function enviarZap(id) {
         const escala = escalasDB.find(e => e.id == id);
         if (!escala) return;
@@ -868,6 +833,13 @@
             alert("Erro de conexão com o servidor.");
         }
     }
+
+    function sairSistema() {
+        localStorage.removeItem('departamentoAtual');
+        localStorage.removeItem('corAtual');
+        window.location.href = 'portal.html';
+    }
+
     carregarPagina();
 </script>
 </body>
