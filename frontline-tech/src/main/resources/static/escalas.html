@@ -261,7 +261,7 @@
 </div>
 
 <script>
-    function toggleMenu() {
+  function toggleMenu() {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('overlay').classList.toggle('active');
     }
@@ -280,7 +280,9 @@
     let equipeSel = [], louvorSel = [], idEscalaSendoEditada = null;
 
     const DEFAULT_IMG = "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80";
-    const DEPARTAMENTOS_CONFIG = { "LOUVOR": { cor: "#FF3300" }, "MIDIA": { cor: "#a855f7" }, "SALT": { cor: "#3b82f6" }, "27+": { cor: "#10b981" }, "JOIN": { cor: "#6366f1" }, "KIDS": { cor: "#facc15" } };
+    
+    // 👉 O NOME FOI ALTERADO AQUI!
+    const DEPARTAMENTOS_CONFIG = { "LOUVOR": { cor: "#FF3300" }, "COMUNICAÇÃO": { cor: "#a855f7" }, "SALT": { cor: "#3b82f6" }, "27+": { cor: "#10b981" }, "JOIN": { cor: "#6366f1" }, "KIDS": { cor: "#facc15" } };
 
     function carregarSidebar() {
         if (!user || !user.nome) return;
@@ -458,14 +460,14 @@
         document.getElementById('listaMembros').innerHTML = membrosFiltrados.map(d => {
             let funcoes = (d.funcao || 'Membro').split(',').map(f => f.trim());
             
-            // 🛑 NOVA INTELIGÊNCIA: ESCONDE FUNÇÕES DE OUTROS MINISTÉRIOS
             funcoes = funcoes.filter(f => {
                 const fLow = f.toLowerCase();
                 let deOutroMinisterio = false;
                 
+                // 👉 O NOME FOI ALTERADO AQUI NO DICIONÁRIO!
                 const palavrasExclusivas = {
                     "LOUVOR": ["vocal", "ministr", "backing", "voz", "violão", "violao", "guitarra", "baixo", "bateria", "teclado", "baterista", "tecladista", "sax", "percussão", "sanfona", "cantor"],
-                    "MIDIA": ["câmera", "camera", "corte", "transmissão", "transmissao", "foto", "storymaker", "projeção", "projecao", "iluminação", "iluminacao", "som", "áudio", "audio", "switcher", "social media", "led"],
+                    "COMUNICAÇÃO": ["câmera", "camera", "corte", "transmissão", "transmissao", "foto", "storymaker", "projeção", "projecao", "iluminação", "iluminacao", "som", "áudio", "audio", "switcher", "social media", "led"],
                     "SALT": ["recepção", "recepcao", "estacionamento", "porta", "segurança", "seguranca", "boas vindas"],
                     "KIDS": ["berçário", "bercario", "maternal", "professor", "monitor", "tia "],
                     "JOIN": ["integração", "integracao", "consolidação", "consolidacao"]
