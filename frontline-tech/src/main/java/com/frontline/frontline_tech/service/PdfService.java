@@ -2,16 +2,12 @@ package com.frontline.frontline_tech.service;
 
 import com.frontline.frontline_tech.model.Escala;
 import com.frontline.frontline_tech.model.Louvor;
-import com.frontline.frontline_tech.model.Membro;
-import com.frontline.frontline_tech.repository.EscalaRepository;
-import com.frontline.frontline_tech.repository.LouvorRepository;
-import com.frontline.frontline_tech.repository.MembroRepository;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
+import com.frontline.frontline_tech.repository.LouvorRepository;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;
@@ -25,38 +21,6 @@ public class PdfService {
     @Autowired
     private LouvorRepository louvorRepository;
 
-    @Autowired
-    private EscalaRepository escalaRepository;
-
-    @Autowired
-    private MembroRepository membroRepository;
-
-    // 🔨 A MARRETA: Vai rodar automaticamente e corrigir "MIDIA" para "COMUNICAÇÃO"
-    @PostConstruct
-    public void atualizarBancoMidiaParaComunicacao() {
-        // Atualiza as escalas
-        List<Escala> escalasAntigas = escalaRepository.findByDepartamento("MIDIA");
-        for (Escala e : escalasAntigas) {
-            e.setDepartamento("COMUNICAÇÃO");
-            escalaRepository.save(e);
-        }
-        
-        // Atualiza os membros (Agora tratando como Lista, sem dar erro de compilação!)
-        List<Membro> membrosAntigos = membroRepository.findByDepartamentosContainingOrderByNomeAsc("MIDIA");
-        for (Membro m : membrosAntigos) {
-            List<String> depts = m.getDepartamentos();
-            if (depts != null && depts.contains("MIDIA")) {
-                List<String> novaLista = new ArrayList<>(depts); // Cria uma cópia segura
-                novaLista.remove("MIDIA"); // Tira o nome velho
-                if (!novaLista.contains("COMUNICAÇÃO")) {
-                    novaLista.add("COMUNICAÇÃO"); // Coloca o novo
-                }
-                m.setDepartamentos(novaLista);
-                membroRepository.save(m);
-            }
-        }
-    }
-
     public byte[] gerarPdfEscala(List<Escala> escalas) throws Exception {
 
         List<Louvor> bancoDeLouvores = louvorRepository.findAll();
@@ -64,6 +28,7 @@ public class PdfService {
         boolean isIndividual = escalas.size() == 1;
 
         for (Escala e : escalas) {
+            // 🛑 FILTRO DE LIDERANÇA: Pula as reuniões na impressão mensal!
             if (!isIndividual && e.getTitulo() != null && e.getTitulo().contains("[LIDERANÇA]")) {
                 continue;
             }
@@ -71,7 +36,7 @@ public class PdfService {
             Map<String, Object> map = new HashMap<>();
             map.put("titulo", e.getTitulo() != null ? e.getTitulo() : "Evento sem título");
             
-            // Agora o Java manda a variável pro Thymeleaf pintar a cor
+            // Variável pro Thymeleaf pintar a cor
             map.put("departamento", e.getDepartamento() != null ? e.getDepartamento() : "LOUVOR");
 
             String dataStr = e.getData();
