@@ -458,6 +458,59 @@
         membrosFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
 
         document.getElementById('listaMembros').innerHTML = membrosFiltrados.map(d => {
+            let funcoes = (d.funcao || 'Membro').split(',').map(f => f.trim());
+            
+            // 🛑 NOVA INTELIGÊNCIA: ESCONDE FUNÇÕES DE OUTROS MINISTÉRIOS
+            funcoes = funcoes.filter(f => {
+                const fLow = f.toLowerCase();
+                let deOutroMinisterio = false;
+                
+                // Dicionário de palavras exclusivas (O sistema esconde essas palavras se você não estiver no departamento delas)
+                const palavrasExclusivas = {
+                    "LOUVOR": ["vocal", "ministr", "backing", "voz", "violão", "violao", "guitarra", "baixo", "bateria", "teclado", "baterista", "tecladista", "sax", "percussão", "sanfona", "cantor"],
+                    "MIDIA": ["câmera", "camera", "corte", "transmissão", "transmissao", "foto", "storymaker", "projeção", "projecao", "iluminação", "iluminacao", "som", "áudio", "audio", "switcher", "social media", "led"],
+                    "SALT": ["recepção", "recepcao", "estacionamento", "porta", "segurança", "seguranca", "boas vindas"],
+                    "KIDS": ["berçário", "bercario", "maternal", "professor", "monitor", "tia "],
+                    "JOIN": ["integração", "integracao", "consolidação", "consolidacao"]
+                };
+
+                // Verifica se a função bate com alguma palavra de OUTRO ministério
+                for (const [nomeDept, palavras] of Object.entries(palavrasExclusivas)) {
+                    if (nomeDept !== deptAtual.toUpperCase()) {
+                        if (palavras.some(palavra => fLow.includes(palavra))) {
+                            deOutroMinisterio = true; // É de outro ministério, então vamos esconder!
+                            break;
+                        }
+                    }
+                }
+                
+                // Mostra a função apenas se ELA NÃO for de outro ministério (ex: funções como 'Líder' ou 'Apoio' passam livre)
+                return !deOutroMinisterio;
+            });
+
+            // Se o filtro acabou escondendo todas as funções (ex: o cara só é Vocal e vc tá na Mídia), coloca uma tag genérica para não ficar vazio.
+            if (funcoes.length === 0) funcoes = ['Equipe'];
+
+            const ausente = faltasDB.some(f => f.data === dataFiltro && (f.nomeMembro||'').trim().toLowerCase() === (d.nome||'').trim().toLowerCase());
+            const estiloBlock = ausente ? 'opacity: 0.4; pointer-events: none;' : '';
+            const tagAusente = ausente ? '<span style="color:#ef4444; font-size:10px; font-weight:bold; display:block; margin-top:2px;">INDISPONÍVEL</span>' : '';
+
+            return `
+            <div class="item-wrapper" style="${estiloBlock}">
+                <div class="item-row" onclick="toggleAccordion('sub-${d.id}', this)">
+                    <div><strong>${d.nome}</strong>${tagAusente}</div>
+                    <i class="fas fa-chevron-down" style="font-size:10px; color:var(--primary)"></i>
+                </div>
+                <div id="sub-${d.id}" class="sub-options">
+                    ${funcoes.map(f => `<div class="role-btn" onclick="selecionarFuncao(this, '${d.nome}', '${f}')">${f}</div>`).join('')}
+                </div>
+            </div>`;
+        }).join('');
+        });
+        
+        membrosFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
+
+        document.getElementById('listaMembros').innerHTML = membrosFiltrados.map(d => {
             const funcoes = (d.funcao || 'Membro').split(',').map(f => f.trim());
             const ausente = faltasDB.some(f => f.data === dataFiltro && (f.nomeMembro||'').trim().toLowerCase() === (d.nome||'').trim().toLowerCase());
             const estiloBlock = ausente ? 'opacity: 0.4; pointer-events: none;' : '';
