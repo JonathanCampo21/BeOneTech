@@ -34,17 +34,24 @@ public class PdfService {
     // 🔨 A MARRETA: Vai rodar automaticamente e corrigir "MIDIA" para "COMUNICAÇÃO"
     @PostConstruct
     public void atualizarBancoMidiaParaComunicacao() {
+        // Atualiza as escalas
         List<Escala> escalasAntigas = escalaRepository.findByDepartamento("MIDIA");
         for (Escala e : escalasAntigas) {
             e.setDepartamento("COMUNICAÇÃO");
             escalaRepository.save(e);
         }
         
+        // Atualiza os membros (Agora tratando como Lista, sem dar erro de compilação!)
         List<Membro> membrosAntigos = membroRepository.findByDepartamentosContainingOrderByNomeAsc("MIDIA");
         for (Membro m : membrosAntigos) {
-            String depts = m.getDepartamentos();
+            List<String> depts = m.getDepartamentos();
             if (depts != null && depts.contains("MIDIA")) {
-                m.setDepartamentos(depts.replace("MIDIA", "COMUNICAÇÃO"));
+                List<String> novaLista = new ArrayList<>(depts); // Cria uma cópia segura
+                novaLista.remove("MIDIA"); // Tira o nome velho
+                if (!novaLista.contains("COMUNICAÇÃO")) {
+                    novaLista.add("COMUNICAÇÃO"); // Coloca o novo
+                }
+                m.setDepartamentos(novaLista);
                 membroRepository.save(m);
             }
         }
@@ -122,7 +129,7 @@ public class PdfService {
                 banda.add(m);
             }
             
-            // Essa lista é para a Mídia, Recepção etc, que não divide em Banda e Vocal
+            // Essa lista é para a Comunicação, Recepção etc, que não divide em Banda e Vocal
             List<Map<String, String>> equipeGeral = new ArrayList<>();
             equipeGeral.addAll(vocal);
             equipeGeral.addAll(banda);
