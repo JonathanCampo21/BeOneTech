@@ -2,7 +2,11 @@ package com.frontline.frontline_tech.service;
 
 import com.frontline.frontline_tech.model.Escala;
 import com.frontline.frontline_tech.model.Louvor;
+import com.frontline.frontline_tech.model.Membro;
+import com.frontline.frontline_tech.repository.EscalaRepository;
 import com.frontline.frontline_tech.repository.LouvorRepository;
+import com.frontline.frontline_tech.repository.MembroRepository;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
@@ -21,6 +25,31 @@ public class PdfService {
     @Autowired
     private LouvorRepository louvorRepository;
 
+    @Autowired
+    private EscalaRepository escalaRepository;
+
+    @Autowired
+    private MembroRepository membroRepository;
+
+    // 🔨 A MARRETA: Vai rodar automaticamente e corrigir "MIDIA" para "COMUNICAÇÃO"
+    @PostConstruct
+    public void atualizarBancoMidiaParaComunicacao() {
+        List<Escala> escalasAntigas = escalaRepository.findByDepartamento("MIDIA");
+        for (Escala e : escalasAntigas) {
+            e.setDepartamento("COMUNICAÇÃO");
+            escalaRepository.save(e);
+        }
+        
+        List<Membro> membrosAntigos = membroRepository.findByDepartamentosContainingOrderByNomeAsc("MIDIA");
+        for (Membro m : membrosAntigos) {
+            String depts = m.getDepartamentos();
+            if (depts != null && depts.contains("MIDIA")) {
+                m.setDepartamentos(depts.replace("MIDIA", "COMUNICAÇÃO"));
+                membroRepository.save(m);
+            }
+        }
+    }
+
     public byte[] gerarPdfEscala(List<Escala> escalas) throws Exception {
 
         List<Louvor> bancoDeLouvores = louvorRepository.findAll();
@@ -28,7 +57,6 @@ public class PdfService {
         boolean isIndividual = escalas.size() == 1;
 
         for (Escala e : escalas) {
-            // 🛑 FILTRO DE LIDERANÇA: Pula as reuniões na impressão mensal!
             if (!isIndividual && e.getTitulo() != null && e.getTitulo().contains("[LIDERANÇA]")) {
                 continue;
             }
@@ -36,7 +64,7 @@ public class PdfService {
             Map<String, Object> map = new HashMap<>();
             map.put("titulo", e.getTitulo() != null ? e.getTitulo() : "Evento sem título");
             
-            // 👉 A VARIÁVEL QUE FALTAVA PRO PDF NÃO DAR ERRO 500:
+            // Agora o Java manda a variável pro Thymeleaf pintar a cor
             map.put("departamento", e.getDepartamento() != null ? e.getDepartamento() : "LOUVOR");
 
             String dataStr = e.getData();
@@ -94,7 +122,7 @@ public class PdfService {
                 banda.add(m);
             }
             
-            // 👉 AJUSTE DA MÍDIA: Junta todos pra não imprimir a palavra "Banda" na Mídia
+            // Essa lista é para a Mídia, Recepção etc, que não divide em Banda e Vocal
             List<Map<String, String>> equipeGeral = new ArrayList<>();
             equipeGeral.addAll(vocal);
             equipeGeral.addAll(banda);
@@ -160,13 +188,13 @@ public class PdfService {
             context.setVariable("escala", new HashMap<>());
         }
 
-        // 🔀 ROTEAMENTO DE TEMPLATES (A Solução que você pediu!)
-        String templateName = "template-pdf-padrao"; // Puxa esse arquivo pra Mídia, Salt, Kids (Sem Músicas)
+        // 🔀 ROTEAMENTO DE TEMPLATES 
+        String templateName = "template-pdf-padrao"; 
         
         if (!escalasFormatadas.isEmpty()) {
             String dept = (String) escalasFormatadas.get(0).get("departamento");
             if ("LOUVOR".equalsIgnoreCase(dept)) {
-                templateName = "template-pdf-louvor"; // Puxa esse arquivo só pro Louvor!
+                templateName = "template-pdf-louvor"; 
             }
         }
 
