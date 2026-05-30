@@ -325,99 +325,123 @@
     }
 
     async function salvarMembro() {
-        const nome = document.getElementById('nomeMembro').value.trim();
-        const cargoSelecionado = document.getElementById('cargoMembro').value;
-        const whatsapp = document.getElementById('whatsappMembro').value.replace(/\D/g, '');
-        const funcaoNovaDesteDepto = funcoesSelecionadas.join(', ');
+        const btn = document.getElementById('btnSalvarMembro');
+        const textoOriginal = btn.innerText;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+        btn.disabled = true;
 
-        if(!nome) return alert("Por favor, preencha o nome do membro.");
-        
-        // Se for convidado, ele não exige função. Se não for, exige.
-        if(cargoSelecionado !== 'CONVIDADO' && funcoesSelecionadas.length === 0) {
-            return alert("Selecione ao menos uma função para ele neste ministério.");
-        }
+        try {
+            const nome = document.getElementById('nomeMembro').value.trim();
+            const cargoSelecionado = document.getElementById('cargoMembro').value;
+            const whatsapp = document.getElementById('whatsappMembro').value.replace(/\D/g, '');
+            const funcaoNovaDesteDepto = funcoesSelecionadas.join(', ');
 
-        let url = '/api/membros';
-        let metodo = 'POST';
-        let payload = {};
-
-        let baseMembro = idMembroSendoEditado ? membrosDB.find(item => item.id == idMembroSendoEditado) : (membroEncontradoNoScanner || null);
-
-        let mochilaDeLider = [];
-        if (baseMembro && baseMembro.liderDe) {
-            mochilaDeLider = baseMembro.liderDe.split(',').map(s=>s.trim()).filter(Boolean);
-        }
-
-        if (cargoSelecionado === 'LIDER') {
-            if (!mochilaDeLider.includes(deptAtual)) mochilaDeLider.push(deptAtual);
-        } else {
-            mochilaDeLider = mochilaDeLider.filter(d => d !== deptAtual);
-        }
-
-        let cargoFinal = baseMembro ? baseMembro.cargo : 'MEMBRO';
-        
-        if (cargoSelecionado === 'CONVIDADO') {
-            cargoFinal = 'CONVIDADO';
-            mochilaDeLider = [];
-        } else {
-            if (mochilaDeLider.length > 0 && cargoFinal === 'MEMBRO') cargoFinal = 'LIDER';
-            if (mochilaDeLider.length === 0 && cargoFinal === 'LIDER') cargoFinal = 'MEMBRO';
-        }
-
-        if (idMembroSendoEditado) {
-            metodo = 'PUT';
-            url = `/api/membros/${idMembroSendoEditado}`;
-
-            let deptsFinais = baseMembro.departamentos || [];
-            const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || [];
-            let funcoesOutrosDepts = baseMembro.funcao ? baseMembro.funcao.split(',').map(f => f.trim()).filter(f => !listaFuncoesArea.includes(f)) : [];
+            if(!nome) {
+                alert("Por favor, preencha o nome do membro.");
+                return;
+            }
             
-            if(cargoSelecionado === 'CONVIDADO') {
-                deptsFinais = []; // Arranca de todos os ministérios
-                funcoesOutrosDepts = []; // Arranca as funções
-            } else {
-                if(funcaoNovaDesteDepto) funcoesOutrosDepts.push(funcaoNovaDesteDepto);
+            if(cargoSelecionado !== 'CONVIDADO' && funcoesSelecionadas.length === 0) {
+                alert("Selecione ao menos uma função para ele neste ministério.");
+                return;
             }
 
-            payload = { ...baseMembro, whatsapp: whatsapp, cargo: cargoFinal, liderDe: mochilaDeLider.join(', '), funcao: funcoesOutrosDepts.join(', '), departamentos: deptsFinais };
-        } 
-        else if (membroEncontradoNoScanner) {
-            metodo = 'PUT';
-            url = `/api/membros/${membroEncontradoNoScanner.id}`;
+            let url = '/api/membros';
+            let metodo = 'POST';
+            let payload = {};
 
-            let depts = baseMembro.departamentos || [];
-            if(!depts.contains) depts = Array.from(depts); 
+            let baseMembro = idMembroSendoEditado ? membrosDB.find(item => item.id == idMembroSendoEditado) : (membroEncontradoNoScanner || null);
+
+            let mochilaDeLider = [];
+            if (baseMembro && baseMembro.liderDe) {
+                mochilaDeLider = baseMembro.liderDe.split(',').map(s=>s.trim()).filter(Boolean);
+            }
+
+            if (cargoSelecionado === 'LIDER') {
+                if (!mochilaDeLider.includes(deptAtual)) mochilaDeLider.push(deptAtual);
+            } else {
+                mochilaDeLider = mochilaDeLider.filter(d => d !== deptAtual);
+            }
+
+            let cargoFinal = baseMembro ? baseMembro.cargo : 'MEMBRO';
             
             if (cargoSelecionado === 'CONVIDADO') {
-                depts = [];
+                cargoFinal = 'CONVIDADO';
+                mochilaDeLider = [];
             } else {
-                if(!depts.includes(deptAtual)) depts.push(deptAtual);
+                if (mochilaDeLider.length > 0 && cargoFinal === 'MEMBRO') cargoFinal = 'LIDER';
+                if (mochilaDeLider.length === 0 && cargoFinal === 'LIDER') cargoFinal = 'MEMBRO';
             }
 
-            let funcoesGlobais = baseMembro.funcao ? baseMembro.funcao.split(',').map(f => f.trim()) : [];
-            if (cargoSelecionado === 'CONVIDADO') {
-                funcoesGlobais = [];
-            } else {
-                funcoesSelecionadas.forEach(f => { if(!funcoesGlobais.includes(f)) funcoesGlobais.push(f); });
+            if (idMembroSendoEditado) {
+                metodo = 'PUT';
+                url = `/api/membros/${idMembroSendoEditado}`;
+
+                let deptsFinais = baseMembro.departamentos || [];
+                // BLINDAGEM FORTE CONTRA BUGS DO JAVASCRIPT
+                if (!Array.isArray(deptsFinais)) deptsFinais = [deptsFinais];
+
+                const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || [];
+                let funcoesOutrosDepts = baseMembro.funcao ? baseMembro.funcao.split(',').map(f => f.trim()).filter(f => !listaFuncoesArea.includes(f)) : [];
+                
+                if(cargoSelecionado === 'CONVIDADO') {
+                    deptsFinais = []; 
+                    funcoesOutrosDepts = []; 
+                } else {
+                    if(funcaoNovaDesteDepto) funcoesOutrosDepts.push(funcaoNovaDesteDepto);
+                }
+
+                payload = { ...baseMembro, whatsapp: whatsapp, cargo: cargoFinal, liderDe: mochilaDeLider.join(', '), funcao: funcoesOutrosDepts.join(', '), departamentos: deptsFinais };
+            } 
+            else if (membroEncontradoNoScanner) {
+                metodo = 'PUT';
+                url = `/api/membros/${membroEncontradoNoScanner.id}`;
+
+                let depts = baseMembro.departamentos || [];
+                if (!Array.isArray(depts)) depts = [depts];
+                
+                if (cargoSelecionado === 'CONVIDADO') {
+                    depts = [];
+                } else {
+                    if(!depts.includes(deptAtual)) depts.push(deptAtual);
+                }
+
+                let funcoesGlobais = baseMembro.funcao ? baseMembro.funcao.split(',').map(f => f.trim()) : [];
+                if (cargoSelecionado === 'CONVIDADO') {
+                    funcoesGlobais = [];
+                } else {
+                    funcoesSelecionadas.forEach(f => { if(!funcoesGlobais.includes(f)) funcoesGlobais.push(f); });
+                }
+
+                payload = { ...baseMembro, departamentos: depts, cargo: cargoFinal, liderDe: mochilaDeLider.join(', '), funcao: funcoesGlobais.join(', ') };
+            } 
+            else {
+                payload = {
+                    nome: nome, whatsapp: whatsapp, cargo: cargoFinal, liderDe: mochilaDeLider.join(', '), 
+                    funcao: cargoSelecionado === 'CONVIDADO' ? "" : funcaoNovaDesteDepto,
+                    senha: '123', 
+                    departamentos: cargoSelecionado === 'CONVIDADO' ? [] : [deptAtual]
+                };
             }
 
-            payload = { ...baseMembro, departamentos: depts, cargo: cargoFinal, liderDe: mochilaDeLider.join(', '), funcao: funcoesGlobais.join(', ') };
-        } 
-        else {
-            payload = {
-                nome: nome, whatsapp: whatsapp, cargo: cargoFinal, liderDe: mochilaDeLider.join(', '), 
-                funcao: cargoSelecionado === 'CONVIDADO' ? "" : funcaoNovaDesteDepto,
-                senha: '123', 
-                departamentos: cargoSelecionado === 'CONVIDADO' ? [] : [deptAtual]
-            };
+            const finalUrl = (metodo === 'POST' && cargoSelecionado !== 'CONVIDADO') ? `${url}?departamentoAtual=${deptAtual}` : url;
+
+            const res = await fetch(finalUrl, { method: metodo, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            
+            if(res.ok) { 
+                resetarFormulario(); 
+                carregarMembros(); 
+            } else {
+                const txt = await res.text();
+                alert("O servidor recusou salvar. Erro: " + txt);
+            }
+        } catch (e) {
+            console.error("Erro interno no botão: ", e);
+            alert("Deu erro interno. Verifique o F12 do navegador.");
+        } finally {
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
         }
-
-        // 👉 AQUI É O DRIBLE! Se for convidado, a gente não avisa o Java qual é a tela atual, 
-        // pra ele não forçar o departamento na pessoa!
-        const finalUrl = (metodo === 'POST' && cargoSelecionado !== 'CONVIDADO') ? `${url}?departamentoAtual=${deptAtual}` : url;
-
-        const res = await fetch(finalUrl, { method: metodo, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-        if(res.ok) { resetarFormulario(); carregarMembros(); }
     }
 
     async function excluirMembroDepto(id, nomeMembro) {
