@@ -412,7 +412,9 @@
             };
         }
 
-        const finalUrl = metodo === 'POST' ? `${url}?departamentoAtual=${deptAtual}` : url;
+        // 👉 AQUI É O DRIBLE! Se for convidado, a gente não avisa o Java qual é a tela atual, 
+        // pra ele não forçar o departamento na pessoa!
+        const finalUrl = (metodo === 'POST' && cargoSelecionado !== 'CONVIDADO') ? `${url}?departamentoAtual=${deptAtual}` : url;
 
         const res = await fetch(finalUrl, { method: metodo, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
         if(res.ok) { resetarFormulario(); carregarMembros(); }
