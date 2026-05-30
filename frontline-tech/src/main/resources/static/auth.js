@@ -70,19 +70,36 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ====================================================================
-// ---> LÓGICA CAMALEÃO: MULTI-DEPARTAMENTOS <---
+// ---> LÓGICA CAMALEÃO: MULTI-DEPARTAMENTOS E BLINDAGEM DE CORES <---
 // ====================================================================
 document.addEventListener("DOMContentLoaded", () => {
     const departamentoAtual = localStorage.getItem('departamentoAtual') || 'LOUVOR';
-    const corAtual = localStorage.getItem('corAtual') || '#FF3300';
+    
+    // 👉 TRAVA DE CORES: Força a cor correta brilhante e ignora o cache antigo do navegador
+    const DEPARTAMENTOS_CORES = {
+        "LOUVOR": "#FF3300",
+        "COMUNICAÇÃO": "#a855f7",
+        "SALT": "#3b82f6",
+        "27+": "#10b981",
+        "JOIN": "#6366f1",
+        "KIDS": "#facc15"
+    };
+    
+    // Pega a cor oficial do dicionário acima
+    const corCorreta = DEPARTAMENTOS_CORES[departamentoAtual] || '#FF3300';
+    
+    // Atualiza a memória do navegador do usuário na marra pra ele nunca mais usar cor velha
+    localStorage.setItem('corAtual', corCorreta); 
+    
     const userLogado = JSON.parse(localStorage.getItem('usuario')) || {};
 
-    document.documentElement.style.setProperty('--primary', corAtual);
+    // Injeta a cor correta na página
+    document.documentElement.style.setProperty('--primary', corCorreta);
 
     const badgeDept = document.getElementById('nomeDeptBadge');
     if (badgeDept) {
         badgeDept.innerText = departamentoAtual;
-        badgeDept.style.color = corAtual;
+        badgeDept.style.color = corCorreta;
     }
 
     if (departamentoAtual !== 'LOUVOR') {
