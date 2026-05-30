@@ -126,3 +126,47 @@ function sairSistema() {
         window.location.href = 'login.html';
     }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const usrConvidado = JSON.parse(localStorage.getItem('usuario'));
+    const cargoConv = usrConvidado ? String(usrConvidado.cargo).toUpperCase().trim() : '';
+
+    if (cargoConv === 'CONVIDADO') {
+        // 1. Injeta um CSS que oculta os botões de ação e edição da tela
+        const style = document.createElement('style');
+        style.innerHTML = `
+            button[onclick*="salvar"], button[onclick*="Salvar"], 
+            button[onclick*="excluir"], button[onclick*="Excluir"], 
+            button[onclick*="deletar"], button[onclick*="Deletar"],
+            button[onclick*="enviarZap"], .btn-icon[onclick*="prepararEdicao"],
+            .btn-action.edit, .btn-action.delete, .btn-add-event,
+            .fa-trash, .fa-trash-alt, .fa-edit, .fa-whatsapp,
+            .btn-salvar, #btnNovaMusica, #btnNovoMembro {
+                display: none !important;
+            }
+            
+            /* Desativa qualquer link que leve pro WhatsApp */
+            a[href*="whatsapp"], a[href*="wa.me"] {
+                pointer-events: none !important;
+                opacity: 0.3 !important;
+                filter: grayscale(100%);
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 2. Desativa a função de WhatsApp no Javascript
+        window.enviarZap = function() { 
+            alert("Modo Demonstração: O envio de mensagens está desabilitado."); 
+            return false; 
+        };
+        
+        const originalOpen = window.open;
+        window.open = function(url, target, features) {
+            if (url && (url.includes('whatsapp.com') || url.includes('wa.me'))) {
+                alert('Modo Demonstração: O envio de mensagens está desabilitado.');
+                return null;
+            }
+            return originalOpen(url, target, features);
+        };
+    }
+});
