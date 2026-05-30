@@ -164,7 +164,7 @@
     let membrosDB = [];
 
     // Proteção de Rota
-   if(userLogado.cargo !== 'PASTOR' && userLogado.cargo !== 'DEV' && userLogado.cargo !== 'ADMIN' && userLogado.cargo !== 'CONVIDADO') { window.location.href = 'portal.html'; }
+   if(userLogado.cargo !== 'DEV' && userLogado.cargo !== 'CONVIDADO') { window.location.href = 'portal.html'; }
       
 
     async function carregarSidebar() {
