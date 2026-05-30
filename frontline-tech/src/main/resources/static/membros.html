@@ -378,7 +378,6 @@
                 url = `/api/membros/${idMembroSendoEditado}`;
 
                 let deptsFinais = baseMembro.departamentos || [];
-                // BLINDAGEM FORTE CONTRA BUGS DO JAVASCRIPT
                 if (!Array.isArray(deptsFinais)) deptsFinais = [deptsFinais];
 
                 const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || [];
@@ -424,13 +423,17 @@
                 };
             }
 
-            const finalUrl = (metodo === 'POST' && cargoSelecionado !== 'CONVIDADO') ? `${url}?departamentoAtual=${deptAtual}` : url;
+            // 👉 O DRIBLE REFINADO: Manda o parâmetro "vazio" pro Java não dar erro 400, 
+            // mas também não ter nenhum ministério pra vincular o cara!
+            let paramDept = cargoSelecionado === 'CONVIDADO' ? '' : deptAtual;
+            const finalUrl = (metodo === 'POST') ? `${url}?departamentoAtual=${paramDept}` : url;
 
             const res = await fetch(finalUrl, { method: metodo, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
             
             if(res.ok) { 
                 resetarFormulario(); 
                 carregarMembros(); 
+                alert(cargoSelecionado === 'CONVIDADO' ? "Convidado criado no sistema! Vá na aba de Usuários para criar a senha dele." : "Ficha atualizada com sucesso!");
             } else {
                 const txt = await res.text();
                 alert("O servidor recusou salvar. Erro: " + txt);
