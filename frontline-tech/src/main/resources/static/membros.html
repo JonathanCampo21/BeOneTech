@@ -247,9 +247,12 @@
         if (['ADMIN', 'DEV', 'PASTOR'].includes(cargoUser)) isChefiaLocal = true;
         else if (cargoUser === 'LIDER' && (user.liderDe || "").includes(deptAtual)) isChefiaLocal = true;
 
-        let filtrados = membrosDB.filter(m => 
-            m.nome.toLowerCase().includes(termoBusca) || (m.funcao && m.funcao.toLowerCase().includes(termoBusca))
-        );
+        // 👉 INVISIBILIDADE DO CONVIDADO: Filtra a lista pra esconder o Convidado
+        let filtrados = membrosDB.filter(m => {
+            const ehConvidado = String(m.cargo || '').toUpperCase() === 'CONVIDADO';
+            const bateuBusca = m.nome.toLowerCase().includes(termoBusca) || (m.funcao && m.funcao.toLowerCase().includes(termoBusca));
+            return !ehConvidado && bateuBusca;
+        });
 
         filtrados.sort((a, b) => a.nome.localeCompare(b.nome));
 
@@ -423,8 +426,6 @@
                 };
             }
 
-            // 👉 O DRIBLE REFINADO: Manda o parâmetro "vazio" pro Java não dar erro 400, 
-            // mas também não ter nenhum ministério pra vincular o cara!
             let paramDept = cargoSelecionado === 'CONVIDADO' ? '' : deptAtual;
             const finalUrl = (metodo === 'POST') ? `${url}?departamentoAtual=${paramDept}` : url;
 
@@ -433,7 +434,8 @@
             if(res.ok) { 
                 resetarFormulario(); 
                 carregarMembros(); 
-                alert(cargoSelecionado === 'CONVIDADO' ? "Convidado criado no sistema! Vá na aba de Usuários para criar a senha dele." : "Ficha atualizada com sucesso!");
+                // 👉 ALERTA PERSONALIZADO COMO PEDIDO
+                alert("Membro criado com sucesso! Entre em contato com o Jonathan Campos para ele cadastrar o membro no sistema.");
             } else {
                 const txt = await res.text();
                 alert("O servidor recusou salvar. Erro: " + txt);
