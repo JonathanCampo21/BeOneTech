@@ -164,9 +164,8 @@
     let membrosDB = [];
 
     // Proteção de Rota
-    if (cargoUser !== 'DEV' && cargoUser !== 'ADMIN') {
-        window.location.href = 'inicio.html';
-    }
+   if(userLogado.cargo !== 'PASTOR' && userLogado.cargo !== 'DEV' && userLogado.cargo !== 'ADMIN' && userLogado.cargo !== 'CONVIDADO') { window.location.href = 'portal.html'; }
+      
 
     async function carregarSidebar() {
         let fotoFinal = userLogado.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userLogado.nome || 'Visitante')}&background=222&color=10b981`;
