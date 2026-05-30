@@ -25,6 +25,15 @@
         .badge-convidado { background: rgba(255, 255, 255, 0.1); color: #fff; border-color: #fff; }
         .vinculo-tag { font-size: 11px; color: var(--primary); background: rgba(16, 185, 129, 0.1); padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
         
+        /* 🚨 NOVO DESTAQUE CORRIGIDO PARA QUEM NÃO TEM ACESSO */
+        tr.linha-sem-login { 
+            background: rgba(239, 68, 68, 0.06) !important; 
+        }
+        tr.linha-sem-login td:first-child { 
+            border-left: 4px solid #ef4444; 
+            padding-left: 15px; 
+        }
+
         .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 10px 15px; border: 1px solid transparent; border-bottom: 1px solid #222; margin-bottom: 15px; cursor: pointer; transition: 0.3s; border-radius: 8px;}
         .sidebar-user:hover { background: #1a1a1a; border-color: var(--primary); }
         .sidebar-user img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
@@ -209,13 +218,13 @@
             if(cargo === 'ADMIN') badgeClass = 'badge-admin';
             if(cargo === 'CONVIDADO') badgeClass = 'badge-convidado';
 
-            // 👉 DESTAQUE PARA QUEM NÃO TEM ACESSO
+            // 👉 SISTEMA CORRIGIDO DE LEITURA E INJEÇÃO DE CLASSE CSS DE ERRO
             const semAcesso = !u.senha || u.senha.trim() === '';
-            const rowStyle = semAcesso ? 'background: rgba(239, 68, 68, 0.05); border-left: 3px solid #ef4444;' : '';
-            const avisoSemAcesso = semAcesso ? '<br><span style="color: #ef4444; font-size: 10px; font-weight: bold;"><i class="fas fa-exclamation-triangle"></i> SEM LOGIN CRIADO</span>' : '';
+            const rowClass = semAcesso ? 'class="linha-sem-login"' : '';
+            const avisoSemAcesso = semAcesso ? '<br><span style="color: #ef4444; font-size: 11px; font-weight: bold;"><i class="fas fa-exclamation-triangle"></i> SEM LOGIN</span>' : '';
 
             return `
-                <tr style="${rowStyle}">
+                <tr ${rowClass}>
                     <td><strong>${u.nome}</strong>${avisoSemAcesso}<br><span class="vinculo-tag"><i class="fas fa-link"></i> Membro ID: ${u.id}</span></td>
                     <td><span class="badge ${badgeClass}">${cargo}</span></td>
                     <td><i class="fab fa-whatsapp" style="color:#25d366"></i> ${u.whatsapp || '---'}</td>
