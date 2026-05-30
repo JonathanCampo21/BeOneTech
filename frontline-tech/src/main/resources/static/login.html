@@ -88,11 +88,11 @@
 
     const DEPARTAMENTOS_CONFIG = {
         "LOUVOR": { cor: "#FF3300" },
-        "MIDIA": { cor: "#190B28" },
-        "SALT": { cor: "#121831" },
-        "27+": { cor: "#10251A" },
-        "JOIN": { cor: "#2F3C64" },
-        "KIDS": { cor: "#FDD835" }
+        "COMUNICAÇÃO": { cor: "#a855f7" },
+        "SALT": { cor: "#3b82f6" },
+        "27+": { cor: "#10b981" },
+        "JOIN": { cor: "#6366f1" },
+        "KIDS": { cor: "#facc15" }
     };
 
     async function fazerLogin() {
@@ -171,9 +171,8 @@
                         // Pastor vai pra tela exclusiva dele
                         window.location.href = 'painel_pastor.html';
                     } 
-                    else if (cargoUser === 'DEV' || cargoUser === 'ADMIN') {
-                        // Chefões de sistema (Dev/Admin) vão pro Portal ter a visão geral, 
-                        // mesmo se o array de departamentos deles vier vazio
+                    else if (cargoUser === 'DEV' || cargoUser === 'ADMIN' || cargoUser === 'CONVIDADO') {
+                        // 👉 Chefões e Vitrine (Convidado) vão direto pro Portal! Sem passar por ministério.
                         window.location.href = 'portal.html';
                     }
                     else if (departamentosUser.length > 1) {
@@ -181,7 +180,7 @@
                         window.location.href = 'portal.html';
                     } 
                     else {
-                        // Se só tiver um ministério (ou nenhum), vai direto pra aba Início
+                        // Se for membro comum com apenas 1 ministério, joga direto pra tela dele.
                         const deptUnico = departamentosUser.length === 1 ? departamentosUser[0] : "LOUVOR";
                         const configCor = DEPARTAMENTOS_CONFIG[deptUnico] ? DEPARTAMENTOS_CONFIG[deptUnico].cor : "#FF3300";
                         
