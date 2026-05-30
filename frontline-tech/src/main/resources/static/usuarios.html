@@ -22,6 +22,7 @@
         .badge-dev { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-color: #3b82f6; }
         .badge-admin { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: #ef4444; }
         .badge-membro { background: #222; color: #aaa; border-color: #333; }
+        .badge-convidado { background: rgba(255, 255, 255, 0.1); color: #fff; border-color: #fff; }
         .vinculo-tag { font-size: 11px; color: var(--primary); background: rgba(16, 185, 129, 0.1); padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
         
         .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 10px 15px; border: 1px solid transparent; border-bottom: 1px solid #222; margin-bottom: 15px; cursor: pointer; transition: 0.3s; border-radius: 8px;}
@@ -123,6 +124,7 @@
                     <option value="PASTOR">Pastor</option>
                     <option value="ADMIN">Administrador</option>
                     <option value="DEV">Developer (Full Access)</option>
+                    <option value="CONVIDADO">Convidado (Vitrine)</option>
                 </select>
             </div>
             <div>
@@ -163,8 +165,8 @@
     const cargoUser = String(userLogado.cargo).toUpperCase().trim();
     let membrosDB = [];
 
-    // Proteção de Rota
-   if(userLogado.cargo !== 'DEV' && userLogado.cargo !== 'CONVIDADO') { window.location.href = 'portal.html'; }
+    // Proteção de Rota (Agora o Convidado tem o passe pra ver a tela!)
+   if(userLogado.cargo !== 'DEV' && userLogado.cargo !== 'ADMIN' && userLogado.cargo !== 'PASTOR' && userLogado.cargo !== 'CONVIDADO') { window.location.href = 'portal.html'; }
       
 
     async function carregarSidebar() {
@@ -207,6 +209,7 @@
             let badgeClass = 'badge-membro';
             if(cargo === 'DEV') badgeClass = 'badge-dev';
             if(cargo === 'ADMIN') badgeClass = 'badge-admin';
+            if(cargo === 'CONVIDADO') badgeClass = 'badge-convidado';
 
             return `
                 <tr>
@@ -230,6 +233,13 @@
         const membro = membrosDB.find(m => m.id == idMembro);
         membro.cargo = cargo; 
         membro.senha = senha;
+        
+        // 👉 A MÁGICA FINAL: Se ele for setado como convidado, arranca de todos os ministérios
+        if (cargo === 'CONVIDADO') {
+            membro.departamentos = [];
+            membro.liderDe = "";
+            membro.funcao = "";
+        }
 
         const res = await fetch(`/api/membros/${idMembro}`, { 
             method: 'PUT', 
@@ -263,7 +273,7 @@
     }
 
     // ==========================================
-    // FUNÇÕES DO RADAR DE ACESSOS (CORRIGIDO)
+    // FUNÇÕES DO RADAR DE ACESSOS
     // ==========================================
     function abrirHistorico() {
         document.getElementById('historicoOverlay').classList.add('active');
@@ -283,10 +293,8 @@
             const res = await fetch('/api/membros');
             let membros = await res.json();
             
-            // Só mostra quem tem acesso (Cargos acima de MEMBRO comum)
             membros = membros.filter(m => m.cargo && m.cargo.toUpperCase() !== 'MEMBRO');
 
-            // Ordena do acesso mais recente para o mais antigo (Injetando o 'Z' para correção UTC)
             membros.sort((a, b) => {
                 const dataA = a.ultimaAtividade ? new Date(a.ultimaAtividade + (a.ultimaAtividade.endsWith('Z') ? '' : 'Z')) : new Date(0);
                 const dataB = b.ultimaAtividade ? new Date(b.ultimaAtividade + (b.ultimaAtividade.endsWith('Z') ? '' : 'Z')) : new Date(0);
@@ -301,7 +309,6 @@
                 let bolinha = 'fa-user-clock';
 
                 if (m.ultimaAtividade) {
-                    // BLINDAGEM UTC: Coloca o Z no final se o banco tiver mandado sem fuso!
                     let stringData = m.ultimaAtividade;
                     if (!stringData.endsWith('Z')) {
                         stringData += 'Z'; 
@@ -311,7 +318,6 @@
                     const diferencaMs = agora - ultimoAcesso;
                     const minutosInativo = Math.floor(diferencaMs / 60000);
 
-                    // REGRA CIRÚRGICA DE 3 MINUTOS (Se der negativo por bug de relógio local, conta como 0)
                     if (minutosInativo <= 3) {
                         statusColor = '#10b981';
                         statusTexto = 'Online agora';
