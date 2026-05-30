@@ -218,10 +218,11 @@
             if(cargo === 'ADMIN') badgeClass = 'badge-admin';
             if(cargo === 'CONVIDADO') badgeClass = 'badge-convidado';
 
-            // 👉 SISTEMA CORRIGIDO DE LEITURA E INJEÇÃO DE CLASSE CSS DE ERRO
-            const semAcesso = !u.senha || u.senha.trim() === '';
+            // 👉 O TRUQUE: O sistema cria as pessoas com a senha '123' de fábrica. 
+            // Agora ele entende que '123' significa "Sem cadastro"!
+            const semAcesso = !u.senha || u.senha.trim() === '' || u.senha === '123';
             const rowClass = semAcesso ? 'class="linha-sem-login"' : '';
-            const avisoSemAcesso = semAcesso ? '<br><span style="color: #ef4444; font-size: 11px; font-weight: bold;"><i class="fas fa-exclamation-triangle"></i> SEM LOGIN</span>' : '';
+            const avisoSemAcesso = semAcesso ? '<br><span style="color: #ef4444; font-size: 11px; font-weight: bold;"><i class="fas fa-exclamation-triangle"></i> SEM LOGIN OFICIAL</span>' : '';
 
             return `
                 <tr ${rowClass}>
