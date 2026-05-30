@@ -305,7 +305,7 @@
 
 <script>
     const userLogado = JSON.parse(localStorage.getItem('usuario')) || {};
-    if(userLogado.cargo !== 'PASTOR' && userLogado.cargo !== 'DEV' && userLogado.cargo !== 'ADMIN') { window.location.href = 'portal.html'; }
+   if(userLogado.cargo !== 'PASTOR' && userLogado.cargo !== 'DEV' && userLogado.cargo !== 'ADMIN' && userLogado.cargo !== 'CONVIDADO') { window.location.href = 'portal.html'; }
     document.getElementById('nomePastor').innerText = "| Pr. " + (userLogado.nome ? userLogado.nome.split(' ')[0] : 'Admin');
 
     const tokenLocal = localStorage.getItem('token');
