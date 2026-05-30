@@ -104,6 +104,7 @@
                 <select id="cargoMembro" style="margin-top: 5px;">
                     <option value="MEMBRO">Membro Comum</option>
                     <option value="LIDER">Líder (Gerente de Escalas)</option>
+                    <option value="CONVIDADO">Convidado (Vitrine de Acesso)</option>
                 </select>
             </div>
         </div>
@@ -137,7 +138,7 @@
 
     const FUNCOES_POR_DEPARTAMENTO = {
         "LOUVOR": ["Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado", "Ministro", "Diretor Musical"],
-        "MIDIA": ["Fotografia", "Storymaker", "Transmissão", "Camera transmissão"],
+        "COMUNICAÇÃO": ["Fotografia", "Storymaker", "Transmissão", "Camera transmissão"],
         "SALT": ["Intercessão", "Conselheiro", "Apoio Logístico", "Líder de Célula"],
         "27+": ["Organização", "Apoio", "Conselheiro"],
         "JOIN": ["Recepção", "Estacionamento", "Boas-Vindas", "Consolação"],
@@ -159,9 +160,6 @@
         document.getElementById('sidebarUserRole').innerText = user.cargo;
     }
 
-    // ========================================================
-    // A NOVA INTELIGÊNCIA: Verifica se ele manda AQUI
-    // ========================================================
     function ajustarAcessos() {
         if (cargoUser === 'DEV') {
             const linkAdmin = document.getElementById('linkAdmin');
@@ -171,10 +169,8 @@
         let isChefiaLocal = false;
         
         if (['ADMIN', 'DEV', 'PASTOR'].includes(cargoUser)) {
-            // Deuses Globais
             isChefiaLocal = true;
         } else if (cargoUser === 'LIDER') {
-            // Se for Líder, olha pra "mochila" de liderança dele pra ver se ele manda aqui
             const mochila = user.liderDe || "";
             if (mochila.includes(deptAtual)) {
                 isChefiaLocal = true;
@@ -247,7 +243,6 @@
         const container = document.getElementById('containerMembros');
         const termoBusca = document.getElementById('buscaMembro').value.toLowerCase();
         
-        // Verifica de novo para não imprimir os botões de lixeira pro cara errado
         let isChefiaLocal = false;
         if (['ADMIN', 'DEV', 'PASTOR'].includes(cargoUser)) isChefiaLocal = true;
         else if (cargoUser === 'LIDER' && (user.liderDe || "").includes(deptAtual)) isChefiaLocal = true;
@@ -261,11 +256,8 @@
         if (filtrados.length === 0) { container.innerHTML = '<p style="text-align: center; color: var(--text-dim); padding: 20px;">Nenhum membro ativo listado nesta extensão.</p>'; return; }
 
         container.innerHTML = filtrados.map(m => {
-            
-            // Pega o cargo global
             let cargoStr = (m.cargo || 'MEMBRO').toUpperCase();
             
-            // Corrige a visualização: Se o cara é Líder global, mas não é líder DAQUI, mostra 'Membro' na etiqueta dele
             if (cargoStr === 'LIDER') {
                 const mochila = m.liderDe || "";
                 if (!mochila.includes(deptAtual)) cargoStr = 'MEMBRO';
@@ -313,12 +305,11 @@
         inputWhats.value = m.whatsapp || '';
         inputWhats.disabled = false;
         
-        // Ajusta o select para mostrar se ele é lider DESTA extensão
         let éLiderAqui = false;
         if (m.cargo === 'LIDER' && (m.liderDe || "").includes(deptAtual)) {
             éLiderAqui = true;
         }
-        document.getElementById('cargoMembro').value = éLiderAqui ? 'LIDER' : 'MEMBRO';
+        document.getElementById('cargoMembro').value = m.cargo === 'CONVIDADO' ? 'CONVIDADO' : (éLiderAqui ? 'LIDER' : 'MEMBRO');
 
         const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || [];
         funcoesSelecionadas = m.funcao ? m.funcao.split(',').map(f => f.trim()).filter(f => listaFuncoesArea.includes(f)) : [];
@@ -340,13 +331,16 @@
         const funcaoNovaDesteDepto = funcoesSelecionadas.join(', ');
 
         if(!nome) return alert("Por favor, preencha o nome do membro.");
-        if(funcoesSelecionadas.length === 0) return alert("Selecione ao menos uma função para ele neste ministério.");
+        
+        // Se for convidado, ele não exige função. Se não for, exige.
+        if(cargoSelecionado !== 'CONVIDADO' && funcoesSelecionadas.length === 0) {
+            return alert("Selecione ao menos uma função para ele neste ministério.");
+        }
 
         let url = '/api/membros';
         let metodo = 'POST';
         let payload = {};
 
-        // Variáveis base do usuário
         let baseMembro = idMembroSendoEditado ? membrosDB.find(item => item.id == idMembroSendoEditado) : (membroEncontradoNoScanner || null);
 
         let mochilaDeLider = [];
@@ -354,51 +348,67 @@
             mochilaDeLider = baseMembro.liderDe.split(',').map(s=>s.trim()).filter(Boolean);
         }
 
-        // Se marcou LIDER no select, joga esse departamento na mochila dele
         if (cargoSelecionado === 'LIDER') {
             if (!mochilaDeLider.includes(deptAtual)) mochilaDeLider.push(deptAtual);
         } else {
-            // Se marcou MEMBRO, arranca ele do comando desse departamento
             mochilaDeLider = mochilaDeLider.filter(d => d !== deptAtual);
         }
 
         let cargoFinal = baseMembro ? baseMembro.cargo : 'MEMBRO';
-        // Ele se torna Lider Global automaticamente se ele virar líder de qualquer área.
-        if (mochilaDeLider.length > 0 && cargoFinal === 'MEMBRO') cargoFinal = 'LIDER';
-        // E ele volta a ser Membro Comum se não for chefe de mais nada
-        if (mochilaDeLider.length === 0 && cargoFinal === 'LIDER') cargoFinal = 'MEMBRO';
-
+        
+        if (cargoSelecionado === 'CONVIDADO') {
+            cargoFinal = 'CONVIDADO';
+            mochilaDeLider = [];
+        } else {
+            if (mochilaDeLider.length > 0 && cargoFinal === 'MEMBRO') cargoFinal = 'LIDER';
+            if (mochilaDeLider.length === 0 && cargoFinal === 'LIDER') cargoFinal = 'MEMBRO';
+        }
 
         if (idMembroSendoEditado) {
-            // EDITAR
             metodo = 'PUT';
             url = `/api/membros/${idMembroSendoEditado}`;
 
+            let deptsFinais = baseMembro.departamentos || [];
             const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || [];
             let funcoesOutrosDepts = baseMembro.funcao ? baseMembro.funcao.split(',').map(f => f.trim()).filter(f => !listaFuncoesArea.includes(f)) : [];
-            if(funcaoNovaDesteDepto) funcoesOutrosDepts.push(funcaoNovaDesteDepto);
+            
+            if(cargoSelecionado === 'CONVIDADO') {
+                deptsFinais = []; // Arranca de todos os ministérios
+                funcoesOutrosDepts = []; // Arranca as funções
+            } else {
+                if(funcaoNovaDesteDepto) funcoesOutrosDepts.push(funcaoNovaDesteDepto);
+            }
 
-            payload = { ...baseMembro, whatsapp: whatsapp, cargo: cargoFinal, liderDe: mochilaDeLider.join(', '), funcao: funcoesOutrosDepts.join(', ') };
+            payload = { ...baseMembro, whatsapp: whatsapp, cargo: cargoFinal, liderDe: mochilaDeLider.join(', '), funcao: funcoesOutrosDepts.join(', '), departamentos: deptsFinais };
         } 
         else if (membroEncontradoNoScanner) {
-            // VINCULAR
             metodo = 'PUT';
             url = `/api/membros/${membroEncontradoNoScanner.id}`;
 
             let depts = baseMembro.departamentos || [];
             if(!depts.contains) depts = Array.from(depts); 
-            if(!depts.includes(deptAtual)) depts.push(deptAtual);
+            
+            if (cargoSelecionado === 'CONVIDADO') {
+                depts = [];
+            } else {
+                if(!depts.includes(deptAtual)) depts.push(deptAtual);
+            }
 
             let funcoesGlobais = baseMembro.funcao ? baseMembro.funcao.split(',').map(f => f.trim()) : [];
-            funcoesSelecionadas.forEach(f => { if(!funcoesGlobais.includes(f)) funcoesGlobais.push(f); });
+            if (cargoSelecionado === 'CONVIDADO') {
+                funcoesGlobais = [];
+            } else {
+                funcoesSelecionadas.forEach(f => { if(!funcoesGlobais.includes(f)) funcoesGlobais.push(f); });
+            }
 
             payload = { ...baseMembro, departamentos: depts, cargo: cargoFinal, liderDe: mochilaDeLider.join(', '), funcao: funcoesGlobais.join(', ') };
         } 
         else {
-            // NOVO
             payload = {
-                nome: nome, whatsapp: whatsapp, cargo: cargoFinal, liderDe: mochilaDeLider.join(', '), funcao: funcaoNovaDesteDepto,
-                senha: '123', departamentos: [deptAtual]
+                nome: nome, whatsapp: whatsapp, cargo: cargoFinal, liderDe: mochilaDeLider.join(', '), 
+                funcao: cargoSelecionado === 'CONVIDADO' ? "" : funcaoNovaDesteDepto,
+                senha: '123', 
+                departamentos: cargoSelecionado === 'CONVIDADO' ? [] : [deptAtual]
             };
         }
 
@@ -420,7 +430,6 @@
                 const listaFuncoesArea = FUNCOES_POR_DEPARTAMENTO[deptAtual] || [];
                 let funcoesPreservadas = membro.funcao ? membro.funcao.split(',').map(f => f.trim()).filter(f => !listaFuncoesArea.includes(f)) : [];
                 
-                // Se ele era líder daqui, tira da mochila também!
                 let mochilaDeLider = membro.liderDe ? membro.liderDe.split(',').map(s=>s.trim()).filter(Boolean) : [];
                 mochilaDeLider = mochilaDeLider.filter(d => d !== deptAtual);
                 let cargoFinal = membro.cargo;
@@ -460,11 +469,8 @@
     }
 
     function sairSistema() {
-        // NÃO APAGA O CRACHÁ! Apaga apenas a memória de qual ministério você estava
         localStorage.removeItem('departamentoAtual');
         localStorage.removeItem('corAtual');
-        
-        // Te manda direto e reto para o Portal
         window.location.href = 'portal.html';
     }
     
