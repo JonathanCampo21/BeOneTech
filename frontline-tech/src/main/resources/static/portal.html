@@ -326,7 +326,7 @@
     const deptsDoUsuario = userLogado.departamentos || [];
     const cargo = String(userLogado.cargo).toUpperCase().trim();
 
-    if (cargo !== 'DEV' && cargo !== 'ADMIN' && cargo !== 'PASTOR') {
+  if (cargo !== 'DEV' && cargo !== 'ADMIN' && cargo !== 'PASTOR' && cargo !== 'CONVIDADO') {
         const todosOsCards = document.querySelectorAll('.dept-card');
         todosOsCards.forEach(card => {
             const nomeCard = card.id.replace('card-', '');
