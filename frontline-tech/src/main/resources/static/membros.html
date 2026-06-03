@@ -141,7 +141,7 @@
         "COMUNICAÇÃO": ["Fotografia", "Storymaker", "Transmissão", "Camera transmissão"],
         "SALT": ["Intercessão", "Conselheiro", "Apoio Logístico", "Líder de Célula"],
         "27+": ["Organização", "Apoio", "Conselheiro"],
-        "JOIN": ["Recepção", "Estacionamento", "Boas-Vindas", "Consolação"],
+        "JOIN": ["Líder", "Coordenador", "Boas Vindas"],
         "KIDS": ["Professor(a)", "Teatrinho", "Apoio Kids", "Louvor Kids"]
     };
 
@@ -247,7 +247,6 @@
         if (['ADMIN', 'DEV', 'PASTOR'].includes(cargoUser)) isChefiaLocal = true;
         else if (cargoUser === 'LIDER' && (user.liderDe || "").includes(deptAtual)) isChefiaLocal = true;
 
-        // 👉 INVISIBILIDADE DO CONVIDADO: Filtra a lista pra esconder o Convidado
         let filtrados = membrosDB.filter(m => {
             const ehConvidado = String(m.cargo || '').toUpperCase() === 'CONVIDADO';
             const bateuBusca = m.nome.toLowerCase().includes(termoBusca) || (m.funcao && m.funcao.toLowerCase().includes(termoBusca));
@@ -434,7 +433,6 @@
             if(res.ok) { 
                 resetarFormulario(); 
                 carregarMembros(); 
-                // 👉 ALERTA PERSONALIZADO COMO PEDIDO
                 alert("Membro criado com sucesso! Entre em contato com o Jonathan Campos para ele cadastrar o membro no sistema.");
             } else {
                 const txt = await res.text();
