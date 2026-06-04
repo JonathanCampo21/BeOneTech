@@ -309,7 +309,6 @@
     let estadoChamada = {};
     let faltasDoMesGlobais = [];
 
-    // 👉 ADICIONADOS OS ÍCONES NA CONFIG PARA EVITAR BUGS DE RENDERIZAÇÃO
     const DEPARTAMENTOS_CONFIG = { 
         "LOUVOR": { cor: "#FF3300", icone: "fa-music" }, 
         "COMUNICAÇÃO": { cor: "#a855f7", icone: "fa-camera" }, 
@@ -348,13 +347,13 @@
 
     function agruparEquipe(equipeStr) {
         if (!equipeStr) return [];
-        const linhas = equipeStr.split('\n').filter(Boolean);
+        const lines = equipeStr.split('\n').filter(Boolean);
         const nomesParaModal = [];
 
-        linhas.forEach(linha => {
+        lines.forEach(linha => {
             let nome = linha; let funcao = '';
             if (linha.includes('(') && linha.includes(')')) {
-                const openIdx = linha.lastIndexOf('('); const closeIdx = linha.lastIndexOf(')');
+                const openIdx = linha.lastIndexOf('('); const closeIdx = inline = linha.lastIndexOf(')');
                 nome = linha.substring(0, openIdx).trim(); funcao = linha.substring(openIdx + 1, closeIdx).trim();
             }
             if(!nomesParaModal.find(n => n.nome === nome)) {
@@ -430,14 +429,23 @@
             if(resEscalas.ok) {
                 todasEscalas = await resEscalas.json();
                 
-                const isAdminOuPastor = ['DEV', 'ADMIN', 'PASTOR'].includes(cargoUser);
+                const isAdminOuPastor = ['DEV', 'ADMIN', 'PASTOR', 'CONVIDADO'].includes(cargoUser);
                 const mochilaLider = user.liderDe || "";
 
                 const dataAtual = new Date();
-                const hjStr = dataAtual.getFullYear() + '-' + String(dataAtual.getMonth() + 1).padStart(2, '0') + '-' + String(dataAtual.getDate()).padStart(2, '0');
+                dataAtual.setHours(0,0,0,0); 
 
                 const escalasFiltradas = todasEscalas.filter(e => {
-                    if (!e.data || e.data < hjStr) return false;
+                    // 👉 NOVA TRAVA DO TEMPO: Ultra inteligente e à prova de fuso horário
+                    if (e.data) {
+                        const partes = e.data.split('-');
+                        if (partes.length === 3) {
+                            const dataEscala = new Date(partes[0], partes[1] - 1, partes[2]);
+                            dataEscala.setHours(0,0,0,0);
+                            
+                            if (dataEscala < dataAtual) return false;
+                        }
+                    }
 
                     const deptoDaEscala = e.departamento || 'LOUVOR';
                     if (deptoDaEscala !== deptAtual) return false;
@@ -638,7 +646,7 @@
                     if (linha.includes('(') && linha.includes(')')) {
                         const openIdx = linha.lastIndexOf('(');
                         tituloPuro = linha.substring(0, openIdx).trim();
-                        tomInfo = linha.substring(openIdx);
+                        tomInfo = inline = linha.substring(openIdx);
                     }
 
                     const louvorOficial = louvoresGlobais.find(l => l.titulo.toLowerCase().trim() === tituloPuro.toLowerCase().trim());
@@ -714,7 +722,7 @@
         let meuNomeNaLista = false;
         if (isReuniao) {
             const mochila = user.liderDe || "";
-            meuNomeNaLista = ['PASTOR', 'DEV', 'ADMIN'].includes(cargoUser) || (cargoUser === 'LIDER' && mochila.includes(deptoDaEscala));
+            meuNomeNaLista = ['PASTOR', 'DEV', 'ADMIN', 'CONVIDADO'].includes(cargoUser) || (cargoUser === 'LIDER' && mochila.includes(deptoDaEscala));
         } else {
             const eqF = agruparEquipe(escalaAtualAberta.equipe);
             meuNomeNaLista = eqF.find(n => n.nome.toUpperCase() === user.nome.toUpperCase()) !== undefined;
@@ -732,11 +740,11 @@
             document.getElementById('rsvpAreaContainer').style.display = 'none';
         }
 
-        const ehChefe = ['DEV', 'ADMIN', 'PASTOR'].includes(cargoUser) || (cargoUser === 'LIDER' && (user.liderDe || "").includes(deptoDaEscala));
+        const ehChefe = ['DEV', 'ADMIN', 'PASTOR', 'CONVIDADO'].includes(cargoUser) || (cargoUser === 'LIDER' && (user.liderDe || "").includes(deptoDaEscala));
         
         if (ehChefe && nomesParaChamada.length > 0) {
             document.getElementById('areaChamadaLider').style.display = 'block';
-            carregarTabelaDeChamada(nomesParaChamada, escalaAtualAberta.data);
+            carregarTabelaDeChamada(nomesParaChamada, scalaAtualAberta = escalaAtualAberta.data);
         } else {
             document.getElementById('areaChamadaLider').style.display = 'none';
         }
