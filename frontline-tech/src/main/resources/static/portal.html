@@ -3,209 +3,381 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Be One Tech - Login</title>
-    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-
+    <title>Be One Tech - Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <style>
+        :root {
+            --bg-color: #050505;
+            --text-main: #ffffff;
+            --text-dim: #a1a1aa;
+        }
+
+        /* SCROLLBAR CUSTOMIZADO */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
         body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #050505;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Urbanist', sans-serif;
             margin: 0;
-            animation: none !important;
+            display: block; 
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto; 
         }
-        .login-box {
-            background: #111;
-            padding: 40px;
-            border-radius: 15px;
-            border: 1px solid #333;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            width: 100%;
-            max-width: 400px;
+
+        @keyframes portalEntrada {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .portal-wrapper {
             text-align: center;
-            animation: contentFadeIn 0.5s ease-out forwards;
-        }
-        .login-box h1 { font-size: 32px; margin-bottom: 10px; color: white; }
-        .login-box p { color: var(--text-dim); margin-bottom: 30px; font-size: 14px; }
-
-        .login-input {
             width: 100%;
-            padding: 15px;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            color: white;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            outline: none;
-            font-family: 'Urbanist', sans-serif;
-            font-size: 15px;
-            transition: 0.3s;
-            box-sizing: border-box; 
+            max-width: 1200px;
+            padding: 40px 20px 100px 20px; 
+            margin: 0 auto;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100vh;
+            animation: portalEntrada 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .login-input:focus { border-color: var(--primary); }
 
-        .btn-login {
+        h1 { font-size: 36px; margin-bottom: 5px; font-weight: 900; }
+        p.subtitle { color: var(--text-dim); margin-bottom: 40px; font-size: 16px; }
+
+        .dept-grid {
+            display: flex;
             width: 100%;
-            padding: 15px;
-            background: var(--primary);
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 16px;
+            height: 450px; 
+            gap: 15px;
+            margin: 0 auto;
+        }
+
+        .dept-card {
+            flex: 1; 
+            position: relative;
+            border-radius: 30px;
+            overflow: hidden;
             cursor: pointer;
-            transition: 0.3s;
-            font-family: 'Urbanist', sans-serif;
-            margin-top: 10px;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); 
+            user-select: none;
+            -webkit-user-select: none;
         }
-        .btn-login:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .dept-card:hover, .dept-card.active {
+            flex: 5; 
+            border-color: var(--card-color);
+            box-shadow: 0 0 30px var(--card-glow);
+        }
+
+        .bg-image {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            filter: grayscale(100%) brightness(0.3); 
+            transition: all 0.6s ease;
+            z-index: 1;
+        }
+
+        .dept-card:hover .bg-image, .dept-card.active .bg-image {
+            filter: grayscale(0%) brightness(0.7); 
+            transform: scale(1.05); 
+        }
+
+        .vertical-title {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            writing-mode: vertical-rl; 
+            text-orientation: mixed;
+            color: #666;
+            font-weight: 900;
+            letter-spacing: 6px;
+            font-size: 18px;
+            transition: 0.4s;
+            z-index: 2;
+        }
+
+        .dept-card:hover .vertical-title, .dept-card.active .vertical-title {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+        }
+
+        .content {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 30px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 60%);
+        }
+
+        .icon-wrapper {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; color: #555;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            margin: 0 auto; 
+        }
+
+        .dept-card:hover .icon-wrapper, .dept-card.active .icon-wrapper {
+            background: var(--card-color);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 0 20px var(--card-glow);
+            margin: 0; 
+            transform: translateY(-15px);
+        }
+
+        .text-wrapper {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            white-space: nowrap; 
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .dept-card:hover .text-wrapper, .dept-card.active .text-wrapper {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: 0.1s; 
+        }
+
+        .text-wrapper h3 { margin: 0 0 5px 0; font-size: 32px; font-weight: 900; color: #fff; text-shadow: 0 5px 15px rgba(0,0,0,0.8); }
+        .text-wrapper p { margin: 0; color: #ccc; font-size: 15px; }
+
+        .dept-card.disabled { display: none !important; }
+
+        @media (max-width: 800px) {
+            .dept-grid {
+                flex-direction: column; 
+                height: 70vh; 
+                min-height: 450px;
+            }
+            .vertical-title {
+                writing-mode: horizontal-tb; 
+                top: 50%;
+                transform: translate(-50%, -50%);
+                letter-spacing: 4px;
+            }
+            .dept-card:hover .vertical-title, .dept-card.active .vertical-title {
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            .icon-wrapper {
+                position: absolute;
+                left: 20px;
+                bottom: 50%;
+                transform: translateY(50%);
+                margin: 0;
+                width: 50px; height: 50px; font-size: 20px;
+            }
+            .dept-card:hover .icon-wrapper, .dept-card.active .icon-wrapper {
+                top: 20px; bottom: auto; transform: translateY(0);
+            }
+            .content { padding: 20px; }
+            .text-wrapper h3 { font-size: 24px; }
+        }
+
+        .btn-sair-container {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-sair {
+            background: transparent;
+            color: #ef4444;
+            border: 1px dashed #ef4444;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Urbanist', sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-sair:hover {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
     </style>
 </head>
 <body>
 
-<div class="login-box">
-    <h1>Be One <span class="highlight">Tech</span></h1>
-    <p>Acesso restrito à liderança e equipe.</p>
+<div class="portal-wrapper">
+    <h1 id="tituloPortal">Bem-vindo, <span class="highlight">Visitante</span>!</h1>
+    <p class="subtitle">Selecione o ministério que deseja acessar</p>
 
-    <input type="text" id="usuario" class="login-input" placeholder="Usuário / Nome">
-    <input type="password" id="senha" class="login-input" placeholder="Senha">
+    <div class="dept-grid" id="gridDepartamentos">
+        
+        <div class="dept-card" id="card-LOUVOR" style="--card-color: #FF3300; --card-glow: rgba(255, 51, 0, 0.5);" onclick="entrarDept('LOUVOR', '#FF3300', this)">
+            <div class="bg-image" style="background-image: url('/img/foto-2.jpg');"></div>
+            <div class="vertical-title">LOUVOR</div>
+            <div class="content">
+                <div class="icon-wrapper"><i class="fas fa-music"></i></div>
+                <div class="text-wrapper">
+                    <h3>LOUVOR</h3>
+                    <p>Equipe de Adoração</p>
+                </div>
+            </div>
+        </div>
 
-    <button class="btn-login" onclick="fazerLogin()">Entrar no Sistema</button>
+        <div class="dept-card" id="card-COMUNICAÇÃO" style="--card-color: #a855f7; --card-glow: rgba(168, 85, 247, 0.5);" onclick="entrarDept('COMUNICAÇÃO', '#a855f7', this)">
+            <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="vertical-title">COMUNICAÇÃO</div>
+            <div class="content">
+                <div class="icon-wrapper"><i class="fas fa-camera"></i></div>
+                <div class="text-wrapper">
+                    <h3>COMUNICAÇÃO</h3>
+                    <p>Mídia e Transmissão</p>
+                </div>
+            </div>
+        </div>
 
-    <p id="msgErro" style="color: #ef4444; font-size: 13px; margin-top: 15px; display: none;">Credenciais inválidas!</p>
+        <div class="dept-card" id="card-SALT" style="--card-color: #3b82f6; --card-glow: rgba(59, 130, 246, 0.5);" onclick="entrarDept('SALT', '#3b82f6', this)">
+            <div class="bg-image" style="background-image: url('/img/foto-salt.jpg');"></div>
+            <div class="vertical-title">SALT</div>
+            <div class="content">
+                <div class="icon-wrapper"><i class="fas fa-users"></i></div>
+                <div class="text-wrapper">
+                    <h3>SALT</h3>
+                    <p>Apoio, Intercessão e Liderança</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dept-card" id="card-27+" style="--card-color: #10b981; --card-glow: rgba(16, 185, 129, 0.5);" onclick="entrarDept('27+', '#10b981', this)">
+            <div class="bg-image" style="background-image: url('https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="vertical-title">27+</div>
+            <div class="content">
+                <div class="icon-wrapper"><i class="fas fa-plus-circle"></i></div>
+                <div class="text-wrapper">
+                    <h3>27+</h3>
+                    <p>Organização e Membros</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dept-card" id="card-JOIN" style="--card-color: #6366f1; --card-glow: rgba(99, 102, 241, 0.5);" onclick="entrarDept('JOIN', '#6366f1', this)">
+            <div class="bg-image" style="background-image: url('/img/foto-join.jpg');"></div>
+            <div class="vertical-title">JOIN</div>
+            <div class="content">
+                <div class="icon-wrapper"><i class="fas fa-handshake"></i></div>
+                <div class="text-wrapper">
+                    <h3>JOIN</h3>
+                    <p>Recepção e Boas-Vindas</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dept-card" id="card-KIDS" style="--card-color: #facc15; --card-glow: rgba(250, 204, 21, 0.5);" onclick="entrarDept('KIDS', '#facc15', this)">
+            <div class="bg-image" style="background-image: url('/img/foto-kids.jpg');"></div>
+            <div class="vertical-title">KIDS</div>
+            <div class="content">
+                <div class="icon-wrapper"><i class="fas fa-child"></i></div>
+                <div class="text-wrapper">
+                    <h3>KIDS</h3>
+                    <p>Ministério Infantil</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="btn-sair-container">
+        <button class="btn-sair" onclick="deslogarSistema()"><i class="fas fa-sign-out-alt"></i> Sair do Sistema</button>
+    </div>
 </div>
 
 <script>
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            fazerLogin();
-        }
-    });
+    const userLogado = JSON.parse(localStorage.getItem('usuario'));
+    if (!userLogado) {
+        window.location.href = 'login.html';
+    }
 
-    const DEPARTAMENTOS_CONFIG = {
-        "LOUVOR": { cor: "#FF3300" },
-        "COMUNICAÇÃO": { cor: "#a855f7" },
-        "SALT": { cor: "#3b82f6" },
-        "27+": { cor: "#10b981" },
-        "JOIN": { cor: "#6366f1" },
-        "KIDS": { cor: "#facc15" }
-    };
+    let primeiroNome = userLogado.nome.split(' ')[0];
+    if(String(userLogado.cargo).toUpperCase() === 'PASTOR') primeiroNome = 'Pr. ' + primeiroNome;
+    
+    document.getElementById('tituloPortal').innerHTML = `Bem-vindo, <span style="color: #10b981;">${primeiroNome}</span>!`;
 
-    async function fazerLogin() {
-        const usuarioInput = document.getElementById('usuario').value.trim();
-        const senhaInput = document.getElementById('senha').value.trim();
-        const msgErro = document.getElementById('msgErro');
+    const deptsDoUsuario = userLogado.departamentos || [];
+    const cargo = String(userLogado.cargo).toUpperCase().trim();
 
-        if (!usuarioInput || !senhaInput) {
-            msgErro.innerText = "Preencha o usuário e a senha!";
-            msgErro.style.display = 'block';
-            return;
-        }
-
-        const btn = document.querySelector('.btn-login');
-        btn.innerText = "Aguarde...";
-        btn.disabled = true;
-
-        try {
-            // 1. FAZ O LOGIN OFICIAL PARA PEGAR O TOKEN DE ACESSO
-            const res = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nome: usuarioInput, senha: senhaInput })
-            });
-
-            if (res.ok) {
-                const dados = await res.json();
-                
-                // 2. A SEGUNDA CHECAGEM: FORÇANDO A LEITURA DO BANCO DE DADOS COM O TOKEN!
-                try {
-                    const resFresh = await fetch(`/api/membros/buscar-por-nome?nome=${encodeURIComponent(dados.nome)}`, {
-                        headers: { 'Authorization': `Bearer ${dados.token}` }
-                    });
-                    
-                    if (resFresh.ok) {
-                        const fichaBanco = await resFresh.json();
-                        // Substitui os dados capengas pelos dados reais e frescos do banco
-                        dados.departamentos = fichaBanco.departamentos || [];
-                        dados.cargo = fichaBanco.cargo || dados.cargo;
-                        dados.liderDe = fichaBanco.liderDe || "";
-                        dados.fotoPerfil = fichaBanco.fotoPerfil || dados.fotoPerfil;
-                        dados.funcao = fichaBanco.funcao || "";
-                        dados.whatsapp = fichaBanco.whatsapp || "";
-                    }
-                } catch (err) {
-                    console.log("Servidor ocupado. Usando dados básicos da sessão.");
-                }
-
-                // BLINDAGEM DE VARIÁVEIS
-                const departamentosUser = dados.departamentos || [];
-                const cargoUser = String(dados.cargo || 'MEMBRO').toUpperCase().trim();
-
-                console.warn(`[RAIO-X 2.0] Usuário: ${dados.nome} | Cargo: ${cargoUser} | Acessos:`, departamentosUser);
-
-                // 3. SALVA TUDO NA MEMÓRIA DO NAVEGADOR
-                localStorage.setItem('token', dados.token);
-                localStorage.setItem('usuario', JSON.stringify({
-                    id: dados.id,
-                    nome: dados.nome,
-                    cargo: cargoUser,
-                    fotoPerfil: dados.fotoPerfil,
-                    departamentos: departamentosUser,
-                    liderDe: dados.liderDe,
-                    funcao: dados.funcao,
-                    whatsapp: dados.whatsapp
-                }));
-
-                // Faz a tela sumir suavemente
-                document.body.style.opacity = '0';
-                document.body.style.transition = '0.3s';
-
-                setTimeout(() => {
-                    // 4. LÓGICA DE REDIRECIONAMENTO INFALÍVEL
-                    
-                    if (cargoUser === 'PASTOR') {
-                        // Pastor vai pra tela exclusiva dele
-                        window.location.href = 'painel_pastor.html';
-                    } 
-                    else if (cargoUser === 'DEV' || cargoUser === 'ADMIN' || cargoUser === 'CONVIDADO') {
-                        // 👉 Chefões e Vitrine (Convidado) vão direto pro Portal! Sem passar por ministério.
-                        window.location.href = 'portal.html';
-                    }
-                    else if (departamentosUser.length > 1) {
-                        // Se for membro ou líder, mas tiver mais de 1 ministério, vai pro Portal escolher
-                        window.location.href = 'portal.html';
-                    } 
-                    else {
-                        // Se for membro comum com apenas 1 ministério, joga direto pra tela dele.
-                        const deptUnico = departamentosUser.length === 1 ? departamentosUser[0] : "LOUVOR";
-                        const configCor = DEPARTAMENTOS_CONFIG[deptUnico] ? DEPARTAMENTOS_CONFIG[deptUnico].cor : "#FF3300";
-                        
-                        localStorage.setItem('departamentoAtual', deptUnico);
-                        localStorage.setItem('corAtual', configCor);
-                        
-                        window.location.href = 'inicio.html';
-                    }
-                }, 300);
-
-            } else {
-                const erroTxt = await res.text();
-                msgErro.innerText = erroTxt || "Usuário ou senha incorretos!";
-                msgErro.style.display = 'block';
+  if (cargo !== 'DEV' && cargo !== 'ADMIN' && cargo !== 'PASTOR' && cargo !== 'CONVIDADO') {
+        const todosOsCards = document.querySelectorAll('.dept-card');
+        todosOsCards.forEach(card => {
+            const nomeCard = card.id.replace('card-', '');
+            if (!deptsDoUsuario.includes(nomeCard)) {
+                card.classList.add('disabled');
             }
-        } catch (error) {
-            console.error("Falha no login:", error);
-            msgErro.innerText = "Erro de conexão com o servidor.";
-            msgErro.style.display = 'block';
-        } finally {
-            const btn = document.querySelector('.btn-login');
-            btn.innerText = "Entrar no Sistema";
-            btn.disabled = false;
+        });
+    }
+
+    let isDragging = false;
+    let startY = 0;
+
+    document.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+        isDragging = false;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+        let moveY = e.touches[0].clientY;
+        if (Math.abs(moveY - startY) > 10) {
+            isDragging = true;
         }
+    }, { passive: true });
+
+    function entrarDept(nomeDept, corDept, elementoCard) {
+        if (isDragging) return;
+
+        if (window.innerWidth <= 800) {
+            if (!elementoCard.classList.contains('active')) {
+                document.querySelectorAll('.dept-card').forEach(c => c.classList.remove('active'));
+                elementoCard.classList.add('active');
+                return; 
+            }
+        }
+
+        localStorage.setItem('departamentoAtual', nomeDept);
+        localStorage.setItem('corAtual', corDept);
+
+        document.body.style.opacity = '0';
+        document.body.style.transition = '0.4s ease';
+        
+        setTimeout(() => {
+            window.location.href = 'inicio.html';
+        }, 400);
+    }
+
+    function deslogarSistema() {
+        localStorage.clear(); 
+        window.location.href = 'login.html';
     }
 </script>
+
 </body>
 </html>
